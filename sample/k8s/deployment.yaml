@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rcon-tiktok
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rcon-tiktok
+  template:
+    metadata:
+      labels:
+        app: rcon-tiktok
+    spec:
+      containers:
+        - name: client
+          image: marongt123/jamming-minecraft-stream:tiktok
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: access-config
+              mountPath: /app/config
+      volumes:
+        - name: access-config
+          configMap:
+            name: access-config
