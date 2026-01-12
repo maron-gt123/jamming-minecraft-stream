@@ -1,0 +1,68 @@
+# =====================
+# TikTok Live config
+# =====================
+tiktok:
+  user: tv_asahi_news  # TikTok配信いつでもやっているのでテンプレートとして使用
+
+# =====================
+# Minecraft RCON
+# =====================
+minecraft:
+  RCON_HOST: 0.0.0.0
+  RCON_PORT: 25575
+  RCON_PASSWORD: "123456789"
+
+# =====================
+# event rules
+# =====================
+reset_interval_seconds: 10
+rules:
+  - type: gift
+    gift_name: Heart Me
+    count: 1
+    actions:
+      - command: "say Heart Me"
+
+  - type: gift
+    gift_name: Rose
+    count: 3
+    actions:
+      - command: "say Rose_1"
+
+  - type: gift
+    gift_name: Strawberry toffee
+    count: 1
+    actions:
+      - command: "say Strawberry toffee_1"
+
+  - type: gift
+    gift_name: Finger Heart
+    count: 2
+    actions:
+      - command: "say Strawberry toffee_2"
+
+  - type: like
+    count: 1
+    actions:
+      - command: "say like1"
+        times: 1
+
+  - type: like
+    count: 20
+    actions:
+      - command: "say like20"
+
+  - type: follow
+    actions:
+      - command: "say follow"
+        times: 1
+
+  - type: share
+    actions:
+      - command: "say share"
+        times: 1
+
+  - type: subscribe
+    actions:
+      - command: "execute at @a[name=maron_12345] positioned ^ ^ ^3 run summon zombie ~ ~ ~"
+        times: 1
