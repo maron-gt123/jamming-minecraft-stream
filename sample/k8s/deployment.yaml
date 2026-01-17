@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rcon-tiktok
+  name: tiktok-live-runner
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: rcon-tiktok
+      app: tiktok-live-runner
   template:
     metadata:
       labels:
-        app: rcon-tiktok
+        app: tiktok-live-runner
     spec:
       containers:
-        - name: rcon-tiktok
+        - name: tiktok-live-runner
           image: marongt123/jamming-minecraft-stream:tiktok
           imagePullPolicy: Always
           volumeMounts:
