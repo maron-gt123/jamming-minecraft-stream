@@ -1,24 +1,32 @@
-# =====================
-# TikTok settings
-# =====================
-tiktok:
-  # TikTok Live streamer username (without @)
-  user: tv_asahi_news
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: access-config
+data:
+  config.yml: |
+    
+    # =====================
+    # TikTok settings
+    # =====================
+    tiktok:
+      # TikTok Live streamer username (without @)
+      user: tv_asahi_news
 
-# =====================
-# HTTP forward settings
-# =====================
-http:
-  # HTTP endpoint to which events are forwarded
-  endpoint: "http://localhost:8080/"
-  # Timeout for HTTP requests (in seconds)
-  timeout: 5
+    # =====================
+    # HTTP forward settings
+    # =====================
+    http:
+      # HTTP endpoint to which events are forwarded
+      endpoint: "http://localhost:8080/"
+      # Timeout for HTTP requests (in seconds)
+      timeout: 5
 
-# =====================
-# Like counter settings
-# =====================
-# Example:
-#   60        = 1 minute
-#   3600     = 1 hour
-#   86400    = 24 hours
-reset_interval_seconds: 60
+    # =====================
+    # Like counter settings
+    # =====================
+    # Interval to reset per-user LIKE totals (seconds)
+    #Example:
+    #   60        = 1 minute
+    #   3600     = 1 hour
+    #   86400    = 24 hours
+    reset_interval_seconds: 60
