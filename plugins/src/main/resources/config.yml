@@ -1,0 +1,44 @@
+http:
+  port: 8080
+  path: /event
+
+events:
+  gift:
+    enabled: true
+    broadcast: true
+  like:
+    enabled: true
+    broadcast: true
+  follow:
+    enabled: true
+    broadcast: true
+  share:
+    enabled: true
+    broadcast: true
+  subscribe:
+    enabled: true
+    broadcast: true
+
+commands:
+  follow:
+    - command: "say {nickname} follow"
+  share:
+    - command: "say {nickname} share"
+  subscribe:
+    - command: "say {nickname} subscribe"
+  like:
+    - count: 50
+      command: "say {nickname} reached 50 likes!"
+
+    - count: 100
+      command: "say {nickname} reached 100 likes!"
+
+  gift:
+    - gift_name: "Heart Me"
+      command: "say {nickname} sent Heart Me"
+    - gift_name: "Rose"
+      count: 1
+      command: "say {nickname} sent Rose x{count}!"
+    - gift_name: "Popular Vote"
+      count: 1
+      command: "say {nickname} sent Popular Vote x{count}!"
