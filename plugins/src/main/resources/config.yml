@@ -5,19 +5,14 @@ http:
 events:
   gift:
     enabled: true
-    broadcast: true
   like:
     enabled: true
-    broadcast: true
   follow:
     enabled: true
-    broadcast: true
   share:
     enabled: true
-    broadcast: true
   subscribe:
     enabled: true
-    broadcast: true
 
 commands:
   follow:
