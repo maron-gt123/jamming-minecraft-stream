@@ -13,7 +13,7 @@ spec:
         app: rcon-tiktok
     spec:
       containers:
-        - name: client
+        - name: rcon-tiktok
           image: marongt123/jamming-minecraft-stream:tiktok
           imagePullPolicy: Always
           volumeMounts:
