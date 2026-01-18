@@ -217,7 +217,19 @@ public class JammingBoxManager {
     public boolean isGameActive() {
         return gameActive;
     }
+
+    public void startGame() {
+        if (box != null) {
+            box.activate();
+        }
+        gameActive = true;
+        gameStartTime = System.currentTimeMillis();
+        startActionBar();
+    }
     public void stopGame() {
+        if (box != null) {
+            box.deactivate();
+        }
         this.gameActive = false;
         this.gameStartTime = 0L;
         stopActionBar();
@@ -226,11 +238,6 @@ public class JammingBoxManager {
             countdownTask = null;
         }
         playGameStopSound();
-    }
-    public void startGame() {
-        gameActive = true;
-        gameStartTime = System.currentTimeMillis();
-        startActionBar();
     }
     public long getElapsedSeconds() {
         if (!gameActive) return 0;
