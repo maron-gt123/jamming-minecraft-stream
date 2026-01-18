@@ -2,6 +2,7 @@ package jp.master.jamming.command;
 
 import jp.master.jamming.box.JammingBoxManager;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -19,7 +20,7 @@ public class JammingBoxCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
-        if (!(sender instanceof Player player)) {
+            if (!(sender instanceof Player player)) {
             sender.sendMessage("§cこのコマンドはプレイヤーのみ実行できます");
             return true;
         }
@@ -32,7 +33,7 @@ public class JammingBoxCommand implements CommandExecutor {
         switch (args[0].toLowerCase()) {
             case "create" -> handleCreate(player, args);
             case "remove" -> handleRemove(player);
-            case "start"  -> handleStart(player);
+            case "start"  -> handleStart(player, args);
             case "stop"   -> handleStop(player);
             default -> sendHelp(player);
         }
@@ -97,7 +98,7 @@ public class JammingBoxCommand implements CommandExecutor {
     /* =======================
        start
        ======================= */
-    private void handleStart(Player player) {
+    private void handleStart(Player player, String[] args) {
 
         if (!manager.hasBox()) {
             player.sendMessage("§c先に /jammingbox create を実行してください");
@@ -109,10 +110,20 @@ public class JammingBoxCommand implements CommandExecutor {
             return;
         }
 
-        manager.startGame();
+        int countdownSeconds = 0;
+        if (args.length >= 2) {
+            try {
+                countdownSeconds = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                player.sendMessage("§c秒数は数字で指定してください: /jammingbox start <秒数>");
+                return;
+            }
+        }
 
-        player.sendMessage("§aゲームを開始しました！");
+        manager.startGameWithCountdown(countdownSeconds);
+        player.sendMessage("§aゲーム開始準備中...");
     }
+
     /* =======================
        stop
        ======================= */
@@ -122,9 +133,14 @@ public class JammingBoxCommand implements CommandExecutor {
             player.sendMessage("§eゲームはすでに停止しています");
             return;
         }
-
+        long seconds = manager.getElapsedSeconds();
         manager.stopGame();
-
+        player.getWorld().playSound(
+                player.getLocation(),
+                Sound.UI_TOAST_CHALLENGE_COMPLETE,
+                1.0f,
+                1.0f
+        );
         player.sendMessage("§cゲームを停止しました");
     }
     /* =======================
@@ -134,7 +150,7 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§6==== JammingBox ====");
         sender.sendMessage("§e/jammingbox create [size] §7- jammingboxを作成");
         sender.sendMessage("§e/jammingbox remove        §7- jammingboxを削除");
-        sender.sendMessage("§e/jammingbox start        §7- ゲーム開始");
+        sender.sendMessage("§e/jammingbox start [count] §7- ゲーム開始");
         sender.sendMessage("§e/jammingbox stop         §7- ゲーム停止");
     }
 }

@@ -18,7 +18,7 @@ public final class JammingStream extends JavaPlugin {
         saveDefaultConfig();
         ConfigManager.loadConfig(this);
 
-        boxManager = new JammingBoxManager();
+        boxManager = new JammingBoxManager(this);
 
         httpServerManager = new HttpServerManager(this);
         httpServerManager.start();

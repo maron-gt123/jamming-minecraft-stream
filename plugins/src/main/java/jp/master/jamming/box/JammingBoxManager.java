@@ -4,6 +4,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -16,22 +21,23 @@ public class JammingBoxManager {
     private final Set<BlockKey> placedBlocks = new HashSet<>();
 
     private boolean autoConvertEnabled = false;
-
     public boolean isAutoConvertEnabled() {
         return autoConvertEnabled;
     }
-
     public void setAutoConvertEnabled(boolean enabled) {
         this.autoConvertEnabled = enabled;
     }
+    private boolean gameActive = false;
+    private long gameStartTime = 0L;
+    private BukkitTask actionBarTask;
+    private final JavaPlugin plugin;
+    private BukkitTask countdownTask;
 
     public void removeBox() {
         if (box == null) return;
         clearWalls(box);
         box = null;
-
-        this.box = null;
-        this.gameActive = false;
+        stopGame();
     }
 
     public boolean hasBox() {
@@ -140,7 +146,7 @@ public class JammingBoxManager {
         }
     }
 
-    private Material getAutoBlockType(JammingBox box, int y) {
+    public Material getAutoBlockType(JammingBox box, int y) {
         int minY = box.getCenter().getBlockY() - box.getHalf() + 1;
         int maxY = box.getCenter().getBlockY() + box.getHalf();
 
@@ -207,15 +213,131 @@ public class JammingBoxManager {
             return Objects.hash(worldId, x, y, z);
         }
     }
-    private boolean gameActive = false;
 
     public boolean isGameActive() {
         return gameActive;
     }
-    public void startGame() {
-        this.gameActive = true;
-    }
     public void stopGame() {
         this.gameActive = false;
+        this.gameStartTime = 0L;
+        stopActionBar();
+        if (countdownTask != null) {
+            countdownTask.cancel();
+            countdownTask = null;
+        }
+        playGameStopSound();
+    }
+    public void startGame() {
+        gameActive = true;
+        gameStartTime = System.currentTimeMillis();
+        startActionBar();
+    }
+    public long getElapsedSeconds() {
+        if (!gameActive) return 0;
+        return (System.currentTimeMillis() - gameStartTime) / 1000;
+    }
+    public JammingBoxManager(JavaPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    private void startActionBar() {
+        // 二重起動防止
+        if (actionBarTask != null) return;
+
+        actionBarTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            if (!gameActive) return;
+
+            long seconds = getElapsedSeconds();
+            String time = formatTime(seconds);
+
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                player.spigot().sendMessage(
+                        ChatMessageType.ACTION_BAR,
+                        new TextComponent("§a⏱ 経過時間: §e" + time)
+                );
+            }
+        }, 0L, 20L); // 1秒ごと
+    }
+    public void startGameWithCountdown(int seconds) {
+        if (gameActive) return;
+        if (seconds <= 0) {
+            startGame();
+            playGameStartSound();
+            return;
+        }
+        stopActionBar();
+
+        if (countdownTask != null) {
+            countdownTask.cancel();
+            countdownTask = null;
+        }
+
+        countdownTask = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
+            int timeLeft = seconds;
+
+            @Override
+            public void run() {
+                if (timeLeft <= 0) {
+                    countdownTask.cancel();
+                    countdownTask = null;
+
+                    // ゲーム開始
+                    startGame();
+                    playGameStartSound();
+                    return;
+                }
+
+                // カウントダウン表示
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    player.spigot().sendMessage(
+                            ChatMessageType.ACTION_BAR,
+                            new TextComponent("§eゲーム開始まで §c" + timeLeft + " §e秒")
+                    );
+                    playCountdownSound(player);
+                }
+
+                timeLeft--;
+            }
+        }, 0L, 20L);
+    }
+
+    private void stopActionBar() {
+        if (actionBarTask != null) {
+            actionBarTask.cancel();
+            actionBarTask = null;
+        }
+    }
+    private String formatTime(long seconds) {
+        long min = seconds / 60;
+        long sec = seconds % 60;
+        return String.format("%02d:%02d", min, sec);
+    }
+    private void playCountdownSound(Player player) {
+        player.playSound(
+                player.getLocation(),
+                org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP,
+                0.6f,
+                1.8f
+        );
+    }
+    private void playGameStartSound() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.playSound(
+                    player.getLocation(),
+                    org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE,
+                    0.9f,
+                    1.2f
+            );
+        }
+    }
+    private void playGameStopSound() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.playSound(
+                    player.getLocation(),
+                    org.bukkit.Sound.BLOCK_BEACON_DEACTIVATE,
+                    0.8f,
+                    0.8f
+            );
+        }
     }
 }
