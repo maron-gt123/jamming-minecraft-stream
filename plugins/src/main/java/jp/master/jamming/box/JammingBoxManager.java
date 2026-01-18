@@ -1,14 +1,18 @@
 package jp.master.jamming.box;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.Objects;
 
 public class JammingBoxManager {
 
-    private final List<JammingBox> boxes = new ArrayList<>();
+    private JammingBox box = null;
     private final Set<BlockKey> placedBlocks = new HashSet<>();
 
     private boolean autoConvertEnabled = false;
@@ -21,26 +25,19 @@ public class JammingBoxManager {
         this.autoConvertEnabled = enabled;
     }
 
-    public void addBox(JammingBox box) {
-        boxes.add(box);
-    }
-
-    public void removeBox(JammingBox box) {
+    public void removeBox() {
         if (box == null) return;
         clearWalls(box);
-        boxes.remove(box);
-    }
-
-    public List<JammingBox> getBoxes() {
-        return Collections.unmodifiableList(boxes);
+        box = null;
     }
 
     public boolean hasBox() {
-        return !boxes.isEmpty();
+        return box != null;
     }
 
     public Optional<JammingBox> getActiveBox() {
-        return boxes.stream().filter(JammingBox::isActive).findFirst();
+        if (box != null && box.isActive()) return Optional.of(box);
+        return Optional.empty();
     }
 
     public Optional<Location> getRandomInnerLocation() {
@@ -54,8 +51,10 @@ public class JammingBoxManager {
     }
 
     public void createBox(Location center, int size, Material material) {
-        JammingBox box = new JammingBox(center, size);
-        addBox(box);
+        if (box != null) {
+            return;
+        }
+        box = new JammingBox(center, size);
         buildWalls(box, material);
     }
 
@@ -96,16 +95,20 @@ public class JammingBoxManager {
     }
 
     private void clearWalls(JammingBox box) {
+        for (BlockKey key : placedBlocks) {
+            World world = Bukkit.getWorld(key.worldId);
+            if (world != null) {
+                world.getBlockAt(key.x, key.y, key.z)
+                        .setType(Material.AIR, false);
+            }
+        }
         placedBlocks.clear();
     }
 
     public void fillInsideWithAutoConvert() {
         if (!autoConvertEnabled) return;
         if (!hasBox()) return;
-
-        for (JammingBox box : boxes) {
-            fillInside(box);
-        }
+        if (box != null) fillInside(box);
     }
 
     private void fillInside(JammingBox box) {
@@ -149,10 +152,7 @@ public class JammingBoxManager {
 
     public void clearInside() {
         if (!hasBox()) return;
-
-        for (JammingBox box : boxes) {
-            clearInside(box);
-        }
+        if (box != null) clearInside(box);
     }
 
     private void clearInside(JammingBox box) {

@@ -2,3 +2,7 @@ name: JammingStream
 main: jp.master.jamming.JammingStream
 version: 0.1.0
 api-version: 1.20
+commands:
+  jammingbox:
+    description: Jamming Box control command
+    usage: /jammingbox <create|remove>

@@ -1,9 +1,12 @@
 package jp.master.jamming;
 
-import jp.master.jamming.box.JammingBoxManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import jp.master.jamming.config.ConfigManager;
 import jp.master.jamming.http.HttpServerManager;
+import jp.master.jamming.box.JammingBoxManager;
+import jp.master.jamming.command.JammingBoxCommand;
+import jp.master.jamming.listener.JammingBoxPlaceListener;
+import jp.master.jamming.listener.JammingBoxProtectListener;
 
 public final class JammingStream extends JavaPlugin {
 
@@ -19,6 +22,15 @@ public final class JammingStream extends JavaPlugin {
 
         httpServerManager = new HttpServerManager(this);
         httpServerManager.start();
+
+        getCommand("jammingbox").setExecutor(new JammingBoxCommand(boxManager));
+
+        getServer().getPluginManager().registerEvents(
+                new JammingBoxProtectListener(boxManager), this
+        );
+        getServer().getPluginManager().registerEvents(
+                new JammingBoxPlaceListener(boxManager), this
+        );
 
         getLogger().info("JammingStream enabled");
     }
