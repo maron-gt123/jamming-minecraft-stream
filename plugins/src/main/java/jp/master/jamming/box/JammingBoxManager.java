@@ -29,6 +29,9 @@ public class JammingBoxManager {
         if (box == null) return;
         clearWalls(box);
         box = null;
+
+        this.box = null;
+        this.gameActive = false;
     }
 
     public boolean hasBox() {
@@ -203,5 +206,16 @@ public class JammingBoxManager {
         public int hashCode() {
             return Objects.hash(worldId, x, y, z);
         }
+    }
+    private boolean gameActive = false;
+
+    public boolean isGameActive() {
+        return gameActive;
+    }
+    public void startGame() {
+        this.gameActive = true;
+    }
+    public void stopGame() {
+        this.gameActive = false;
     }
 }

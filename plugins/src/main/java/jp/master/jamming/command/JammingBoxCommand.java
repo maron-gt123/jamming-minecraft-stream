@@ -32,6 +32,8 @@ public class JammingBoxCommand implements CommandExecutor {
         switch (args[0].toLowerCase()) {
             case "create" -> handleCreate(player, args);
             case "remove" -> handleRemove(player);
+            case "start"  -> handleStart(player);
+            case "stop"   -> handleStop(player);
             default -> sendHelp(player);
         }
         return true;
@@ -85,11 +87,46 @@ public class JammingBoxCommand implements CommandExecutor {
             player.sendMessage("§ejammingboxは存在しません");
             return;
         }
-
+        if (manager.isGameActive()) {
+            player.sendMessage("§cゲーム中は削除できません。先に stop してください");
+            return;
+        }
         manager.removeBox();
         player.sendMessage("§ajammingboxを削除しました");
     }
+    /* =======================
+       start
+       ======================= */
+    private void handleStart(Player player) {
 
+        if (!manager.hasBox()) {
+            player.sendMessage("§c先に /jammingbox create を実行してください");
+            return;
+        }
+
+        if (manager.isGameActive()) {
+            player.sendMessage("§eゲームはすでに開始されています");
+            return;
+        }
+
+        manager.startGame();
+
+        player.sendMessage("§aゲームを開始しました！");
+    }
+    /* =======================
+       stop
+       ======================= */
+    private void handleStop(Player player) {
+
+        if (!manager.isGameActive()) {
+            player.sendMessage("§eゲームはすでに停止しています");
+            return;
+        }
+
+        manager.stopGame();
+
+        player.sendMessage("§cゲームを停止しました");
+    }
     /* =======================
        help
        ======================= */
@@ -97,5 +134,7 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§6==== JammingBox ====");
         sender.sendMessage("§e/jammingbox create [size] §7- jammingboxを作成");
         sender.sendMessage("§e/jammingbox remove        §7- jammingboxを削除");
+        sender.sendMessage("§e/jammingbox start        §7- ゲーム開始");
+        sender.sendMessage("§e/jammingbox stop         §7- ゲーム停止");
     }
 }

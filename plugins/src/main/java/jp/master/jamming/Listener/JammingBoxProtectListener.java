@@ -15,8 +15,8 @@ public class JammingBoxProtectListener implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
+        if (!manager.isGameActive()) return;
         if (!manager.hasBox()) return;
-
         if (manager.isProtected(event.getBlock().getLocation())) {
             event.setCancelled(true);
         }
