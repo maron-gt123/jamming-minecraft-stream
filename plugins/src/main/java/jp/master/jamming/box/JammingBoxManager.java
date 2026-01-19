@@ -27,6 +27,10 @@ public class JammingBoxManager {
     public void setAutoConvertEnabled(boolean enabled) {
         this.autoConvertEnabled = enabled;
     }
+    public void fillInsideForce() {
+        if (!hasBox()) return;
+        fillInside(box);
+    }
     private boolean gameActive = false;
     private long gameStartTime = 0L;
     private BukkitTask actionBarTask;
@@ -115,7 +119,6 @@ public class JammingBoxManager {
     }
 
     public void fillInsideWithAutoConvert() {
-        if (!autoConvertEnabled) return;
         if (!hasBox()) return;
         if (box != null) fillInside(box);
     }

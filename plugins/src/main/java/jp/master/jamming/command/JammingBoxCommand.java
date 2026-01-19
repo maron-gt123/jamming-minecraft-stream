@@ -167,7 +167,7 @@ public class JammingBoxCommand implements CommandExecutor {
             player.sendMessage("§cJammingBoxが存在しません");
             return;
         }
-        manager.fillInsideWithAutoConvert();
+        manager.fillInsideForce();
         player.sendMessage("§aJammingBoxを自動変換ルールで埋めました");
     }
 
