@@ -21,6 +21,9 @@ public class JammingBoxManager {
     private final Set<BlockKey> placedBlocks = new HashSet<>();
 
     private boolean autoConvertEnabled = false;
+    private Material autoBottom;
+    private Material autoMiddle;
+    private Material autoTop;
     public boolean isAutoConvertEnabled() {
         return autoConvertEnabled;
     }
@@ -149,6 +152,20 @@ public class JammingBoxManager {
         }
     }
 
+    private void loadAutoConvertConfig() {
+        autoBottom = loadMaterial("jammingbox.autocvt.bottom", Material.IRON_BLOCK);
+        autoMiddle = loadMaterial("jammingbox.autocvt.middle", Material.GOLD_BLOCK);
+        autoTop = loadMaterial("jammingbox.autocvt.top", Material.DIAMOND_BLOCK);
+    }
+
+    private Material loadMaterial(String path, Material def) {
+        String name = plugin.getConfig().getString(path);
+        if (name == null) return def;
+
+        Material mat = Material.matchMaterial(name.toUpperCase());
+        return mat != null ? mat : def;
+    }
+
     public Material getAutoBlockType(JammingBox box, int y) {
         int minY = box.getCenter().getBlockY() - box.getHalf() + 1;
         int maxY = box.getCenter().getBlockY() + box.getHalf();
@@ -157,9 +174,9 @@ public class JammingBoxManager {
         int relativeY = y - minY;
         int layerHeight = height / 3;
 
-        if (relativeY >= 2 * layerHeight) return Material.DIAMOND_BLOCK;
-        else if (relativeY >= layerHeight) return Material.GOLD_BLOCK;
-        else return Material.IRON_BLOCK;
+        if (relativeY >= 2 * layerHeight) return autoTop;
+        else if (relativeY >= layerHeight) return autoMiddle;
+        else return autoBottom;
     }
 
     public void clearInside() {
@@ -248,10 +265,10 @@ public class JammingBoxManager {
     }
     public JammingBoxManager(JavaPlugin plugin) {
         this.plugin = plugin;
+        loadAutoConvertConfig();
     }
 
     private void startActionBar() {
-        // 二重起動防止
         if (actionBarTask != null) return;
 
         actionBarTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {

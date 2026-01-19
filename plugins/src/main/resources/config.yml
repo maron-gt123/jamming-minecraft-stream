@@ -14,6 +14,12 @@ events:
   subscribe:
     enabled: true
 
+jammingbox:
+  autocvt:
+    bottom: IRON_BLOCK
+    middle: GOLD_BLOCK
+    top: DIAMOND_BLOCK
+
 commands:
   follow:
     - command: "say {nickname} follow"
