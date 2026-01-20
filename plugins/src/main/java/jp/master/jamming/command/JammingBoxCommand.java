@@ -38,6 +38,7 @@ public class JammingBoxCommand implements CommandExecutor {
             case "replace" -> handleReplace(player, args);
             case "fill" -> handleFill(player);
             case "clear" -> handleClear(player);
+            case "set_block_interaction_range" -> handleSetBlockInteractionRange(player, args);
             default -> sendHelp(player);
         }
         return true;
@@ -183,6 +184,34 @@ public class JammingBoxCommand implements CommandExecutor {
         player.sendMessage("§aJammingBox内のブロックを削除しました");
     }
     /* =======================
+   set_block_interaction_range
+   ======================= */
+    private void handleSetBlockInteractionRange(Player player, String[] args) {
+
+        if (args.length < 2) {
+            player.sendMessage("§e/jammingbox set_block_interaction_range <数値>");
+            return;
+        }
+
+        double range;
+        try {
+            range = Double.parseDouble(args[1]);
+        } catch (NumberFormatException e) {
+            player.sendMessage("§c数値を指定してください");
+            return;
+        }
+
+        // ★ Minecraft 標準 attribute を実行
+        player.getServer().dispatchCommand(
+                player.getServer().getConsoleSender(),
+                "attribute " + player.getName()
+                        + " minecraft:block_interaction_range base set "
+                        + range
+        );
+
+        player.sendMessage("§aブロック操作距離を " + range + " に設定しました");
+    }
+    /* =======================
        help
        ======================= */
     private void sendHelp(CommandSender sender) {
@@ -194,5 +223,6 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§e/jammingbox replace true | false §7- ブロック置換切替");
         sender.sendMessage("§e/jammingbox fill         §7- jammingboxを埋める");
         sender.sendMessage("§e/jammingbox clear        §7- jammingboxを空にする");
+        sender.sendMessage("§e/jammingbox set_block_interaction_range <value> §7- 操作距離変更");
     }
 }
