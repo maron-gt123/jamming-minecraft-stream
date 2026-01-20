@@ -35,7 +35,7 @@ public class JammingBoxCommand implements CommandExecutor {
             case "remove" -> handleRemove(player);
             case "start"  -> handleStart(player, args);
             case "stop"   -> handleStop(player);
-            case "autocvt" -> handleAutoCvt(player, args);
+            case "replace" -> handleReplace(player, args);
             case "fill" -> handleFill(player);
             case "clear" -> handleClear(player);
             default -> sendHelp(player);
@@ -147,16 +147,16 @@ public class JammingBoxCommand implements CommandExecutor {
         player.sendMessage("§cゲームを停止しました");
     }
     /* =======================
-       autocvt
+       replace
        ======================= */
-    private void handleAutoCvt(Player player, String[] args) {
+    private void handleReplace(Player player, String[] args) {
         if (args.length < 2) {
-            player.sendMessage("§e/jammingbox autocvt true|false");
+            player.sendMessage("§e/jammingbox replace true|false");
             return;
         }
         boolean enabled = args[1].equalsIgnoreCase("true");
         manager.setAutoConvertEnabled(enabled);
-        player.sendMessage("§aJammingBox内ブロック自動変換: " + (enabled ? "有効" : "無効"));
+        player.sendMessage("§aJammingBox内ブロック置換: " + (enabled ? "有効" : "無効"));
     }
 
     /* =======================
@@ -191,7 +191,7 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§e/jammingbox remove        §7- jammingboxを削除");
         sender.sendMessage("§e/jammingbox start [count] §7- ゲーム開始");
         sender.sendMessage("§e/jammingbox stop         §7- ゲーム停止");
-        sender.sendMessage("§e/jammingbox autocvt true|false §7- 自動変換切替");
+        sender.sendMessage("§e/jammingbox replace true | false §7- ブロック置換切替");
         sender.sendMessage("§e/jammingbox fill         §7- jammingboxを埋める");
         sender.sendMessage("§e/jammingbox clear        §7- jammingboxを空にする");
     }
