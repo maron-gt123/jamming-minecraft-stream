@@ -19,13 +19,11 @@ public class JammingBoxPlaceListener implements Listener {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        if (!manager.isGameActive()) return;
         if (!manager.isAutoConvertEnabled()) return;
 
-        Optional<JammingBox> boxOpt = manager.getActiveBox();
-        if (boxOpt.isEmpty()) return;
+        JammingBox box = manager.getBox();
+        if (box == null) return;
 
-        JammingBox box = boxOpt.get();
         if (!box.isInside(event.getBlockPlaced().getLocation())) return;
 
         int y = event.getBlockPlaced().getY();

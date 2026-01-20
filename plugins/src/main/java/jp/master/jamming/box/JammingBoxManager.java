@@ -328,6 +328,10 @@ public class JammingBoxManager {
         }, 0L, 20L);
     }
 
+    public JammingBox getBox() {
+        return box;
+    }
+
     private void stopActionBar() {
         if (actionBarTask != null) {
             actionBarTask.cancel();
