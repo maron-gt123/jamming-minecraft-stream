@@ -26,7 +26,7 @@ public class JammingBoxTabCompleter implements TabCompleter {
 
         List<String> result = new ArrayList<>();
 
-        // /jammingbox <ここ>
+        // /jammingbox
         if (args.length == 1) {
             result.add("create");
             result.add("remove");
