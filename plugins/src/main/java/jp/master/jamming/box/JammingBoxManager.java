@@ -7,6 +7,10 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.FireworkEffect;
+import org.bukkit.entity.Firework;
+import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.Color;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import java.util.HashSet;
@@ -17,17 +21,34 @@ import java.util.Objects;
 
 public class JammingBoxManager {
 
+    // =========================================================
+    // Box state
+    // =========================================================
     private JammingBox box = null;
     private final Set<BlockKey> placedBlocks = new HashSet<>();
+    // =========================================================
+    // AutoConvert settings
+    // =========================================================
     private boolean autoConvertEnabled = false;
     private Material autoBottom;
     private Material autoMiddle;
     private Material autoTop;
+    // =========================================================
+    // Game state
+    // =========================================================
     private boolean gameActive = false;
     private long gameStartTime = 0L;
+    private boolean clearSequenceRunning = false;
+    private int clearCountdownSeconds;
+    // =========================================================
+    // Tasks / Plugin
+    // =========================================================
     private BukkitTask actionBarTask;
     private final JavaPlugin plugin;
     private BukkitTask countdownTask;
+    private BukkitTask clearCountdownTask;
+
+    // =========================================================
 
     // =========================================================
     // config load
@@ -35,6 +56,7 @@ public class JammingBoxManager {
     public JammingBoxManager(JavaPlugin plugin) {
         this.plugin = plugin;
         loadAutoConvertConfig();
+        loadClearConfig();
     }
     // =========================================================
     // ボックス操作
@@ -135,11 +157,16 @@ public class JammingBoxManager {
     public boolean isGameActive() {
         return gameActive;
     }
+    private void loadClearConfig() {
+        clearCountdownSeconds =
+                plugin.getConfig().getInt("jammingbox.clear.countdown", 15);
+    }
     /** ゲーム開始 */
     public void startGame() {
         if (box != null) {
             box.activate();
         }
+        clearSequenceRunning = false;
         gameActive = true;
         gameStartTime = System.currentTimeMillis();
         startActionBar();
@@ -181,6 +208,31 @@ public class JammingBoxManager {
             }
         }, 0L, 20L);
     }
+    /** 経過秒数取得 */
+    public long getElapsedSeconds() {
+        if (!gameActive) return 0;
+        return (System.currentTimeMillis() - gameStartTime) / 1000;
+    }
+    /** ゲーム開始カウントダウン音 */
+    private void playCountdownSound(Player player) {
+        player.playSound(
+                player.getLocation(),
+                org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP,
+                0.6f,
+                1.8f
+        );
+    }
+    /** ゲームスタート音 */
+    private void playGameStartSound() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.playSound(
+                    player.getLocation(),
+                    org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE,
+                    0.9f,
+                    1.2f
+            );
+        }
+    }
     /** ゲーム停止 */
     public void stopGame() {
         if (box != null) {
@@ -195,31 +247,6 @@ public class JammingBoxManager {
         }
         playGameStopSound();
     }
-    /** 経過秒数取得 */
-    public long getElapsedSeconds() {
-        if (!gameActive) return 0;
-        return (System.currentTimeMillis() - gameStartTime) / 1000;
-    }
-    /** ゲームスタート音 */
-    private void playGameStartSound() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            player.playSound(
-                    player.getLocation(),
-                    org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE,
-                    0.9f,
-                    1.2f
-            );
-        }
-    }
-    /** ゲーム開始カウントダウン音 */
-    private void playCountdownSound(Player player) {
-        player.playSound(
-                player.getLocation(),
-                org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP,
-                0.6f,
-                1.8f
-        );
-    }
     /** ゲーム終了音 */
     private void playGameStopSound() {
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -230,6 +257,33 @@ public class JammingBoxManager {
                     0.8f
             );
         }
+    }
+    /** ゲームクリア判定 */
+    private boolean isBoxFullyFilled() {
+        if (!hasBox()) return false;
+
+        JammingBox box = this.box;
+        World world = box.getWorld();
+        Location center = box.getCenter();
+        int half = box.getHalf();
+
+        int minX = center.getBlockX() - half + 1;
+        int maxX = center.getBlockX() + half - 1;
+        int minY = center.getBlockY() - half + 1;
+        int maxY = center.getBlockY() + half - 1;
+        int minZ = center.getBlockZ() - half + 1;
+        int maxZ = center.getBlockZ() + half - 1;
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    if (world.getBlockAt(x, y, z).getType() == Material.AIR) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
     // =========================================================
     // 壁・床構築
@@ -308,6 +362,14 @@ public class JammingBoxManager {
                 }
             }
         }
+        if (gameActive && !clearSequenceRunning && isBoxFullyFilled()) {
+            onGameClear();
+        }
+    }
+    private void onGameClear() {
+        clearSequenceRunning = true;
+        stopActionBar();
+        startClearCountdown(clearCountdownSeconds);
     }
     private void clearInside(JammingBox box) {
         Location center = box.getCenter();
@@ -366,6 +428,60 @@ public class JammingBoxManager {
         return String.format("%02d:%02d", min, sec);
     }
 
+    /** ゲームクリアアクション */
+    private void startClearCountdown(int seconds) {
+        if (clearCountdownTask != null) {
+            clearCountdownTask.cancel();
+        }
+
+        clearCountdownTask = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
+            int timeLeft = seconds;
+
+            @Override
+            public void run() {
+                if (timeLeft <= 0) {
+                    clearCountdownTask.cancel();
+                    clearCountdownTask = null;
+                    onGameClearComplete();
+                    return;
+                }
+
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    player.sendTitle(
+                            "§aクリアまで",
+                            "§e" + timeLeft + " §a秒"
+                    );
+                    player.playSound(
+                            player.getLocation(),
+                            org.bukkit.Sound.BLOCK_NOTE_BLOCK_PLING,
+                            0.8f,
+                            1.5f
+                    );
+                }
+                timeLeft--;
+            }
+        }, 0L, 20L);
+    }
+    private void playGameClearEffect() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.sendTitle(
+                    "§6§lGAME CLEAR!",
+                    "§eおめでとう！",
+                    10, 60, 20
+            );
+            player.playSound(
+                    player.getLocation(),
+                    org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE,
+                    1.0f,
+                    1.0f
+            );
+        }
+    }
+    private void onGameClearComplete() {
+        playGameClearEffect();
+        clearInsideWithFireworks(box);
+        clearSequenceRunning = false;
+    }
     // =========================================================
     // 内部クラス
     // =========================================================
@@ -390,6 +506,54 @@ public class JammingBoxManager {
         @Override
         public int hashCode() {
             return Objects.hash(worldId, x, y, z);
+        }
+    }
+    // =========================================================
+    // 演出関連
+    // =========================================================
+    /** ゲームクリア時の花火演出 */
+    private void clearInsideWithFireworks(JammingBox box) {
+        Location center = box.getCenter();
+        World world = box.getWorld();
+        int half = box.getHalf();
+
+        int minX = center.getBlockX() - half + 1;
+        int maxX = center.getBlockX() + half - 1;
+        int minY = center.getBlockY() - half + 1;
+        int maxY = center.getBlockY() + half - 1;
+        int minZ = center.getBlockZ() - half + 1;
+        int maxZ = center.getBlockZ() + half - 1;
+
+        // ブロック削除
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    world.getBlockAt(x, y, z).setType(Material.AIR, false);
+                }
+            }
+        }
+
+        // 花火を複数ランダムに打ち上げ
+        for (int i = 0; i < 50; i++) {
+            Location fwLoc = getRandomInnerLocation()
+                    .orElse(center)
+                    .clone()
+                    .add(0.5, 1.0, 0.5);
+
+            Firework fw = world.spawn(fwLoc, Firework.class);
+            FireworkMeta meta = fw.getFireworkMeta();
+
+            meta.addEffect(
+                    FireworkEffect.builder()
+                            .with(FireworkEffect.Type.BALL_LARGE)
+                            .withColor(Color.LIME, Color.YELLOW, Color.AQUA)
+                            .withFade(Color.WHITE)
+                            .flicker(true)
+                            .trail(true)
+                            .build()
+            );
+            meta.setPower(1);
+            fw.setFireworkMeta(meta);
         }
     }
 }
