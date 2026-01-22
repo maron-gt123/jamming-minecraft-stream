@@ -1,6 +1,7 @@
 package jp.master.jamming.command;
 
 import jp.master.jamming.box.JammingBoxManager;
+import jp.master.jamming.config.ConfigManager;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.Material;
@@ -156,8 +157,11 @@ public class JammingBoxCommand implements CommandExecutor {
             return;
         }
         boolean enabled = args[1].equalsIgnoreCase("true");
-        manager.setAutoConvertEnabled(enabled);
-        player.sendMessage("§aJammingBox内ブロック置換: " + (enabled ? "有効" : "無効"));
+        manager.setReplaceEnabled(enabled);
+
+        player.sendMessage(
+                "§aJammingBox内ブロック置換: " + (enabled ? "有効" : "無効")
+        );
     }
 
     /* =======================

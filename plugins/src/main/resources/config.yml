@@ -17,7 +17,7 @@ events:
 jammingbox:
   clear:
     countdown: 15
-  autocvt:
+  replace:
     enabled: true
     bottom: IRON_BLOCK
     middle: GOLD_BLOCK

@@ -2,6 +2,7 @@ package jp.master.jamming.listener;
 
 import jp.master.jamming.box.JammingBox;
 import jp.master.jamming.box.JammingBoxManager;
+import jp.master.jamming.config.ConfigManager;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,7 +20,7 @@ public class JammingBoxPlaceListener implements Listener {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        if (!manager.isAutoConvertEnabled()) return;
+        if (!manager.isReplaceEnabled()) return;
 
         JammingBox box = manager.getBox();
         if (box == null) return;
@@ -32,7 +33,7 @@ public class JammingBoxPlaceListener implements Listener {
 
         if (y < minY || y > maxY) return;
 
-        Material converted = manager.getAutoBlockType(
+        Material converted = manager.getReplaceBlockType(
                 box,
                 event.getBlockPlaced().getY()
         );

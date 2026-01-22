@@ -30,10 +30,10 @@ public class JammingBoxManager {
     // =========================================================
     // AutoConvert settings
     // =========================================================
-    private boolean autoConvertEnabled = false;
-    private Material autoBottom;
-    private Material autoMiddle;
-    private Material autoTop;
+    private boolean replaceEnabled;
+    private Material replaceBottom;
+    private Material replaceMiddle;
+    private Material replaceTop;
     // =========================================================
     // Game state
     // =========================================================
@@ -56,7 +56,8 @@ public class JammingBoxManager {
     // =========================================================
     public JammingBoxManager(JavaPlugin plugin) {
         this.plugin = plugin;
-        loadAutoConvertConfig();
+        this.replaceEnabled = ConfigManager.getReplaceEnabledDefault();
+        loadReplaceConfig();
         loadClearConfig();
     }
     // =========================================================
@@ -109,9 +110,9 @@ public class JammingBoxManager {
         fillInside(box);
     }
     /** replace 有効時の内部充填 */
-    public void fillInsideWithAutoConvert() {
+    public void fillInsideWithReplace() {
         if (!hasBox()) return;
-        if (!autoConvertEnabled) return;
+        if (!replaceEnabled) return;
         fillInside(box);
     }
     /** 内部ブロック全消去 */
@@ -120,27 +121,20 @@ public class JammingBoxManager {
         if (box != null) clearInside(box);
     }
     // =========================================================
-    // AutoConvert
+    // replase
     // =========================================================
-    public boolean isAutoConvertEnabled() {
-        return autoConvertEnabled;
-    }
-    public void setAutoConvertEnabled(boolean enabled) {
-        this.autoConvertEnabled = enabled;
-    }
     /** config情報取得 */
-    private void loadAutoConvertConfig() {
-        autoConvertEnabled = ConfigManager.isAutoConvertEnabled();
-        autoBottom = Material.matchMaterial(ConfigManager.getAutoConvertBottom());
-        autoMiddle = Material.matchMaterial(ConfigManager.getAutoConvertMiddle());
-        autoTop = Material.matchMaterial(ConfigManager.getAutoConvertTop());
+    private void loadReplaceConfig() {
+        replaceBottom = Material.matchMaterial(ConfigManager.getReplaceBottom());
+        replaceMiddle = Material.matchMaterial(ConfigManager.getReplaceMiddle());
+        replaceTop = Material.matchMaterial(ConfigManager.getReplaceTop());
 
-        if (autoBottom == null) autoBottom = Material.IRON_BLOCK;
-        if (autoMiddle == null) autoMiddle = Material.GOLD_BLOCK;
-        if (autoTop == null) autoTop = Material.DIAMOND_BLOCK;
+        if (replaceBottom == null) replaceBottom = Material.IRON_BLOCK;
+        if (replaceMiddle == null) replaceMiddle = Material.GOLD_BLOCK;
+        if (replaceTop == null) replaceTop = Material.DIAMOND_BLOCK;
     }
     /** 高さに応じたブロック種別取得 */
-    public Material getAutoBlockType(JammingBox box, int y) {
+    public Material getReplaceBlockType(JammingBox box, int y) {
         int minY = box.getCenter().getBlockY() - box.getHalf() + 1;
         int maxY = box.getCenter().getBlockY() + box.getHalf();
 
@@ -148,11 +142,16 @@ public class JammingBoxManager {
         int relativeY = y - minY;
         int layerHeight = height / 3;
 
-        if (relativeY >= 2 * layerHeight) return autoTop;
-        else if (relativeY >= layerHeight) return autoMiddle;
-        else return autoBottom;
+        if (relativeY >= 2 * layerHeight) return replaceTop;
+        else if (relativeY >= layerHeight) return replaceMiddle;
+        else return replaceBottom;
     }
-
+    public boolean isReplaceEnabled() {
+        return replaceEnabled;
+    }
+    public void setReplaceEnabled(boolean enabled) {
+        this.replaceEnabled = enabled;
+    }
     // =========================================================
     // ゲーム制御
     // =========================================================
@@ -359,7 +358,7 @@ public class JammingBoxManager {
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
                 for (int z = minZ; z <= maxZ; z++) {
-                    Material mat = getAutoBlockType(box, y);
+                    Material mat = getReplaceBlockType(box, y);
                     world.getBlockAt(x, y, z).setType(mat, false);
                 }
             }

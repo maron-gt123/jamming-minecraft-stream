@@ -47,20 +47,27 @@ public class ConfigManager {
         return plugin.getConfig().getInt("jammingbox.clear.countdown", 15);
     }
 
-    public static boolean isAutoConvertEnabled() {
-        return plugin.getConfig().getBoolean("jammingbox.autocvt.enabled", false);
+    public static boolean getReplaceEnabledDefault() {
+        return plugin.getConfig().getBoolean(
+                "jammingbox.replace.enabled",
+                false
+        );
     }
 
-    public static String getAutoConvertBottom() {
-        return plugin.getConfig().getString("jammingbox.autocvt.bottom");
+    public static boolean isReplaceEnabled() {
+        return plugin.getConfig().getBoolean("jammingbox.replace.enabled", false);
     }
 
-    public static String getAutoConvertMiddle() {
-        return plugin.getConfig().getString("jammingbox.autocvt.middle");
+    public static String getReplaceBottom() {
+        return plugin.getConfig().getString("jammingbox.replace.bottom");
     }
 
-    public static String getAutoConvertTop() {
-        return plugin.getConfig().getString("jammingbox.autocvt.top");
+    public static String getReplaceMiddle() {
+        return plugin.getConfig().getString("jammingbox.replace.middle");
+    }
+
+    public static String getReplaceTop() {
+        return plugin.getConfig().getString("jammingbox.replace.top");
     }
     // ===== reload =====
     public static void reload() {
