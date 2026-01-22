@@ -28,7 +28,7 @@ public class JammingBoxManager {
     private JammingBox box = null;
     private final Set<BlockKey> placedBlocks = new HashSet<>();
     // =========================================================
-    // AutoConvert settings
+    // replase settings
     // =========================================================
     private boolean replaceEnabled;
     private Material replaceBottom;
@@ -41,6 +41,7 @@ public class JammingBoxManager {
     private long gameStartTime = 0L;
     private boolean clearSequenceRunning = false;
     private int clearCountdownSeconds;
+    private BukkitTask clearCheckTask;
     // =========================================================
     // Tasks / Plugin
     // =========================================================
@@ -171,6 +172,7 @@ public class JammingBoxManager {
         gameActive = true;
         gameStartTime = System.currentTimeMillis();
         startActionBar();
+        startClearConditionWatcher();
     }
     /** ゲーム開始カウントダウン */
     public void startGameWithCountdown(int seconds) {
@@ -246,6 +248,7 @@ public class JammingBoxManager {
             countdownTask.cancel();
             countdownTask = null;
         }
+        stopClearConditionWatcher();
         playGameStopSound();
     }
     /** ゲーム終了音 */
@@ -285,6 +288,57 @@ public class JammingBoxManager {
             }
         }
         return true;
+    }
+    /** ゲーム内監視 */
+    private void startClearConditionWatcher() {
+        if (clearCheckTask != null) return;
+
+        clearCheckTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            if (!gameActive || !hasBox()) return;
+
+            // ▼ クリアカウントダウン中
+            if (clearSequenceRunning) {
+                if (!isBoxFullyFilled()) {
+                    cancelClearCountdown();
+                }
+                return;
+            }
+
+            // ▼ まだクリア演出に入っていない
+            if (isBoxFullyFilled()) {
+                onGameClear();
+            }
+
+        }, 0L, 10L);
+    }
+    /** クリアキャンセル */
+    private void cancelClearCountdown() {
+        if (clearCountdownTask != null) {
+            clearCountdownTask.cancel();
+            clearCountdownTask = null;
+        }
+        clearSequenceRunning = false;
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.sendTitle(
+                    "§cクリア中断",
+                    "§7ブロックが壊されました",
+                    5, 30, 10
+            );
+            player.playSound(
+                    player.getLocation(),
+                    org.bukkit.Sound.BLOCK_ANVIL_LAND,
+                    0.6f,
+                    0.8f
+            );
+        }
+    }
+    /** 監視停止 */
+    private void stopClearConditionWatcher() {
+        if (clearCheckTask != null) {
+            clearCheckTask.cancel();
+            clearCheckTask = null;
+        }
     }
     // =========================================================
     // 壁・床構築
@@ -362,9 +416,6 @@ public class JammingBoxManager {
                     world.getBlockAt(x, y, z).setType(mat, false);
                 }
             }
-        }
-        if (gameActive && !clearSequenceRunning && isBoxFullyFilled()) {
-            onGameClear();
         }
     }
     private void onGameClear() {
