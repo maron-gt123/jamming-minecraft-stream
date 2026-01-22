@@ -1,5 +1,6 @@
 package jp.master.jamming.box;
 
+import jp.master.jamming.config.ConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -110,7 +111,8 @@ public class JammingBoxManager {
     /** replace 有効時の内部充填 */
     public void fillInsideWithAutoConvert() {
         if (!hasBox()) return;
-        if (box != null) fillInside(box);
+        if (!autoConvertEnabled) return;
+        fillInside(box);
     }
     /** 内部ブロック全消去 */
     public void clearInside() {
@@ -126,16 +128,16 @@ public class JammingBoxManager {
     public void setAutoConvertEnabled(boolean enabled) {
         this.autoConvertEnabled = enabled;
     }
+    /** config情報取得 */
     private void loadAutoConvertConfig() {
-        autoBottom = loadMaterial("jammingbox.autocvt.bottom", Material.IRON_BLOCK);
-        autoMiddle = loadMaterial("jammingbox.autocvt.middle", Material.GOLD_BLOCK);
-        autoTop = loadMaterial("jammingbox.autocvt.top", Material.DIAMOND_BLOCK);
-    }
-    private Material loadMaterial(String path, Material def) {
-        String name = plugin.getConfig().getString(path);
-        if (name == null) return def;
-        Material mat = Material.matchMaterial(name.toUpperCase());
-        return mat != null ? mat : def;
+        autoConvertEnabled = ConfigManager.isAutoConvertEnabled();
+        autoBottom = Material.matchMaterial(ConfigManager.getAutoConvertBottom());
+        autoMiddle = Material.matchMaterial(ConfigManager.getAutoConvertMiddle());
+        autoTop = Material.matchMaterial(ConfigManager.getAutoConvertTop());
+
+        if (autoBottom == null) autoBottom = Material.IRON_BLOCK;
+        if (autoMiddle == null) autoMiddle = Material.GOLD_BLOCK;
+        if (autoTop == null) autoTop = Material.DIAMOND_BLOCK;
     }
     /** 高さに応じたブロック種別取得 */
     public Material getAutoBlockType(JammingBox box, int y) {
@@ -157,9 +159,9 @@ public class JammingBoxManager {
     public boolean isGameActive() {
         return gameActive;
     }
+    /** config情報取得 */
     private void loadClearConfig() {
-        clearCountdownSeconds =
-                plugin.getConfig().getInt("jammingbox.clear.countdown", 15);
+        clearCountdownSeconds = ConfigManager.getClearCountdown();
     }
     /** ゲーム開始 */
     public void startGame() {

@@ -1,5 +1,6 @@
 package jp.master.jamming.http;
 
+import jp.master.jamming.config.ConfigManager;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -47,9 +48,7 @@ public class EventHttpHandler implements HttpHandler {
                 return;
             }
 
-            boolean enabled = plugin.getConfig().getBoolean("events." + eventType + ".enabled", false);
-
-            if (!enabled) {
+            if (!ConfigManager.isEventEnabled(eventType)) {
                 exchange.sendResponseHeaders(200, 0);
                 exchange.getResponseBody().write("OK".getBytes());
                 exchange.close();
@@ -73,20 +72,24 @@ public class EventHttpHandler implements HttpHandler {
     }
 
     private void executeCommands(String eventType, Object dataObj) {
-        List<Map<String, Object>> commands = (List<Map<String, Object>>) plugin.getConfig().getList("commands." + eventType);
-        if (commands == null) return;
+        List<Map<String, Object>> commands =
+                ConfigManager.getCommands(eventType);
+        if (commands.isEmpty()) return;
 
         Map<String, Object> data = (Map<String, Object>) dataObj;
 
         for (Map<String, Object> cmdConfig : commands) {
             if (!cmdConfig.containsKey("command")) continue;
-
             if (!checkCondition(eventType, cmdConfig, data)) continue;
 
-            final String command = replacePlaceholders((String) cmdConfig.get("command"), data);
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
-                plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), command);
-            });
+            final String command =
+                    replacePlaceholders((String) cmdConfig.get("command"), data);
+
+            plugin.getServer().getScheduler().runTask(plugin, () ->
+                    plugin.getServer().dispatchCommand(
+                            plugin.getServer().getConsoleSender(), command
+                    )
+            );
         }
     }
 

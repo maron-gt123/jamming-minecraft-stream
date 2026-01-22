@@ -18,6 +18,7 @@ jammingbox:
   clear:
     countdown: 15
   autocvt:
+    enabled: true
     bottom: IRON_BLOCK
     middle: GOLD_BLOCK
     top: DIAMOND_BLOCK
