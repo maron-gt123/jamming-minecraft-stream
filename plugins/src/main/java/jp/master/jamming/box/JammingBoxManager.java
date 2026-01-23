@@ -14,6 +14,14 @@ import org.bukkit.entity.Firework;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.Color;
 import org.bukkit.Sound;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.DragonFireball;
+import org.bukkit.Particle;
+
+import org.bukkit.util.Vector;
+
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import java.util.HashSet;
@@ -362,28 +370,9 @@ public class JammingBoxManager {
     // 内部ブロック処理
     // =========================================================
     private void fillInside(JammingBox box) {
-        Location center = box.getCenter();
-        World world = box.getWorld();
-        int half = box.getHalf();
-
-        int cx = center.getBlockX();
-        int cy = center.getBlockY();
-        int cz = center.getBlockZ();
-
-        int minX = cx - half + 1;
-        int maxX = cx + half - 1;
-        int minY = cy - half + 1;
-        int maxY = cy + half - 1;
-        int minZ = cz - half + 1;
-        int maxZ = cz + half - 1;
-
-        for (int x = minX; x <= maxX; x++) {
-            for (int y = minY; y <= maxY; y++) {
-                for (int z = minZ; z <= maxZ; z++) {
-                    Material mat = getReplaceBlockType(box, y);
-                    world.getBlockAt(x, y, z).setType(mat, false);
-                }
-            }
+        for (Location loc : box.getInnerBlocks()) {
+            Material mat = getReplaceBlockType(box, loc.getBlockY());
+            loc.getBlock().setType(mat, false);
         }
     }
     private void onGameClear() {
@@ -391,27 +380,8 @@ public class JammingBoxManager {
         startClearCountdown(clearCountdownSeconds);
     }
     private void clearInside(JammingBox box) {
-        Location center = box.getCenter();
-        World world = box.getWorld();
-        int half = box.getHalf();
-
-        int cx = center.getBlockX();
-        int cy = center.getBlockY();
-        int cz = center.getBlockZ();
-
-        int minX = cx - half + 1;
-        int maxX = cx + half - 1;
-        int minY = cy - half + 1;
-        int maxY = cy + half - 1;
-        int minZ = cz - half + 1;
-        int maxZ = cz + half - 1;
-
-        for (int x = minX; x <= maxX; x++) {
-            for (int y = minY; y <= maxY; y++) {
-                for (int z = minZ; z <= maxZ; z++) {
-                    world.getBlockAt(x, y, z).setType(Material.AIR, false);
-                }
-            }
+        for (Location loc : box.getInnerBlocks()) {
+            loc.getBlock().setType(Material.AIR, false);
         }
     }
 
@@ -556,5 +526,9 @@ public class JammingBoxManager {
             meta.setPower(1);
             fw.setFireworkMeta(meta);
         }
+    }
+    /** エンダードラゴン破壊演出 */
+    public void resetByDragon(Player player) {
+        effects.resetByDragon(player, this.box, this.plugin);
     }
 }

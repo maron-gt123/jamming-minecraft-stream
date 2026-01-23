@@ -1,8 +1,18 @@
 package jp.master.jamming.effect;
 
+import jp.master.jamming.box.JammingBox;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.World;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 
@@ -68,5 +78,95 @@ public class JammingGameEffects {
             p.playSound(p.getLocation(),
                     Sound.BLOCK_ANVIL_LAND, 0.6f, 0.8f);
         }
+    }
+    // エンダードラゴン破壊演出
+    public void resetByDragon(Player player, JammingBox box, JavaPlugin plugin) {
+
+        World world = box.getWorld();
+        Location center = box.getCenter();
+
+        // 箱の外周にスポーン
+        double radius = box.getHalf() + 3;
+        Location spawn = center.clone().add(0, 12, radius);
+
+        EnderDragon dragon = (EnderDragon) world.spawnEntity(spawn, EntityType.ENDER_DRAGON);
+
+        dragon.setAI(false);
+        dragon.setSilent(true);
+        dragon.setInvulnerable(true);
+        dragon.setGravity(false);
+
+        // プレイヤーをドラゴンの上へTP
+        Location dragonLoc = dragon.getLocation();
+        Location tpLoc = dragonLoc.clone().add(2, 8, -20);
+        tpLoc.setPitch(65f);
+        tpLoc.setYaw(dragonLoc.getYaw());
+        player.teleport(tpLoc);
+
+        // 箱へ向ける（ここが重要）
+        double dx = center.getX() - dragon.getLocation().getX();
+        double dy = center.getY() - dragon.getLocation().getY();
+        double dz = center.getZ() - dragon.getLocation().getZ();
+
+        float yaw = (float) Math.toDegrees(Math.atan2(dx, dz));
+        float pitch = (float) Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
+
+        dragonLoc.setYaw(yaw);
+        dragonLoc.setPitch(pitch);
+        dragon.teleport(dragonLoc);
+
+        // 鳴き声（絶望系）
+        world.playSound(center, Sound.ENTITY_WITHER_AMBIENT, 4.0f, 0.6f);
+        world.playSound(center, Sound.ENTITY_ENDER_DRAGON_GROWL, 4.0f, 0.8f);
+        world.playSound(center, Sound.BLOCK_PORTAL_TRAVEL, 2.0f, 0.5f);
+
+        // クリスタルをスポーン（Entityとして）
+        Location crystalLoc = center.clone().add(0, 1, 0);
+        Entity crystal = world.spawnEntity(crystalLoc, EntityType.ENDER_CRYSTAL);
+
+        // ビーム演出（パーティクルで代用）
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            if (!crystal.isValid()) return;
+
+            Location from = crystal.getLocation();
+            Location to = center.clone().add(0, 1, 0);
+
+            Vector vec = to.toVector().subtract(from.toVector());
+            double length = vec.length();
+            vec.normalize();
+
+            int beams = 4;
+            for (int b = 0; b < beams; b++) {
+                Vector offset = vec.clone().rotateAroundY((b - beams / 2.0) * 0.1);
+
+                for (double i = 0; i < length; i += 0.5) {
+                    Location point = from.clone().add(offset.clone().multiply(i));
+                    world.spawnParticle(Particle.END_ROD, point, 1, 0, 0, 0, 0);
+                }
+            }
+
+        }, 0L, 2L);
+
+        // 破壊までの遅延
+        long delayTicks = 60L; // 3秒
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+
+            world.createExplosion(center, 0F, false, false);
+            world.spawnParticle(Particle.EXPLOSION_HUGE, center, 200, 2, 2, 2, 0.05);
+            world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 3.0f, 0.8f);
+
+            // 内部破壊
+            for (Location loc : box.getInnerBlocks()) {
+                loc.getBlock().setType(Material.AIR, false);
+            }
+
+            // クリスタル削除
+            crystal.remove();
+
+            // ドラゴン削除
+            dragon.remove();
+
+        }, delayTicks);
     }
 }

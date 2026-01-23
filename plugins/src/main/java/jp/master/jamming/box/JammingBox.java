@@ -2,7 +2,8 @@ package jp.master.jamming.box;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class JammingBox {
@@ -101,5 +102,20 @@ public class JammingBox {
     /** min〜maxの範囲でランダムな整数を返す */
     private int randomBetween(int min, int max) {
         return min + random.nextInt(max - min + 1);
+    }
+
+    /** JammingBox の内部ブロック座標をリスト化 */
+    public List<Location> getInnerBlocks() {
+        List<Location> blocks = new ArrayList<>();
+
+        for (int x = center.getBlockX() - half + 1; x <= center.getBlockX() + half - 1; x++) {
+            for (int y = center.getBlockY() - half + 1; y <= center.getBlockY() + half - 1; y++) {
+                for (int z = center.getBlockZ() - half + 1; z <= center.getBlockZ() + half - 1; z++) {
+                    blocks.add(new Location(world, x, y, z));
+                }
+            }
+        }
+
+        return blocks;
     }
 }

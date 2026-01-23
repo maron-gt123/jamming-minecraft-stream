@@ -39,6 +39,7 @@ public class JammingBoxCommand implements CommandExecutor {
             case "replace" -> handleReplace(player, args);
             case "fill" -> handleFill(player);
             case "clear" -> handleClear(player);
+            case "reset" -> handleReset(player, args);
             case "set_block_interaction_range" -> handleSetBlockInteractionRange(player, args);
             default -> sendHelp(player);
         }
@@ -188,6 +189,40 @@ public class JammingBoxCommand implements CommandExecutor {
         player.sendMessage("§aJammingBox内のブロックを削除しました");
     }
     /* =======================
+    reset
+    ======================= */
+    private void handleReset(Player player, String[] args) {
+
+        if (args.length < 2) {
+            player.sendMessage("§e/jammingbox reset <dragon|wither>");
+            return;
+        }
+
+        if (!manager.hasBox()) {
+            player.sendMessage("§cJammingBoxが存在しません");
+            return;
+        }
+
+        if (!manager.isGameActive()) {
+            player.sendMessage("§cゲーム中のみ実行できます");
+            return;
+        }
+
+        switch (args[1].toLowerCase()) {
+            case "dragon" -> {
+                player.sendMessage("§cドラゴンが接近しています…");
+                manager.resetByDragon(player); // ★ 作成済み処理を呼ぶ
+            }
+            case "wither" -> {
+                player.sendMessage("§cウィザーリセットは未実装です");
+                // manager.resetByWither(player); ← 後で
+            }
+            default -> {
+                player.sendMessage("§e/jammingbox reset <dragon|wither>");
+            }
+        }
+    }
+    /* =======================
    set_block_interaction_range
    ======================= */
     private void handleSetBlockInteractionRange(Player player, String[] args) {
@@ -227,6 +262,7 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§e/jammingbox replace true | false §7- ブロック置換切替");
         sender.sendMessage("§e/jammingbox fill         §7- jammingboxを埋める");
         sender.sendMessage("§e/jammingbox clear        §7- jammingboxを空にする");
+        sender.sendMessage("§e/jammingbox reset <dragon|wither> §7- 演出付きリセット");
         sender.sendMessage("§e/jammingbox set_block_interaction_range <value> §7- 操作距離変更");
     }
 }
