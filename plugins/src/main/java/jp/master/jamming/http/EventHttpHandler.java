@@ -89,17 +89,35 @@ public class EventHttpHandler implements HttpHandler {
                 (String) data.getOrDefault("nickname", "???")
         );
         for (Map<String, Object> cmdConfig : commands) {
-            if (!cmdConfig.containsKey("command")) continue;
             if (!checkCondition(eventType, cmdConfig, data)) continue;
 
-            final String command =
-                    replacePlaceholders((String) cmdConfig.get("command"), data);
+            // commands がある場合（複数）
+            if (cmdConfig.containsKey("commands")) {
+                List<String> commandList = (List<String>) cmdConfig.get("commands");
 
-            plugin.getServer().getScheduler().runTask(plugin, () ->
-                    plugin.getServer().dispatchCommand(
-                            plugin.getServer().getConsoleSender(), command
-                    )
-            );
+                for (String rawCmd : commandList) {
+                    final String command =
+                            replacePlaceholders(rawCmd, data);
+
+                    plugin.getServer().getScheduler().runTask(plugin, () ->
+                            plugin.getServer().dispatchCommand(
+                                    plugin.getServer().getConsoleSender(), command
+                            )
+                    );
+                }
+            }
+
+            // 後方互換：command が1個だけの場合
+            else if (cmdConfig.containsKey("command")) {
+                final String command =
+                        replacePlaceholders((String) cmdConfig.get("command"), data);
+
+                plugin.getServer().getScheduler().runTask(plugin, () ->
+                        plugin.getServer().dispatchCommand(
+                                plugin.getServer().getConsoleSender(), command
+                        )
+                );
+            }
         }
     }
 

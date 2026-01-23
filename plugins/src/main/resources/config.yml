@@ -33,9 +33,10 @@ commands:
   like:
     - count: 50
       command: "jammingbox text {nickname}が50LIKE達成"
-
     - count: 100
-      command: "say {nickname} reached 100 likes!"
+      commands:
+        - "jammingbox tnt 100"
+        - "jammingbox actionbar {nickname} 100LIKE"
 
   gift:
     - gift_name: "Heart Me"

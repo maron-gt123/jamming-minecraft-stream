@@ -5,10 +5,13 @@ import jp.master.jamming.config.ConfigManager;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.Material;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import net.kyori.adventure.title.Title;
+import net.kyori.adventure.text.Component;
 
 public class JammingBoxCommand implements CommandExecutor {
 
@@ -21,13 +24,15 @@ public class JammingBoxCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            sendHelp(sender);
+            handleHelp(sender, new String[]{"help"});
             return true;
         }
 
         switch (args[0].toLowerCase()) {
 
             case "text" -> handleText(sender, args);
+            case "title" -> handleTitle(sender, args);
+            case "tnt"  -> handleTnt(sender, args);
 
             default -> {
                 if (!(sender instanceof Player player)) {
@@ -45,7 +50,7 @@ public class JammingBoxCommand implements CommandExecutor {
                     case "clear" -> handleClear(player);
                     case "reset" -> handleReset(player, args);
                     case "set_block_interaction_range" -> handleSetBlockInteractionRange(player, args);
-                    default -> sendHelp(sender);
+                    default -> handleHelp(sender, args);
                 }
             }
         }
@@ -281,10 +286,94 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.getServer().broadcastMessage(result);
     }
     /* =======================
+       Title
+       ======================= */
+    private void handleTitle(CommandSender sender, String[] args) {
+
+        if (args.length < 2) {
+            sender.sendMessage("§e/jammingbox title <message>");
+            return;
+        }
+
+        String rawMessage = String.join(
+                " ",
+                java.util.Arrays.copyOfRange(args, 1, args.length)
+        );
+
+        String nickname = ConfigManager.getLastNickname();
+        if (nickname == null) nickname = "???";
+
+        String message = rawMessage.replace("{nickname}", nickname);
+
+        for (Player player : sender.getServer().getOnlinePlayers()) {
+            player.sendTitle(
+                    "",                // タイトル
+                    "§c§l" + message, // サブタイトル
+                    10,               // フェードイン
+                    40,               // 表示時間
+                    10                // フェードアウト
+            );
+        }
+    }
+    /* =======================
+    tnt
+    ======================= */
+    private void handleTnt(CommandSender sender, String[] args) {
+
+        if (!manager.hasBox()) {
+            sender.sendMessage("§cJammingBoxが存在しません");
+            return;
+        }
+
+        int count = 1;
+        if (args.length >= 2) {
+            try {
+                count = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§c数は数値で指定してください");
+                return;
+            }
+        }
+
+        for (int i = 0; i < count; i++) {
+
+            Location inner = manager.getRandomInnerLocation().orElse(null);
+            if (inner == null) continue;
+
+            Location spawn = inner.clone().add(
+                    Math.random() * 3 - 1.5,
+                    10,
+                    Math.random() * 3 - 1.5
+            );
+
+            TNTPrimed tnt = spawn.getWorld().spawn(spawn, TNTPrimed.class);
+            tnt.setFuseTicks(60); // 3秒
+        }
+
+        sender.sendMessage("§c§l[TNT] §f" + count + " 個投下 💣");
+    }
+    /* =======================
        help
        ======================= */
-    private void sendHelp(CommandSender sender) {
-        sender.sendMessage("§6==== JammingBox ====");
+    private void handleHelp(CommandSender sender, String[] args) {
+        int page = 1;
+        if (args.length >= 2) {
+            try {
+                page = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§cページ番号は数値で指定してください");
+                return;
+            }
+        }
+        switch (page) {
+            case 1 -> sendHelpPage1(sender);
+            case 2 -> sendHelpPage2(sender);
+            case 3 -> sendHelpPage3(sender);
+            default -> sender.sendMessage("§cそのページは存在しません");
+        }
+    }
+    private void sendHelpPage1(CommandSender sender) {
+        sender.sendMessage("§6==== JammingBox Help (1/3) ====");
         sender.sendMessage("§e/jammingbox create [size] §7- jammingboxを作成");
         sender.sendMessage("§e/jammingbox remove        §7- jammingboxを削除");
         sender.sendMessage("§e/jammingbox start [count] §7- ゲーム開始");
@@ -292,7 +381,19 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§e/jammingbox replace true | false §7- ブロック置換切替");
         sender.sendMessage("§e/jammingbox fill         §7- jammingboxを埋める");
         sender.sendMessage("§e/jammingbox clear        §7- jammingboxを空にする");
+        sender.sendMessage("§e/jammingbox set_block_interaction_range <v>  §7- ブロック設置の長さ");
+        sender.sendMessage("§7/jammingbox help 2 で次へ ▶");
+    }
+    private void sendHelpPage2(CommandSender sender) {
+        sender.sendMessage("§6==== JammingBox Help (2/3) ====");
+        sender.sendMessage("§e/jammingbox text <msg>   §7- 全体メッセージ");
+        sender.sendMessage("§e/jammingbox actionbar <msg> §7- アクションバー表示");
+        sender.sendMessage("§e/jammingbox tnt [count]        §7- TNT投下");
         sender.sendMessage("§e/jammingbox reset <dragon|wither> §7- 演出付きリセット");
-        sender.sendMessage("§e/jammingbox set_block_interaction_range <value> §7- 操作距離変更");
+        sender.sendMessage("§7◀ help 1   help 3 ▶");
+    }
+    private void sendHelpPage3(CommandSender sender) {
+        sender.sendMessage("§6==== JammingBox Help (3/3) ====");
+        sender.sendMessage("§7◀ /jammingbox help 2");
     }
 }
