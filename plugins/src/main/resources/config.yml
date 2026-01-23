@@ -36,7 +36,7 @@ commands:
     - count: 100
       commands:
         - "jammingbox tnt 100"
-        - "jammingbox actionbar {nickname} 100LIKE"
+        - "jammingbox title {nickname} 100LIKE"
 
   gift:
     - gift_name: "Heart Me"
