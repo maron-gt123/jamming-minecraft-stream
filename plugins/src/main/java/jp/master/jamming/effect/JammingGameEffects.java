@@ -8,11 +8,13 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.Wither;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
+import org.bukkit.scheduler.BukkitRunnable;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 
@@ -168,5 +170,81 @@ public class JammingGameEffects {
             dragon.remove();
 
         }, delayTicks);
+    }
+    // ウィザー破壊演出
+    public void resetByWither(Player player, JammingBox box, JavaPlugin plugin) {
+
+        World world = box.getWorld();
+        Location center = box.getCenter();
+
+        // 箱の真上にスポーン
+        Location spawn = center.clone().add(0, 8, 0);
+        Wither wither = (Wither) world.spawnEntity(spawn, EntityType.WITHER);
+
+        wither.setAI(false);
+        wither.setInvulnerable(true);
+        wither.setGravity(false);
+
+        // プレイヤーを少し上＆斜め後ろにTP（全体が見える）
+        Location tpLoc = spawn.clone().add(3, 6, -6);
+        tpLoc.setPitch(60f);
+        tpLoc.setYaw(tpLoc.getYaw());
+        player.teleport(tpLoc);
+
+        // 登場音（絶望）
+        world.playSound(center, Sound.ENTITY_WITHER_SPAWN, 4.0f, 0.6f);
+        world.playSound(center, Sound.BLOCK_PORTAL_TRAVEL, 2.0f, 0.5f);
+
+        // ===== チャージ演出 =====
+        new BukkitRunnable() {
+
+            int ticks = 0;
+
+            @Override
+            public void run() {
+                if (!wither.isValid()) {
+                    cancel();
+                    return;
+                }
+
+                ticks += 5;
+
+                // 煙と低音
+                world.spawnParticle(
+                        Particle.SMOKE_LARGE,
+                        wither.getLocation().add(0, 2, 0),
+                        30, 0.6, 0.6, 0.6, 0.01
+                );
+
+                world.playSound(
+                        wither.getLocation(),
+                        Sound.BLOCK_NOTE_BLOCK_BASS,
+                        1.0f,
+                        0.5f + ticks * 0.02f
+                );
+
+                // ===== 自爆 =====
+                if (ticks >= 40) { // 約2秒
+                    explode();
+                    cancel();
+                }
+            }
+
+            private void explode() {
+                Location loc = wither.getLocation();
+
+                world.spawnParticle(Particle.EXPLOSION_HUGE, loc, 3);
+                world.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 4.0f, 0.7f);
+                world.playSound(loc, Sound.ENTITY_WITHER_DEATH, 4.0f, 0.5f);
+
+                // 内部破壊
+                for (Location l : box.getInnerBlocks()) {
+                    l.getBlock().setType(Material.AIR, false);
+                }
+
+                wither.remove();
+            }
+
+        }.runTaskTimer(plugin, 0L, 5L);
     }
 }

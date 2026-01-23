@@ -214,8 +214,8 @@ public class JammingBoxCommand implements CommandExecutor {
                 manager.resetByDragon(player); // ★ 作成済み処理を呼ぶ
             }
             case "wither" -> {
-                player.sendMessage("§cウィザーリセットは未実装です");
-                // manager.resetByWither(player); ← 後で
+                player.sendMessage("§cウィザーが接近しています…");
+                manager.resetByWither(player);
             }
             default -> {
                 player.sendMessage("§e/jammingbox reset <dragon|wither>");

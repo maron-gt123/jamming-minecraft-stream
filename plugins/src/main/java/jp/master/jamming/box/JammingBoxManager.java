@@ -531,4 +531,8 @@ public class JammingBoxManager {
     public void resetByDragon(Player player) {
         effects.resetByDragon(player, this.box, this.plugin);
     }
+    /** ウィザー破壊演出 */
+    public void resetByWither(Player player) {
+        effects.resetByWither(player, this.box, this.plugin);
+    }
 }
