@@ -35,6 +35,7 @@ public class JammingBoxTabCompleter implements TabCompleter {
             result.add("replace");
             result.add("fill");
             result.add("clear");
+            result.add("reset");
             result.add("set_block_interaction_range");
             return result;
         }
@@ -60,6 +61,13 @@ public class JammingBoxTabCompleter implements TabCompleter {
             result.add("3");
             result.add("5");
             result.add("10");
+            return result;
+        }
+
+        // /jammingbox reset
+        if (args.length == 2 && args[0].equalsIgnoreCase("reset")) {
+            result.add("dragon");
+            result.add("wither");
             return result;
         }
 

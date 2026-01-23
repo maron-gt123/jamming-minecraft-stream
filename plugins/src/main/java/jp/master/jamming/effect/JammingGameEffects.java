@@ -100,8 +100,8 @@ public class JammingGameEffects {
 
         // プレイヤーをドラゴンの上へTP
         Location dragonLoc = dragon.getLocation();
-        Location tpLoc = dragonLoc.clone().add(2, 8, -20);
-        tpLoc.setPitch(65f);
+        Location tpLoc = dragonLoc.clone().add(3, 6, -10);
+        tpLoc.setPitch(60f);
         tpLoc.setYaw(dragonLoc.getYaw());
         player.teleport(tpLoc);
 
