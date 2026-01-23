@@ -13,6 +13,7 @@ import org.bukkit.FireworkEffect;
 import org.bukkit.entity.Firework;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.Color;
+import org.bukkit.Sound;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import java.util.HashSet;
@@ -82,7 +83,6 @@ public class JammingBoxManager {
         if (box == null) return;
         clearWalls(box);
         box = null;
-        stopGame();
     }
     /** ボックス存在確認 */
     public boolean hasBox() {
@@ -206,10 +206,7 @@ public class JammingBoxManager {
                 }
                 // カウントダウン表示
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    player.spigot().sendMessage(
-                            ChatMessageType.ACTION_BAR,
-                            new TextComponent("§eゲーム開始まで §c" + timeLeft + " §e秒")
-                    );
+                    effects.showActionBar("§eゲーム開始まで §c" + timeLeft + " §e秒");
                     playCountdownSound(player);
                 }
                 timeLeft--;
@@ -391,7 +388,6 @@ public class JammingBoxManager {
     }
     private void onGameClear() {
         clearSequenceRunning = true;
-        stopActionBar();
         startClearCountdown(clearCountdownSeconds);
     }
     private void clearInside(JammingBox box) {
@@ -432,10 +428,7 @@ public class JammingBoxManager {
             String time = formatTime(seconds);
 
             for (Player player : Bukkit.getOnlinePlayers()) {
-                player.spigot().sendMessage(
-                        ChatMessageType.ACTION_BAR,
-                        new TextComponent("§a⏱ 経過時間: §e" + time)
-                );
+                effects.showActionBar("§a⏱ 経過時間: §e" + time);
             }
         }, 0L, 20L); // 1秒ごと
     }
@@ -470,13 +463,13 @@ public class JammingBoxManager {
                 }
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    player.sendTitle(
+                    effects.showTitle(
                             "§aクリアまで",
-                            "§e" + timeLeft + " §a秒"
+                            "§e" + timeLeft + " §a秒",
+                            0, 20, 0
                     );
-                    player.playSound(
-                            player.getLocation(),
-                            org.bukkit.Sound.BLOCK_NOTE_BLOCK_PLING,
+                    effects.playSoundAll(
+                            Sound.BLOCK_NOTE_BLOCK_PLING,
                             0.8f,
                             1.5f
                     );
