@@ -1,5 +1,6 @@
 package jp.master.jamming.box;
 
+import jp.master.jamming.effect.JammingGameEffects;
 import jp.master.jamming.config.ConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -22,6 +23,10 @@ import java.util.Objects;
 
 public class JammingBoxManager {
 
+    // =========================================================
+    // Effect
+    // =========================================================
+    private final JammingGameEffects effects = new JammingGameEffects();
     // =========================================================
     // Box state
     // =========================================================
@@ -179,7 +184,7 @@ public class JammingBoxManager {
         if (gameActive) return;
         if (seconds <= 0) {
             startGame();
-            playGameStartSound();
+            effects.playGameStart();
             return;
         }
         stopActionBar();
@@ -196,7 +201,7 @@ public class JammingBoxManager {
                     countdownTask = null;
                     // ゲーム開始
                     startGame();
-                    playGameStartSound();
+                    effects.playGameStart();
                     return;
                 }
                 // カウントダウン表示
@@ -225,17 +230,7 @@ public class JammingBoxManager {
                 1.8f
         );
     }
-    /** ゲームスタート音 */
-    private void playGameStartSound() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            player.playSound(
-                    player.getLocation(),
-                    org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE,
-                    0.9f,
-                    1.2f
-            );
-        }
-    }
+
     /** ゲーム停止 */
     public void stopGame() {
         if (box != null) {
@@ -249,18 +244,7 @@ public class JammingBoxManager {
             countdownTask = null;
         }
         stopClearConditionWatcher();
-        playGameStopSound();
-    }
-    /** ゲーム終了音 */
-    private void playGameStopSound() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            player.playSound(
-                    player.getLocation(),
-                    org.bukkit.Sound.BLOCK_BEACON_DEACTIVATE,
-                    0.8f,
-                    0.8f
-            );
-        }
+        effects.playGameStop();
     }
     /** ゲームクリア判定 */
     private boolean isBoxFullyFilled() {
@@ -318,20 +302,7 @@ public class JammingBoxManager {
             clearCountdownTask = null;
         }
         clearSequenceRunning = false;
-
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            player.sendTitle(
-                    "§cクリア中断",
-                    "§7ブロックが壊されました",
-                    5, 30, 10
-            );
-            player.playSound(
-                    player.getLocation(),
-                    org.bukkit.Sound.BLOCK_ANVIL_LAND,
-                    0.6f,
-                    0.8f
-            );
-        }
+        effects.playClearCanceled();
     }
     /** 監視停止 */
     private void stopClearConditionWatcher() {
@@ -514,23 +485,8 @@ public class JammingBoxManager {
             }
         }, 0L, 20L);
     }
-    private void playGameClearEffect() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            player.sendTitle(
-                    "§6§lGAME CLEAR!",
-                    "§eおめでとう！",
-                    10, 60, 20
-            );
-            player.playSound(
-                    player.getLocation(),
-                    org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE,
-                    1.0f,
-                    1.0f
-            );
-        }
-    }
     private void onGameClearComplete() {
-        playGameClearEffect();
+        effects.playClear();
         clearInsideWithFireworks(box);
         clearSequenceRunning = false;
     }
