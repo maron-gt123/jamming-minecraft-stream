@@ -72,6 +72,14 @@ public class EventHttpHandler implements HttpHandler {
     }
 
     private void executeCommands(String eventType, Object dataObj) {
+        if (plugin instanceof jp.master.jamming.JammingStream stream) {
+            if (!stream.getBoxManager().isGameActive()) {
+                plugin.getLogger().info(
+                        "Event ignored (game not active): " + eventType
+                );
+                return;
+            }
+        }
         List<Map<String, Object>> commands =
                 ConfigManager.getCommands(eventType);
         if (commands.isEmpty()) return;
