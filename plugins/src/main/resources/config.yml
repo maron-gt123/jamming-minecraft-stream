@@ -32,7 +32,7 @@ commands:
     - command: "say {nickname} subscribe"
   like:
     - count: 50
-      command: "say {nickname} reached 50 likes!"
+      command: "jammingbox text {nickname}が50LIKE達成"
 
     - count: 100
       command: "say {nickname} reached 100 likes!"

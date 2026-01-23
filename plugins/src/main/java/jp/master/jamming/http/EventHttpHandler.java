@@ -85,7 +85,9 @@ public class EventHttpHandler implements HttpHandler {
         if (commands.isEmpty()) return;
 
         Map<String, Object> data = (Map<String, Object>) dataObj;
-
+        ConfigManager.setLastNickname(
+                (String) data.getOrDefault("nickname", "???")
+        );
         for (Map<String, Object> cmdConfig : commands) {
             if (!cmdConfig.containsKey("command")) continue;
             if (!checkCondition(eventType, cmdConfig, data)) continue;

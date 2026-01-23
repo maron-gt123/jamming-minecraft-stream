@@ -12,6 +12,7 @@ public class ConfigManager {
     // ===== http =====
     private static int port;
     private static String path;
+    private static String lastNickname;
 
     // ===== load =====
     public static void loadConfig(JavaPlugin pluginInstance) {
@@ -73,5 +74,12 @@ public class ConfigManager {
     public static void reload() {
         plugin.reloadConfig();
         loadConfig(plugin);
+    }
+    public static void setLastNickname(String nickname) {
+        lastNickname = nickname;
+    }
+
+    public static String getLastNickname() {
+        return lastNickname;
     }
 }

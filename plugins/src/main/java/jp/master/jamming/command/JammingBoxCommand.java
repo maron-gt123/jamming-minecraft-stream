@@ -20,28 +20,34 @@ public class JammingBoxCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-
-            if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cこのコマンドはプレイヤーのみ実行できます");
-            return true;
-        }
-
         if (args.length == 0) {
-            sendHelp(player);
+            sendHelp(sender);
             return true;
         }
 
         switch (args[0].toLowerCase()) {
-            case "create" -> handleCreate(player, args);
-            case "remove" -> handleRemove(player);
-            case "start"  -> handleStart(player, args);
-            case "stop"   -> handleStop(player);
-            case "replace" -> handleReplace(player, args);
-            case "fill" -> handleFill(player);
-            case "clear" -> handleClear(player);
-            case "reset" -> handleReset(player, args);
-            case "set_block_interaction_range" -> handleSetBlockInteractionRange(player, args);
-            default -> sendHelp(player);
+
+            case "text" -> handleText(sender, args);
+
+            default -> {
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage("§cこのコマンドはプレイヤーのみ実行できます");
+                    return true;
+                }
+
+                switch (args[0].toLowerCase()) {
+                    case "create" -> handleCreate(player, args);
+                    case "remove" -> handleRemove(player);
+                    case "start"  -> handleStart(player, args);
+                    case "stop"   -> handleStop(player);
+                    case "replace" -> handleReplace(player, args);
+                    case "fill" -> handleFill(player);
+                    case "clear" -> handleClear(player);
+                    case "reset" -> handleReset(player, args);
+                    case "set_block_interaction_range" -> handleSetBlockInteractionRange(player, args);
+                    default -> sendHelp(sender);
+                }
+            }
         }
         return true;
     }
@@ -249,6 +255,30 @@ public class JammingBoxCommand implements CommandExecutor {
         );
 
         player.sendMessage("§aブロック操作距離を " + range + " に設定しました");
+    }
+    /* =======================
+   text
+   ======================= */
+    private void handleText(CommandSender sender, String[] args) {
+
+        if (args.length < 2) {
+            sender.sendMessage("§e/jammingbox text <message>");
+            return;
+        }
+
+        String rawMessage = String.join(
+                " ",
+                java.util.Arrays.copyOfRange(args, 1, args.length)
+        );
+
+        String nickname = ConfigManager.getLastNickname();
+        if (nickname == null) nickname = "???";
+
+        String message = rawMessage.replace("{nickname}", nickname);
+
+        String result = "§6§l[jammingbox] §f" + message;
+
+        sender.getServer().broadcastMessage(result);
     }
     /* =======================
        help
