@@ -68,30 +68,21 @@ def create_client():
     # ---- Gift ----
     @client.on(GiftEvent)
     async def on_gift(event: GiftEvent):
-        gift_name = event.gift.name
-        # ---- Heart Me ----
-        if gift_name == "Heart Me":
+            gift = getattr(event, "m_gift", None)
+            if not gift:
+                return
+            streakable = getattr(gift, "combo", False)
+            if streakable and event.repeat_end != 1:
+                return
+
             data = {
                 "user": event.user.unique_id,
                 "nickname": clean_nickname(event.user.nickname),
                 "gift_name": gift_name,
                 "count": event.repeat_count,
-                "repeat_end": 0,
+                "streakable": streakable,
+                "repeat_end": event.repeat_end,
             }
-            print(f"[{datetime.now()}] [GIFT] {data}")
-            forward_event("gift", data)
-            return
-
-        # ---- Other gifts ----
-        if event.repeat_end != 1:
-            return
-        data = {
-            "user": event.user.unique_id,
-            "nickname": clean_nickname(event.user.nickname),
-            "gift_name": event.gift.name,
-            "count": event.repeat_count,
-            "repeat_end": 1,
-        }
 
         print(f"[{datetime.now()}] [GIFT] {data}")
         forward_event("gift", data)
