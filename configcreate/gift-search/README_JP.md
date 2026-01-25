@@ -8,7 +8,7 @@
 ## ギフト一覧
 
 | gift_id | ギフト名 | ダイヤ価値 | 画像 | 連続可能 |
-|---:|---|---:|---|---
+|---:|---|---:|---|---|
 | 12355 | Team Cheers | 1 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/6a934c90e5533a4145bed7eae66d71bd.png~tplv-obj.png" width="40"> | True |
 | 18279 | 2026 | 1 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/8c99c5571344afb435282096db3edf3f.png~tplv-obj.png" width="40"> | True |
 | 5655 | Rose | 1 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/eba3a9bb85c33e017f3648eaf88d7189~tplv-obj.png" width="40"> | True |
@@ -124,3 +124,7 @@
 | 13628 | Gold Boxing Gloves | 10 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/2b4846f37e2f0b7e978322970e20a091.png~tplv-obj.png" width="40"> | True |
 | 15821 | Music Note | 169 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/b0b97078e33e46c8f7b7b3c321f684c3.png~tplv-obj.png" width="40"> | True |
 | 7123 | Shiny Air Balloon | 1000 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/9e7ebdca64b8f90fcc284bb04ab92d24~tplv-obj.png" width="40"> | True |
+| 18196 | Surfing Penguin | 249 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/de7454192584813d5bcb0e64d44bfc64.png~tplv-obj.png" width="40"> | False |
+| 13538 | New Year Protect | 5 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/3c1c36e227de4376e02d50d49dd23ada.png~tplv-obj.png" width="40"> | True |
+| 8269 | Good Morning | 399 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/5c1a28f3aa7eefc27491f3020748ce54~tplv-obj.png" width="40"> | True |
+| 12898 | udonnoww | 10 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/e977b5fcdf5470a62f99389b943400ac.png~tplv-obj.png" width="40"> | True |
