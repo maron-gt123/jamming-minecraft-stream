@@ -113,7 +113,6 @@
     <div class="event-row">
         <span class="icon">❤️</span>
         <label><input type="checkbox" id="ev_like" checked> Like</label>
-        コマンド <input type="text" id="cmd_like" value="say {nickname} like">
     </div>
     <div class="event-row">
         <span class="icon">➕</span>
@@ -140,6 +139,12 @@
 <div class="panel">
     <h2>🎁 ギフト設定（連続可）</h2>
     <div id="gifts-streak" class="gift-grid"></div>
+</div>
+
+<div class="panel">
+    <h2>❤️ Like 設定（count条件）</h2>
+    <button onclick="addLikeRule()">＋ ルール追加</button>
+    <div id="like-rules"></div>
 </div>
 
 <button onclick="generateYaml()">YAML生成</button>
@@ -202,6 +207,30 @@
       });
     }
 
+    function addLikeRule() {
+      const div = document.createElement("div");
+      div.className = "rule";
+      div.innerHTML = `
+        count <input type="number" class="like-count" min="1"><br><br>
+        commands:<br>
+        <div class="like-commands">
+          <input type="text" class="like-command">
+        </div>
+        <button onclick="addLikeCommand(this)">＋ command</button>
+        <button onclick="this.parentElement.remove()">削除</button>
+      `;
+      document.getElementById("like-rules").appendChild(div);
+    }
+
+    function addLikeCommand(btn) {
+      const wrap = btn.previousElementSibling;
+      wrap.appendChild(document.createElement("br"));
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "like-command";
+      wrap.appendChild(input);
+    }
+
     function generateYaml() {
       const y = [];
 
@@ -225,7 +254,20 @@
       y.push("    top: DIAMOND_BLOCK\n");
 
       y.push("commands:");
-      y.push(`  like:\n    - command: "${cmd_like.value}"`);
+      y.push("  like:");
+      document.querySelectorAll("#like-rules .rule").forEach(rule => {
+        const count = rule.querySelector(".like-count").value;
+        const cmds = rule.querySelectorAll(".like-command");
+        y.push(`    - count: ${count}`);
+        if (cmds.length === 1) {
+          y.push(`      command: "${cmds[0].value}"`);
+        } else {
+          y.push(`      commands:`);
+          cmds.forEach(c => {
+            y.push(`        - "${c.value}"`);
+          });
+        }
+      });
       y.push(`  follow:\n    - command: "${cmd_follow.value}"`);
       y.push(`  share:\n    - command: "${cmd_share.value}"`);
       y.push(`  subscribe:\n    - command: "${cmd_subscribe.value}"`);
