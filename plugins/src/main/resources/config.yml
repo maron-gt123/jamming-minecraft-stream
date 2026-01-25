@@ -46,4 +46,6 @@ commands:
       command: "say {nickname} sent Rose x{count}!"
     - gift_name: "Popular Vote"
       count: 1
-      command: "say {nickname} sent Popular Vote x{count}!"
+      commands:
+        - "say {nickname} sent Popular Vote x{count}!"
+        - "jamming reset dragon"

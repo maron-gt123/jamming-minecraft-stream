@@ -191,6 +191,11 @@
     let BLOCKS = [];
     let JA_LANG = {};
 
+    function changeVersion() {
+      MC_VERSION = document.getElementById("mcVersion").value;
+      loadBlocks();
+    }
+
     function loadBlocks() {
       BLOCKS_URL =
         `https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/${MC_VERSION}/blocks.json`;
@@ -316,13 +321,24 @@
             💎 ${g.diamond}<br>
             ${isStreak ? `連続 <input type="number" class="gift-count" value="1" min="1"><br>` : ``}
             コマンド<br>
-            <input type="text" class="gift-command"
-              value="say {nickname} sent ${g.gift_name}">
+            <div class="gift-commands">
+              <input type="text" class="gift-command" value="say {nickname} sent ${g.gift_name}">
+            </div>
+            <button onclick="addGiftCommand(this)">＋ command</button>
           </div>
         `;
 
         (isStreak ? yes : non).appendChild(d);
       });
+    }
+
+    function addGiftCommand(btn) {
+      const wrap = btn.previousElementSibling;
+      wrap.appendChild(document.createElement("br"));
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "gift-command";
+      wrap.appendChild(input);
     }
 
     function addLikeRule() {
@@ -371,27 +387,28 @@
       y.push(`    middle: ${block_middle.value}`);
       y.push(`    top: ${block_top.value}\n`);
 
-      y.push("commands:");
+      // like
       y.push("  like:");
       document.querySelectorAll("#like-rules .rule").forEach(rule => {
         const count = rule.querySelector(".like-count").value;
-        const cmds = rule.querySelectorAll(".like-command");
+        const cmds = Array.from(rule.querySelectorAll(".like-command")).map(i => i.value).filter(v => v);
         y.push(`    - count: ${count}`);
+
         if (cmds.length === 1) {
-          y.push(`      command: "${cmds[0].value}"`);
-        } else {
+          y.push(`      command: "${cmds[0]}"`);
+        } else if (cmds.length > 1) {
           y.push(`      commands:`);
-          cmds.forEach(c => {
-            y.push(`        - "${c.value}"`);
-          });
+          cmds.forEach(c => y.push(`        - "${c}"`));
         }
       });
+
+      // follow / share / subscribe
       y.push(`  follow:\n    - command: "${cmd_follow.value}"`);
       y.push(`  share:\n    - command: "${cmd_share.value}"`);
       y.push(`  subscribe:\n    - command: "${cmd_subscribe.value}"`);
 
+      // gift
       y.push("  gift:");
-
       document.querySelectorAll(".gift").forEach(d => {
         if (!d.querySelector(".gift-enable").checked) return;
 
@@ -402,13 +419,20 @@
           y.push(`      count: ${count.value}`);
         }
 
-        y.push(`      command: "${d.querySelector(".gift-command").value}"`);
+        const cmds = Array.from(d.querySelectorAll(".gift-command")).map(i => i.value).filter(v => v);
+
+        if (cmds.length === 1) {
+          y.push(`      command: "${cmds[0]}"`);
+        } else if (cmds.length > 1) {
+          y.push(`      commands:`);
+          cmds.forEach(c => y.push(`        - "${c}"`));
+        }
       });
 
       output.value = y.join("\n");
     }
+
     loadBlocks();
-    renderAllBlocks();
 </script>
 </body>
 </html>
