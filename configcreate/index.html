@@ -104,8 +104,23 @@
 <h1>🎵 TikTok Stream config.yml Generator</h1>
 
 <div class="panel">
+    <h2>🧊 BOX内部の自動変換 設定</h2>
+    <div class="event-row">
+        <img id="img_top" width="32" height="32">
+        Top
+        <select id="block_top" onchange="updateBlockImage('top')"></select>
+    </div>
+    <div class="event-row">
+        <img id="img_middle" width="32" height="32">
+        Middle
+        <select id="block_middle" onchange="updateBlockImage('middle')"></select>
+    </div>
+    <div class="event-row">
+        <img id="img_bottom" width="32" height="32">
+        Bottom
+        <select id="block_bottom" onchange="updateBlockImage('bottom')"></select>
+    </div>
     <h2>イベント設定</h2>
-
     <div class="event-row">
         <span class="icon">🎁</span>
         <label><input type="checkbox" id="ev_gift" checked> Gift</label>
@@ -155,10 +170,24 @@
 </div>
 
 <script>
+    const MC_VERSION = "1.20";
     const CSV_URL =
       "https://raw.githubusercontent.com/maron-gt123/jamming-minecraft-stream/refs/heads/main/configcreate/gifts.csv";
-
     let gifts = [];
+    const BLOCKS_URL =
+      "https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.20/blocks.json";
+    const BLOCK_TEXTURE_BASE =
+      `https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/${MC_VERSION}/assets/minecraft/textures/block/`;
+    const LANG_URL =
+      `https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/${MC_VERSION}/assets/minecraft/lang/ja_jp.json`;
+    let BLOCKS = [];
+    let JA_LANG = {};
+
+    fetch(LANG_URL)
+      .then(r => r.json())
+      .then(data => {
+        JA_LANG = data;
+      });
 
     fetch(CSV_URL)
       .then(r => r.text())
@@ -174,6 +203,50 @@
         return o;
       });
       renderGifts();
+    }
+
+    fetch(BLOCKS_URL)
+      .then(r => r.json())
+      .then(data => {
+        BLOCKS = data.map(b => {
+          const key = "block.minecraft." + b.name.toLowerCase();
+          return {
+            id: b.name.toUpperCase(),
+            name: b.name,
+            label: JA_LANG[key] || b.name.replace(/_/g, " ").toUpperCase(),
+            image: BLOCK_TEXTURE_BASE + b.name.toLowerCase() + ".png"
+          };
+        });
+        renderBlocks();
+      });
+    function renderBlocks() {
+      ["bottom", "middle", "top"].forEach(pos => {
+        const sel = document.getElementById("block_" + pos);
+        sel.innerHTML = "";
+
+        BLOCKS.forEach(b => {
+          const opt = document.createElement("option");
+          opt.value = b.id;
+          opt.textContent = b.label;
+          opt.dataset.img = b.image;
+          sel.appendChild(opt);
+        });
+      });
+
+      block_bottom.value = "IRON_BLOCK";
+      block_middle.value = "GOLD_BLOCK";
+      block_top.value = "DIAMOND_BLOCK";
+      updateBlockImage("bottom");
+      updateBlockImage("middle");
+      updateBlockImage("top");
+    }
+    function updateBlockImage(pos) {
+      const sel = document.getElementById("block_" + pos);
+      const img = document.getElementById("img_" + pos);
+      if (!sel || !img) return;
+      const opt = sel.selectedOptions[0];
+      if (!opt) return;
+      img.src = opt.dataset.img;
     }
 
     function renderGifts() {
@@ -249,9 +322,9 @@
       y.push("    countdown: 15");
       y.push("  replace:");
       y.push("    enabled: true");
-      y.push("    bottom: IRON_BLOCK");
-      y.push("    middle: GOLD_BLOCK");
-      y.push("    top: DIAMOND_BLOCK\n");
+      y.push(`    bottom: ${block_bottom.value}`);
+      y.push(`    middle: ${block_middle.value}`);
+      y.push(`    top: ${block_top.value}\n`);
 
       y.push("commands:");
       y.push("  like:");
