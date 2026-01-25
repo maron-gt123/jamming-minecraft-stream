@@ -128,3 +128,27 @@
 | 13538 | New Year Protect | 5 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/3c1c36e227de4376e02d50d49dd23ada.png~tplv-obj.png" width="40"> | True |
 | 8269 | Good Morning | 399 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/5c1a28f3aa7eefc27491f3020748ce54~tplv-obj.png" width="40"> | True |
 | 12898 | udonnoww | 10 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/e977b5fcdf5470a62f99389b943400ac.png~tplv-obj.png" width="40"> | True |
+| 16467 | Tiny Diny Float | 250 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/07f2f1c77323dc05300d25723fc6453a.png~tplv-obj.png" width="40"> | True |
+| 11583 | DJ Glasses | 500 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/d4aad726e2759e54a924fbcd628ea143.png~tplv-obj.png" width="40"> | False |
+| 16933 | Ice-cream truck | 2988 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/858e9f4a507368b572738981e969b465.png~tplv-obj.png" width="40"> | True |
+| 9465 | Fruit Friends | 299 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/1153dd51308c556cb4fcc48c7d62209f.png~tplv-obj.png" width="40"> | True |
+| 8503 | Falcon | 10999 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/6026505eea9b9bce071dd699253abf6a~tplv-obj.png" width="40"> | True |
+| 14557 | Puppy Kisses | 299 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/4ae998a21159b60484169864f8968ba9.png~tplv-obj.png" width="40"> | False |
+| 7569 | Game Controller | 100 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/20ec0eb50d82c2c445cb8391fd9fe6e2~tplv-obj.png" width="40"> | True |
+| 6233 | Travel with You | 999 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/753098e5a8f45afa965b73616c04cf89~tplv-obj.png" width="40"> | True |
+| 17359 | Caterpillar Chaos | 149 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/5fc71d8f491568b0e258e2de1718e37c.png~tplv-obj.png" width="40"> | False |
+| 15189 | Chatting Popcorn | 149 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/f4813ddce6a6b3268df01af9fe3764d9.png~tplv-obj.png" width="40"> | False |
+| 7529 | Mystery Firework | 1999 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/c110230c5db903db5f060a432f5a86cd~tplv-obj.png" width="40"> | True |
+| 13189 | Im Just a Hamster | 499 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/8a8ebe8ac243b381f9b515f7243f145b.png~tplv-obj.png" width="40"> | True |
+| 15187 | Big Shout Out | 149 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/d79737225a5c68dee52b34d1a7c7dec9.png~tplv-obj.png" width="40"> | False |
+| 8264 | Happy Weekend | 599 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/b04f104e717798235cd3edaa6703e6a3~tplv-obj.png" width="40"> | True |
+| 13444 | Star Map Polaris | 500 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/6abb39fb8088a1897b8163e54394845c.png~tplv-obj.png" width="40"> | True |
+| 6890 | Love you | 1 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/ab0a7b44bfc140923bb74164f6f880ab~tplv-obj.png" width="40"> | True |
+| 18605 | Dreamy Strings | 249 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/68e68d79a6ad382321c9cbdee966c025.png~tplv-obj.png" width="40"> | False |
+| 10573 | Massage for You | 199 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/3ebdd3746d91eb06bdd4a04c49c3b04a.png~tplv-obj.png" width="40"> | False |
+| 14000 | Glitter Bow | 149 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/dd02c4c2cb726134314e89abec0b5476.png~tplv-obj.png" width="40"> | False |
+| 13087 | Bubblegum | 99 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/52ebbe9f3f53b5567ad11ad6f8303c58.png~tplv-obj.png" width="40"> | False |
+| 15063 | Journey Pass | 10 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/551ecaf639c5e02354f9e7c1a763ec72.png~tplv-obj.png" width="40"> | True |
+| 18610 | Music Mate | 299 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/789d404702b42340359a4b5ea9366dbb.png~tplv-obj.png" width="40"> | False |
+| 11177 | Coffee Magic | 199 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/0cb623f44c34f77fe14c2e11bfe4ee62.png~tplv-obj.png" width="40"> | False |
+| 15194 | United Heart | 299 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/72ff280b8c6ce16f6efc9bf4cd6a036b.png~tplv-obj.png" width="40"> | False |
