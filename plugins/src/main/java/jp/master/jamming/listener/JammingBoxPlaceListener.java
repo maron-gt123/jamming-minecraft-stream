@@ -2,6 +2,7 @@ package jp.master.jamming.listener;
 
 import jp.master.jamming.box.JammingBox;
 import jp.master.jamming.box.JammingBoxManager;
+import jp.master.jamming.game.JammingGameManager;
 import jp.master.jamming.config.ConfigManager;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -17,10 +18,15 @@ public class JammingBoxPlaceListener implements Listener {
 
     // JammingBox 全体の管理クラス
     private final JammingBoxManager manager;
+    private final JammingGameManager gameManager;
 
     // コンストラクタ
-    public JammingBoxPlaceListener(JammingBoxManager manager) {
+    public JammingBoxPlaceListener(
+            JammingBoxManager manager,
+            JammingGameManager gameManager
+    ) {
         this.manager = manager;
+        this.gameManager = gameManager;
     }
 
     /**
@@ -30,6 +36,7 @@ public class JammingBoxPlaceListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent event) {
         // 自動置換機能が無効なら何もしない
         if (!manager.isReplaceEnabled()) return;
+        if (!gameManager.isGameActive()) return;
 
         // 現在の JammingBox を取得
         JammingBox box = manager.getBox();

@@ -1,6 +1,7 @@
 package jp.master.jamming.listener;
 
 import jp.master.jamming.box.JammingBoxManager;
+import jp.master.jamming.game.JammingGameManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -18,15 +19,20 @@ public class JammingBoxProtectListener implements Listener {
 
     /** JammingBox の状態管理・保護判定を行うマネージャ */
     private final JammingBoxManager manager;
+    private final JammingGameManager gameManager;
 
-    public JammingBoxProtectListener(JammingBoxManager manager) {
+    public JammingBoxProtectListener(
+            JammingBoxManager manager,
+            JammingGameManager gameManager
+    ) {
         this.manager = manager;
+        this.gameManager = gameManager;
     }
 
     // プレイヤー破壊
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        if (!manager.isGameActive()) return;
+        if (!gameManager.isGameActive()) return;
         if (!manager.hasBox()) return;
         if (manager.isProtected(event.getBlock().getLocation())) {
             event.setCancelled(true);
@@ -35,7 +41,7 @@ public class JammingBoxProtectListener implements Listener {
     // TNT・クリーパー等の爆発
     @EventHandler
     public void onEntityExplode(EntityExplodeEvent event) {
-        if (!manager.isGameActive()) return;
+        if (!gameManager.isGameActive()) return;
         if (!manager.hasBox()) return;
         event.blockList().removeIf(block ->
                 manager.isProtected(block.getLocation())
@@ -44,7 +50,7 @@ public class JammingBoxProtectListener implements Listener {
     // エンダードラゴン等のブロック干渉
     @EventHandler
     public void onEntityChangeBlock(EntityChangeBlockEvent event) {
-        if (!manager.isGameActive()) return;
+        if (!gameManager.isGameActive()) return;
         if (!manager.hasBox()) return;
 
         if (manager.isProtected(event.getBlock().getLocation())) {

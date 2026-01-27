@@ -1,6 +1,7 @@
 package jp.master.jamming.command;
 
 import jp.master.jamming.box.JammingBoxManager;
+import jp.master.jamming.game.JammingGameManager;
 import jp.master.jamming.config.ConfigManager;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -16,9 +17,14 @@ import net.kyori.adventure.text.Component;
 public class JammingBoxCommand implements CommandExecutor {
 
     private final JammingBoxManager manager;
+    private final JammingGameManager gameManager;
 
-    public JammingBoxCommand(JammingBoxManager manager) {
+    public JammingBoxCommand(
+            JammingBoxManager manager,
+            JammingGameManager gameManager
+    ) {
         this.manager = manager;
+        this.gameManager = gameManager;
     }
 
     @Override
@@ -105,7 +111,7 @@ public class JammingBoxCommand implements CommandExecutor {
             player.sendMessage("§ejammingboxは存在しません");
             return;
         }
-        if (manager.isGameActive()) {
+        if (gameManager.isGameActive()) {
             player.sendMessage("§cゲーム中は削除できません。先に stop してください");
             return;
         }
@@ -122,7 +128,7 @@ public class JammingBoxCommand implements CommandExecutor {
             return;
         }
 
-        if (manager.isGameActive()) {
+        if (gameManager.isGameActive()) {
             player.sendMessage("§eゲームはすでに開始されています");
             return;
         }
@@ -137,7 +143,7 @@ public class JammingBoxCommand implements CommandExecutor {
             }
         }
 
-        manager.startGameWithCountdown(countdownSeconds);
+        gameManager.startGameWithCountdown(countdownSeconds);
         player.sendMessage("§aゲーム開始準備中...");
     }
 
@@ -146,12 +152,12 @@ public class JammingBoxCommand implements CommandExecutor {
        ======================= */
     private void handleStop(Player player) {
 
-        if (!manager.isGameActive()) {
+        if (!gameManager.isGameActive()) {
             player.sendMessage("§eゲームはすでに停止しています");
             return;
         }
-        long seconds = manager.getElapsedSeconds();
-        manager.stopGame();
+        long seconds = gameManager.getElapsedSeconds();
+        gameManager.stopGame();
         player.getWorld().playSound(
                 player.getLocation(),
                 Sound.UI_TOAST_CHALLENGE_COMPLETE,
@@ -214,7 +220,7 @@ public class JammingBoxCommand implements CommandExecutor {
             return;
         }
 
-        if (!manager.isGameActive()) {
+        if (!gameManager.isGameActive()) {
             player.sendMessage("§cゲーム中のみ実行できます");
             return;
         }
@@ -222,11 +228,11 @@ public class JammingBoxCommand implements CommandExecutor {
         switch (args[1].toLowerCase()) {
             case "dragon" -> {
                 player.sendMessage("§cドラゴンが接近しています…");
-                manager.resetByDragon(player); // ★ 作成済み処理を呼ぶ
+                gameManager.resetBoxByDragon(player);
             }
             case "wither" -> {
                 player.sendMessage("§cウィザーが接近しています…");
-                manager.resetByWither(player);
+                gameManager.resetBoxByWither(player);
             }
             default -> {
                 player.sendMessage("§e/jammingbox reset <dragon|wither>");

@@ -2,6 +2,7 @@ package jp.master.jamming;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import jp.master.jamming.config.ConfigManager;
+import jp.master.jamming.game.JammingGameManager;
 import jp.master.jamming.http.HttpServerManager;
 import jp.master.jamming.box.JammingBoxManager;
 import jp.master.jamming.command.JammingBoxCommand;
@@ -12,6 +13,7 @@ import jp.master.jamming.listener.JammingBoxProtectListener;
 public final class JammingStream extends JavaPlugin {
 
     private HttpServerManager httpServerManager;
+    private JammingGameManager gameManager;
     private JammingBoxManager boxManager;
 
     @Override
@@ -20,18 +22,19 @@ public final class JammingStream extends JavaPlugin {
         ConfigManager.loadConfig(this);
 
         boxManager = new JammingBoxManager(this);
+        gameManager = new JammingGameManager(this, boxManager);
 
         httpServerManager = new HttpServerManager(this);
         httpServerManager.start();
 
-        getCommand("jammingbox").setExecutor(new JammingBoxCommand(boxManager));
+        getCommand("jammingbox").setExecutor(new JammingBoxCommand(boxManager, gameManager));
         getCommand("jammingbox").setTabCompleter(new JammingBoxTabCompleter(boxManager));
 
         getServer().getPluginManager().registerEvents(
-                new JammingBoxProtectListener(boxManager), this
+                new JammingBoxProtectListener(boxManager, gameManager), this
         );
         getServer().getPluginManager().registerEvents(
-                new JammingBoxPlaceListener(boxManager), this
+                new JammingBoxPlaceListener(boxManager, gameManager), this
         );
 
         getLogger().info("JammingStream enabled");
@@ -44,7 +47,7 @@ public final class JammingStream extends JavaPlugin {
         }
         getLogger().info("JammingStream disabled");
     }
-    public JammingBoxManager getBoxManager() {
-        return boxManager;
+    public JammingGameManager getGameManager() {
+        return gameManager;
     }
 }
