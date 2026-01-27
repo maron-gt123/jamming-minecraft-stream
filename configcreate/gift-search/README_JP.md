@@ -152,3 +152,18 @@
 | 18610 | Music Mate | 299 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/789d404702b42340359a4b5ea9366dbb.png~tplv-obj.png" width="40"> | False |
 | 11177 | Coffee Magic | 199 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/0cb623f44c34f77fe14c2e11bfe4ee62.png~tplv-obj.png" width="40"> | False |
 | 15194 | United Heart | 299 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/72ff280b8c6ce16f6efc9bf4cd6a036b.png~tplv-obj.png" width="40"> | False |
+| 11180 | Love Painting | 99 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/de6f01cb2a0deb2da24cb5d1ecf9a23b.png~tplv-obj.png" width="40"> | False |
+| 17922 | Charmer Bow | 99 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/3cbe9384885eab12ace419cc4f28cf4f.png~tplv-obj.png" width="40"> | False |
+| 18199 | Space Love | 449 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/186d36ad446fe5336a3ddce47eae5dab.png~tplv-obj.png" width="40"> | False |
+| 9498 | Blooming Ribbons | 1000 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/f76750ab58ee30fc022c9e4e11d25c9d.png~tplv-obj.png" width="40"> | True |
+| 12290 | Glowing Jellyfish | 1000 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/96d9226ef1c33784a24d0779ad3029d3.png~tplv-obj.png" width="40"> | True |
+| 15752 | Star Goggles | 249 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/e14483e67a44ce522ba583ec923941fa.png~tplv-obj.png" width="40"> | False |
+| 16595 | Prince | 500 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/ea1fc9cb68514ec3c844179c6f09e8de.png~tplv-obj.png" width="40"> | True |
+| 9608 | White Wolf | 12000 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/c8d7768c3f96e945ae1b7e6baf3a1a0b.png~tplv-obj.png" width="40"> | True |
+| 18505 | Confetti Bear | 399 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/6e2944bf91135c52cc8004d9b7ef36ab.png~tplv-obj.png" width="40"> | False |
+| 18230 | Penguin Snowpal | 299 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/29828fedfc36982c9395822e9e5aab20.png~tplv-obj.png" width="40"> | False |
+| 12577 | Manifesting | 500 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/ca11566ae5a41ec8971cc00b51f78dac.png~tplv-obj.png" width="40"> | True |
+| 12680 | Level-up Spectacle | 12999 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/52a09724bbe8d78227db67bc5fe78613.png~tplv-obj.png" width="40"> | True |
+| 12988 | Super GG | 100 | <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/cbd7588c53ec3df1af0ed6d041566362.png~tplv-obj.png" width="40"> | True |
+| 17253 | Love in Sunset | 2999 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/690750b0d08a67f0babaa1fd031ce84c.png~tplv-obj.png" width="40"> | True |
+| 18790 | Doll new year | 1999 | <img src="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/5ec37123593a6fd309cee3ddc1f93de6.png~tplv-obj.png" width="40"> | True |
