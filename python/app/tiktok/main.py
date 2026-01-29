@@ -84,8 +84,8 @@ def create_client():
                 "repeat_end": event.repeat_end,
             }
 
-        print(f"[{datetime.now()}] [GIFT] {data}")
-        forward_event("gift", data)
+            print(f"[{datetime.now()}] [GIFT] {data}")
+            forward_event("gift", data)
 
     # ---- Like ----
     @client.on(LikeEvent)
