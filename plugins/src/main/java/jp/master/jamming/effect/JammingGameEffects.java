@@ -101,9 +101,11 @@ public class JammingGameEffects {
         dragon.setGravity(false);
 
         // プレイヤーTP
-        Location tpLoc = dragon.getLocation().clone().add(3, 6, -10);
-        tpLoc.setPitch(60f);
-        player.teleport(tpLoc);
+        if (player != null && player.isOnline()) {
+            Location tpLoc = dragon.getLocation().clone().add(3, 6, -10);
+            tpLoc.setPitch(60f);
+            player.teleport(tpLoc);
+        }
 
         // 向き調整
         Location dragonLoc = dragon.getLocation();

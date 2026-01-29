@@ -10,7 +10,7 @@ tiktok:
 # =====================
 http:
   # HTTP endpoint to which events are forwarded
-  endpoint: "http://localhost:8080/"
+  endpoint: "http://localhost:8080/event"
   # Timeout for HTTP requests (in seconds)
   timeout: 5
 

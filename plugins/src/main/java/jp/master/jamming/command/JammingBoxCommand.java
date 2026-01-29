@@ -29,36 +29,50 @@ public class JammingBoxCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (args.length == 0) {
-            handleHelp(sender, new String[]{"help"});
+        String root = command.getName().toLowerCase();
+        if (root.equals("jammingbox")) {
+            return handleJammingBox(sender, args);
+        }
+        if (root.equals("jammingevent")) {
+            return handleJammingEvent(sender, args);
+        }
+        return true;
+    }
+
+    private boolean handleJammingBox(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("§cこのコマンドはプレイヤーのみ実行できます");
             return true;
         }
-
+        if (args.length == 0) {
+            sendHelpPage1(sender);
+            return true;
+        }
         switch (args[0].toLowerCase()) {
+            case "create" -> handleCreate(player, args);
+            case "remove" -> handleRemove(player);
+            case "start"  -> handleStart(player, args);
+            case "stop"   -> handleStop(player);
+            case "replace" -> handleReplace(player, args);
+            case "fill" -> handleFill(player);
+            case "clear" -> handleClear(player);
+            case "set_block_interaction_range" -> handleSetBlockInteractionRange(player, args);
+            default -> sendHelpPage1(sender);
+        }
+        return true;
+    }
 
+    private boolean handleJammingEvent(CommandSender sender, String[] args) {
+        if (args.length == 0) {
+            sendHelpPage2(sender);
+            return true;
+        }
+        switch (args[0].toLowerCase()) {
             case "text" -> handleText(sender, args);
             case "title" -> handleTitle(sender, args);
             case "tnt"  -> handleTnt(sender, args);
-
-            default -> {
-                if (!(sender instanceof Player player)) {
-                    sender.sendMessage("§cこのコマンドはプレイヤーのみ実行できます");
-                    return true;
-                }
-
-                switch (args[0].toLowerCase()) {
-                    case "create" -> handleCreate(player, args);
-                    case "remove" -> handleRemove(player);
-                    case "start"  -> handleStart(player, args);
-                    case "stop"   -> handleStop(player);
-                    case "replace" -> handleReplace(player, args);
-                    case "fill" -> handleFill(player);
-                    case "clear" -> handleClear(player);
-                    case "reset" -> handleReset(player, args);
-                    case "set_block_interaction_range" -> handleSetBlockInteractionRange(player, args);
-                    default -> handleHelp(sender, args);
-                }
-            }
+            case "reset" -> handleReset(sender, args);
+            default -> sendHelpPage2(sender);
         }
         return true;
     }
@@ -208,35 +222,44 @@ public class JammingBoxCommand implements CommandExecutor {
     /* =======================
     reset
     ======================= */
-    private void handleReset(Player player, String[] args) {
+    private void handleReset(CommandSender sender, String[] args) {
 
         if (args.length < 2) {
-            player.sendMessage("§e/jammingbox reset <dragon|wither>");
+            sender.sendMessage("§e/jammingevent reset <dragon|wither>");
             return;
         }
 
         if (!manager.hasBox()) {
-            player.sendMessage("§cJammingBoxが存在しません");
+            sender.sendMessage("§cJammingBoxが存在しません");
             return;
         }
 
         if (!gameManager.isGameActive()) {
-            player.sendMessage("§cゲーム中のみ実行できます");
+            sender.sendMessage("§cゲーム中のみ実行できます");
             return;
+        }
+
+        Player player;
+        if (sender instanceof Player p) {
+            player = p;
+        } else {
+            // Console / HTTP から来た場合
+            player = sender.getServer().getOnlinePlayers()
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
         }
 
         switch (args[1].toLowerCase()) {
             case "dragon" -> {
-                player.sendMessage("§cドラゴンが接近しています…");
+                sender.sendMessage("§cドラゴンが接近しています…");
                 gameManager.resetBoxByDragon(player);
             }
             case "wither" -> {
-                player.sendMessage("§cウィザーが接近しています…");
+                sender.sendMessage("§cウィザーが接近しています…");
                 gameManager.resetBoxByWither(player);
             }
-            default -> {
-                player.sendMessage("§e/jammingbox reset <dragon|wither>");
-            }
+            default -> sender.sendMessage("§e/jammingevent reset <dragon|wither>");
         }
     }
     /* =======================
@@ -273,7 +296,7 @@ public class JammingBoxCommand implements CommandExecutor {
     private void handleText(CommandSender sender, String[] args) {
 
         if (args.length < 2) {
-            sender.sendMessage("§e/jammingbox text <message>");
+            sender.sendMessage("§e/jammingevent text <message>");
             return;
         }
 
@@ -297,7 +320,7 @@ public class JammingBoxCommand implements CommandExecutor {
     private void handleTitle(CommandSender sender, String[] args) {
 
         if (args.length < 2) {
-            sender.sendMessage("§e/jammingbox title <message>");
+            sender.sendMessage("§e/jammingevent title <message>");
             return;
         }
 
@@ -388,14 +411,13 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§e/jammingbox fill         §7- jammingboxを埋める");
         sender.sendMessage("§e/jammingbox clear        §7- jammingboxを空にする");
         sender.sendMessage("§e/jammingbox set_block_interaction_range <v>  §7- ブロック設置の長さ");
-        sender.sendMessage("§7/jammingbox help 2 で次へ ▶");
     }
     private void sendHelpPage2(CommandSender sender) {
-        sender.sendMessage("§6==== JammingBox Help (2/3) ====");
-        sender.sendMessage("§e/jammingbox text <msg>   §7- 全体メッセージ");
-        sender.sendMessage("§e/jammingbox actionbar <msg> §7- アクションバー表示");
-        sender.sendMessage("§e/jammingbox tnt [count]        §7- TNT投下");
-        sender.sendMessage("§e/jammingbox reset <dragon|wither> §7- 演出付きリセット");
+        sender.sendMessage("§6==== JammingEvent Help ====");
+        sender.sendMessage("§e/jammingevent text <msg> §7- 全体メッセージ");
+        sender.sendMessage("§e/jammingevent title <msg> §7- タイトル表示");
+        sender.sendMessage("§e/jammingevent tnt [count] §7- TNT投下");
+        sender.sendMessage("§e/jammingevent reset <dragon|wither> §7- 演出付きリセット");
         sender.sendMessage("§7◀ help 1   help 3 ▶");
     }
     private void sendHelpPage3(CommandSender sender) {

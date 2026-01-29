@@ -78,7 +78,7 @@ def create_client():
             data = {
                 "user": event.user.unique_id,
                 "nickname": clean_nickname(event.user.nickname),
-                "gift_name": gift_name,
+                "gift_name": gift.name,
                 "count": event.repeat_count,
                 "streakable": streakable,
                 "repeat_end": event.repeat_end,

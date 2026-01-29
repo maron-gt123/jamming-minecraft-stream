@@ -4,5 +4,8 @@ version: 0.0.1
 api-version: 1.20
 commands:
   jammingbox:
-    description: Jamming Box control command
-    usage: /jammingbox <create|remove>
+    description: JammingBox command
+    usage: /jammingbox
+  jammingevent:
+    description: JammingEvent command
+    usage: /jammingevent

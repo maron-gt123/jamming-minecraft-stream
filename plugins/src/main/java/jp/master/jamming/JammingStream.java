@@ -27,8 +27,11 @@ public final class JammingStream extends JavaPlugin {
         httpServerManager = new HttpServerManager(this);
         httpServerManager.start();
 
-        getCommand("jammingbox").setExecutor(new JammingBoxCommand(boxManager, gameManager));
+        JammingBoxCommand command = new JammingBoxCommand(boxManager, gameManager);
+        getCommand("jammingbox").setExecutor(command);
+        getCommand("jammingevent").setExecutor(command);
         getCommand("jammingbox").setTabCompleter(new JammingBoxTabCompleter(boxManager));
+        getCommand("jammingevent").setTabCompleter(new JammingBoxTabCompleter(boxManager));
 
         getServer().getPluginManager().registerEvents(
                 new JammingBoxProtectListener(boxManager, gameManager), this
