@@ -32,11 +32,11 @@ commands:
     - command: "say {nickname} subscribe"
   like:
     - count: 50
-      command: "jammingbox text {nickname}が50LIKE達成"
+      command: "jammingevent text {nickname}が50LIKE達成"
     - count: 100
       commands:
-        - "jammingbox tnt 100"
-        - "jammingbox title {nickname} 100LIKE"
+        - "jammingevent tnt 100"
+        - "jammingevent title {nickname} 100LIKE"
 
   gift:
     - gift_name: "Heart Me"
@@ -48,4 +48,4 @@ commands:
       count: 1
       commands:
         - "say {nickname} sent Popular Vote x{count}!"
-        - "jamming reset dragon"
+        - "jammingevent reset dragon"

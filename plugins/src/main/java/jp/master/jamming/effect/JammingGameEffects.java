@@ -95,10 +95,18 @@ public class JammingGameEffects {
         Location spawn = center.clone().add(0, 12, radius);
 
         EnderDragon dragon = (EnderDragon) world.spawnEntity(spawn, EntityType.ENDER_DRAGON);
-        dragon.setAI(false);
+        dragon.setAI(true);
         dragon.setSilent(true);
         dragon.setInvulnerable(true);
         dragon.setGravity(false);
+        Location fixed = dragon.getLocation().clone();
+        Bukkit.getScheduler().runTaskTimer(plugin, task -> {
+            if (!dragon.isValid()) {
+                task.cancel();
+                return;
+            }
+            dragon.teleport(fixed);
+        }, 0L, 1L);
 
         // プレイヤーTP
         if (player != null && player.isOnline()) {
@@ -165,11 +173,32 @@ public class JammingGameEffects {
         Location spawn = center.clone().add(0, 8, 0);
         Wither wither = (Wither) world.spawnEntity(spawn, EntityType.WITHER);
 
-        wither.setAI(false);
+        wither.setAI(true);
         wither.setInvulnerable(true);
         wither.setGravity(false);
+        wither.setSilent(true);
 
-        player.teleport(spawn.clone().add(3, 6, -6));
+        Location fixed = spawn.clone();
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!wither.isValid()) {
+                    cancel();
+                    return;
+                }
+                Location loc = fixed.clone();
+                Vector dir = center.toVector().subtract(loc.toVector());
+                loc.setYaw((float) Math.toDegrees(Math.atan2(dir.getX(), dir.getZ())));
+                loc.setPitch(0f);
+                wither.teleport(loc);
+            }
+        }.runTaskTimer(plugin, 0L, 1L);
+
+        if (player != null && player.isOnline()) {
+            Location tp = spawn.clone().add(3, 6, -6);
+            tp.setPitch(60f);
+            player.teleport(tp);
+        }
 
         world.playSound(center, Sound.ENTITY_WITHER_SPAWN, 4.0f, 0.6f);
 
@@ -192,8 +221,31 @@ public class JammingGameEffects {
                 );
 
                 if (ticks >= 40) {
-                    world.spawnParticle(Particle.EXPLOSION_HUGE, wither.getLocation(), 1);
-                    world.playSound(wither.getLocation(), Sound.ENTITY_WITHER_DEATH, 4.0f, 0.5f);
+                    Location loc = wither.getLocation();
+                    world.spawnParticle(Particle.EXPLOSION_HUGE, loc, 1);
+                    world.spawnParticle(
+                            Particle.EXPLOSION_LARGE,
+                            loc,
+                            8,
+                            1.5, 1.0, 1.5,
+                            0.02
+                    );
+                    world.spawnParticle(
+                            Particle.SMOKE_LARGE,
+                            loc,
+                            80,
+                            2.0, 2.0, 2.0,
+                            0.01
+                    );
+                    world.spawnParticle(
+                            Particle.ASH,
+                            loc,
+                            120,
+                            2.0, 2.0, 2.0,
+                            0.02
+                    );
+                    world.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 4.0f, 0.7f);
+                    world.playSound(loc, Sound.ENTITY_WITHER_DEATH, 4.0f, 0.5f);
 
                     wither.remove();
                     onFinish.run();
