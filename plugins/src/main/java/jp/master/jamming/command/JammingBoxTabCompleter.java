@@ -40,12 +40,22 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 result.add("set_block_interaction_range");
                 return result;
             }
-            // /jammingbox create
+            // /jammingbox create <size>
             if (args.length == 2 && args[0].equalsIgnoreCase("create")) {
                 result.add("7");
                 result.add("9");
                 result.add("11");
                 result.add("13");
+                return result;
+            }
+
+            // /jammingbox create <size> <material>
+            if (args.length == 3 && args[0].equalsIgnoreCase("create")) {
+                result.add("GLASS");
+                result.add("RED_STAINED_GLASS");
+                result.add("IRON_BLOCK");
+                result.add("STONE");
+                result.add("OBSIDIAN");
                 return result;
             }
 

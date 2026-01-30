@@ -108,7 +108,16 @@ public class JammingBoxCommand implements CommandExecutor {
         }
 
         Location center = player.getLocation();
-        Material material = Material.GLASS; // ← 後でconfig化可
+        Material material = Material.GLASS;
+        if (args.length >= 3) {
+            Material m = Material.matchMaterial(args[2]);
+            if (m != null && m.isBlock()) {
+                material = m;
+            } else {
+                player.sendMessage("§c無効なブロック素材です: " + args[2]);
+                return;
+            }
+        }
 
         manager.createBox(center, size, material);
 
@@ -336,11 +345,11 @@ public class JammingBoxCommand implements CommandExecutor {
 
         for (Player player : sender.getServer().getOnlinePlayers()) {
             player.sendTitle(
-                    "",                // タイトル
-                    "§c§l" + message, // サブタイトル
-                    10,               // フェードイン
-                    40,               // 表示時間
-                    10                // フェードアウト
+                    "§6§l" + message,   // 上段：置換済み message
+                    "§c§l" + nickname,  // 下段：nickname 固定
+                    10,
+                    40,
+                    10
             );
         }
     }
