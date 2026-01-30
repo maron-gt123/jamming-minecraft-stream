@@ -9,12 +9,14 @@ import jp.master.jamming.command.JammingBoxCommand;
 import jp.master.jamming.command.JammingBoxTabCompleter;
 import jp.master.jamming.listener.JammingBoxPlaceListener;
 import jp.master.jamming.listener.JammingBoxProtectListener;
+import jp.master.jamming.listener.ClickDelay;
 
 public final class JammingStream extends JavaPlugin {
 
     private HttpServerManager httpServerManager;
     private JammingGameManager gameManager;
     private JammingBoxManager boxManager;
+    private ClickDelay clickDelay;
 
     @Override
     public void onEnable() {
@@ -23,11 +25,12 @@ public final class JammingStream extends JavaPlugin {
 
         boxManager = new JammingBoxManager(this);
         gameManager = new JammingGameManager(this, boxManager);
+        clickDelay = new ClickDelay();
 
         httpServerManager = new HttpServerManager(this);
         httpServerManager.start();
 
-        JammingBoxCommand command = new JammingBoxCommand(boxManager, gameManager);
+        JammingBoxCommand command = new JammingBoxCommand(boxManager, gameManager, clickDelay);
         getCommand("jammingbox").setExecutor(command);
         getCommand("jammingevent").setExecutor(command);
         getCommand("jammingbox").setTabCompleter(new JammingBoxTabCompleter(boxManager));
@@ -39,6 +42,7 @@ public final class JammingStream extends JavaPlugin {
         getServer().getPluginManager().registerEvents(
                 new JammingBoxPlaceListener(boxManager, gameManager), this
         );
+        getServer().getPluginManager().registerEvents(clickDelay, this);
 
         getLogger().info("JammingStream enabled");
     }
@@ -53,4 +57,5 @@ public final class JammingStream extends JavaPlugin {
     public JammingGameManager getGameManager() {
         return gameManager;
     }
+    public ClickDelay getClickDelay() { return clickDelay; }
 }

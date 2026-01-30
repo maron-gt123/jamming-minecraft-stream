@@ -3,6 +3,7 @@ package jp.master.jamming.command;
 import jp.master.jamming.box.JammingBoxManager;
 import jp.master.jamming.game.JammingGameManager;
 import jp.master.jamming.config.ConfigManager;
+import jp.master.jamming.listener.ClickDelay;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.Material;
@@ -18,13 +19,16 @@ public class JammingBoxCommand implements CommandExecutor {
 
     private final JammingBoxManager manager;
     private final JammingGameManager gameManager;
+    private final ClickDelay clickDelay;
 
     public JammingBoxCommand(
             JammingBoxManager manager,
-            JammingGameManager gameManager
+            JammingGameManager gameManager,
+            ClickDelay clickDelay
     ) {
         this.manager = manager;
         this.gameManager = gameManager;
+        this.clickDelay = clickDelay;
     }
 
     @Override
@@ -57,6 +61,7 @@ public class JammingBoxCommand implements CommandExecutor {
             case "fill" -> handleFill(player);
             case "clear" -> handleClear(player);
             case "set_block_interaction_range" -> handleSetBlockInteractionRange(player, args);
+            case "clickdelay" -> handleClickDelay(player, args);
             default -> sendHelpPage1(sender);
         }
         return true;
@@ -71,6 +76,7 @@ public class JammingBoxCommand implements CommandExecutor {
             case "text" -> handleText(sender, args);
             case "title" -> handleTitle(sender, args);
             case "tnt"  -> handleTnt(sender, args);
+            case "extnt" -> handleEXTnt(sender, args);
             case "reset" -> handleReset(sender, args);
             default -> sendHelpPage2(sender);
         }
@@ -300,6 +306,25 @@ public class JammingBoxCommand implements CommandExecutor {
         player.sendMessage("§aブロック操作距離を " + range + " に設定しました");
     }
     /* =======================
+   clickdelay
+   ======================= */
+    private void handleClickDelay(Player player, String[] args) {
+        if (args.length < 2) {
+            player.sendMessage("§e/jammingbox clickdelay <true|false>");
+            return;
+        }
+
+        if (args[1].equalsIgnoreCase("true")) {
+            clickDelay.enable(player);
+            player.sendMessage("§aクリック遅延を有効化しました（固定5ティック）");
+        } else if (args[1].equalsIgnoreCase("false")) {
+            clickDelay.disable(player);
+            player.sendMessage("§cクリック遅延を無効化しました");
+        } else {
+            player.sendMessage("§e/jammingbox clickdelay <true|false>");
+        }
+    }
+    /* =======================
    text
    ======================= */
     private void handleText(CommandSender sender, String[] args) {
@@ -390,6 +415,42 @@ public class JammingBoxCommand implements CommandExecutor {
 
         sender.sendMessage("§c§l[TNT] §f" + count + " 個投下 💣");
     }
+    private void handleEXTnt(CommandSender sender, String[] args) {
+
+        final double exPower = 8.0; // 強化版TNTの固定爆発力
+
+        if (!manager.hasBox()) {
+            sender.sendMessage("§cJammingBoxが存在しません");
+            return;
+        }
+
+        int count = 1; // 投下個数デフォルト1
+        if (args.length >= 2) {
+            try {
+                count = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§c個数は数値で指定してください");
+                return;
+            }
+        }
+
+        for (int i = 0; i < count; i++) {
+            Location inner = manager.getRandomInnerLocation().orElse(null);
+            if (inner == null) continue;
+
+            Location spawn = inner.clone().add(
+                    Math.random() * 3 - 1.5,
+                    10,
+                    Math.random() * 3 - 1.5
+            );
+
+            TNTPrimed tnt = spawn.getWorld().spawn(spawn, TNTPrimed.class);
+            tnt.setFuseTicks(60); // 3秒
+            tnt.setYield((float) exPower); // 強化TNT
+        }
+
+        sender.sendMessage("§c§l[EXTNT] §f" + count + " 個投下 💣 爆発力固定: " + exPower);
+    }
     /* =======================
        help
        ======================= */
@@ -420,12 +481,14 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§e/jammingbox fill         §7- jammingboxを埋める");
         sender.sendMessage("§e/jammingbox clear        §7- jammingboxを空にする");
         sender.sendMessage("§e/jammingbox set_block_interaction_range <v>  §7- ブロック設置の長さ");
+        sender.sendMessage("§e/jammingbox clickdelay <true|false> §7- クリック遅延の有効化/無効化");
     }
     private void sendHelpPage2(CommandSender sender) {
         sender.sendMessage("§6==== JammingEvent Help ====");
         sender.sendMessage("§e/jammingevent text <msg> §7- 全体メッセージ");
         sender.sendMessage("§e/jammingevent title <msg> §7- タイトル表示");
         sender.sendMessage("§e/jammingevent tnt [count] §7- TNT投下");
+        sender.sendMessage("§e/jammingevent extnt [count] §7- 強化版TNT投下");
         sender.sendMessage("§e/jammingevent reset <dragon|wither> §7- 演出付きリセット");
         sender.sendMessage("§7◀ help 1   help 3 ▶");
     }

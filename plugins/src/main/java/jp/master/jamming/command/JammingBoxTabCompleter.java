@@ -38,6 +38,7 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 result.add("fill");
                 result.add("clear");
                 result.add("set_block_interaction_range");
+                result.add("clickdelay");
                 return result;
             }
             // /jammingbox create <size>
@@ -81,6 +82,14 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 result.add("10");
                 result.add("15");
                 result.add("20");
+                return result;
+            }
+
+            // /jammingbox clickdelay
+            if (args.length == 2
+                    && args[0].equalsIgnoreCase("clickdelay")) {
+                result.add("true");
+                result.add("false");
                 return result;
             }
         }
