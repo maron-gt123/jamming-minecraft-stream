@@ -127,6 +127,12 @@ public class JammingGameManager {
 
             @Override
             public void run() {
+                if (!isBoxFullyFilled()) {
+                    clearCountdownTask.cancel();
+                    clearSequenceRunning = false;
+                    effects.playClearCanceled();
+                    return;
+                }
                 if (t <= 0) {
                     clearCountdownTask.cancel();
                     onGameClearComplete();
