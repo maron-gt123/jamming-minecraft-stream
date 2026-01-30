@@ -3,7 +3,7 @@ package jp.master.jamming.command;
 import jp.master.jamming.box.JammingBoxManager;
 import jp.master.jamming.game.JammingGameManager;
 import jp.master.jamming.config.ConfigManager;
-import jp.master.jamming.listener.ClickDelay;
+import jp.master.jamming.listener.JammingBoxClickDelay;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.Material;
@@ -19,12 +19,12 @@ public class JammingBoxCommand implements CommandExecutor {
 
     private final JammingBoxManager manager;
     private final JammingGameManager gameManager;
-    private final ClickDelay clickDelay;
+    private final JammingBoxClickDelay clickDelay;
 
     public JammingBoxCommand(
             JammingBoxManager manager,
             JammingGameManager gameManager,
-            ClickDelay clickDelay
+            JammingBoxClickDelay clickDelay
     ) {
         this.manager = manager;
         this.gameManager = gameManager;

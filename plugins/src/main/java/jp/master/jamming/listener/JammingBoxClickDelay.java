@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ClickDelay implements Listener {
+public class JammingBoxClickDelay implements Listener {
 
     // 有効化されているプレイヤー
     private final Set<Player> enabledPlayers = new HashSet<>();

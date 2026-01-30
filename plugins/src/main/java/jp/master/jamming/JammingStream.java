@@ -9,14 +9,14 @@ import jp.master.jamming.command.JammingBoxCommand;
 import jp.master.jamming.command.JammingBoxTabCompleter;
 import jp.master.jamming.listener.JammingBoxPlaceListener;
 import jp.master.jamming.listener.JammingBoxProtectListener;
-import jp.master.jamming.listener.ClickDelay;
+import jp.master.jamming.listener.JammingBoxClickDelay;
 
 public final class JammingStream extends JavaPlugin {
 
     private HttpServerManager httpServerManager;
     private JammingGameManager gameManager;
     private JammingBoxManager boxManager;
-    private ClickDelay clickDelay;
+    private JammingBoxClickDelay clickDelay;
 
     @Override
     public void onEnable() {
@@ -25,7 +25,7 @@ public final class JammingStream extends JavaPlugin {
 
         boxManager = new JammingBoxManager(this);
         gameManager = new JammingGameManager(this, boxManager);
-        clickDelay = new ClickDelay();
+        clickDelay = new JammingBoxClickDelay();
 
         httpServerManager = new HttpServerManager(this);
         httpServerManager.start();
@@ -57,5 +57,7 @@ public final class JammingStream extends JavaPlugin {
     public JammingGameManager getGameManager() {
         return gameManager;
     }
-    public ClickDelay getClickDelay() { return clickDelay; }
+    public JammingBoxClickDelay getClickDelay() {
+        return clickDelay;
+    }
 }
