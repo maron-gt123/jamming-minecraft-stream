@@ -148,7 +148,7 @@ public class JammingGameEffects {
             crystal.remove();
             dragon.remove();
 
-            onFinish.run(); // ← 破壊は呼び出し元に任せる
+            onFinish.run();
         }, 60L);
     }
 
@@ -196,7 +196,7 @@ public class JammingGameEffects {
                     world.playSound(wither.getLocation(), Sound.ENTITY_WITHER_DEATH, 4.0f, 0.5f);
 
                     wither.remove();
-                    onFinish.run(); // ← ここだけ
+                    onFinish.run();
                     cancel();
                 }
             }

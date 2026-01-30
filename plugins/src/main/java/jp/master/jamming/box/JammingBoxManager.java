@@ -107,7 +107,8 @@ public class JammingBoxManager {
 
     /** 箱の内部からランダムな座標を取得する（箱がアクティブな場合のみ）*/
     public Optional<Location> getRandomInnerLocation() {
-        return getActiveBox().map(JammingBox::getRandomInnerLocation);
+        if (box == null) return Optional.empty();
+        return Optional.of(box.getRandomInnerLocation());
     }
 
     // =========================================================
