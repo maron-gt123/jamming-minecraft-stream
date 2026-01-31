@@ -152,17 +152,35 @@
     <div class="event-row">
         <span class="icon">➕</span>
         <label><input type="checkbox" id="ev_follow" checked> Follow</label>
-        コマンド <select id="cmd_follow"></select>
+    </div>
+    <div class="event-row">
+        <div class="follow-commands">
+            <select class="follow-command" onchange="updateOptionUI(this)"></select>
+            <span class="follow-option-wrap"></span>
+        </div>
+        <button onclick="addEventCommand('follow', this)">＋ command</button>
     </div>
     <div class="event-row">
         <span class="icon">🔁</span>
         <label><input type="checkbox" id="ev_share" checked> Share</label>
-        コマンド <select id="cmd_share"></select>
+    </div>
+    <div class="event-row">
+        <div class="share-commands">
+            <select class="share-command" onchange="updateOptionUI(this)"></select>
+            <span class="share-option-wrap"></span>
+        </div>
+        <button onclick="addEventCommand('share', this)">＋ command</button>
     </div>
     <div class="event-row">
         <span class="icon">⭐</span>
         <label><input type="checkbox" id="ev_subscribe" checked> Subscribe</label>
-        コマンド <select id="cmd_subscribe"></select>
+    </div>
+    <div class="event-row">
+        <div class="subscribe-commands">
+            <select class="subscribe-command" onchange="updateOptionUI(this)"></select>
+            <span class="subscribe-option-wrap"></span>
+        </div>
+        <button onclick="addEventCommand('subscribe', this)">＋ command</button>
     </div>
 </div>
 
@@ -348,7 +366,11 @@
     function updateOptionUI(commandSelect) {
       const wrap =
         commandSelect.parentElement.querySelector(".gift-option-wrap")
-        || commandSelect.parentElement.querySelector(".like-option-wrap");
+        || commandSelect.parentElement.querySelector(".like-option-wrap")
+        || commandSelect.parentElement.querySelector(".follow-option-wrap")
+        || commandSelect.parentElement.querySelector(".share-option-wrap")
+        || commandSelect.parentElement.querySelector(".subscribe-option-wrap");
+      if (!wrap) return;
       wrap.innerHTML = "";
 
       const cmd = commandSelect.value;
@@ -434,6 +456,31 @@
       populateCommandSelects();
     }
 
+    function addEventCommand(type, btn) {
+      const commandsWrap = btn.previousElementSibling;
+
+      const row = document.createElement("div");
+
+      const sel = document.createElement("select");
+      sel.className = `${type}-command`;
+      sel.innerHTML = "<option value=''>コマンド選択</option>";
+      Object.keys(commandMap).forEach(cmd => {
+        const opt = document.createElement("option");
+        opt.value = cmd;
+        opt.textContent = cmd;
+        sel.appendChild(opt);
+      });
+
+      const optionWrap = document.createElement("span");
+      optionWrap.className = `${type}-option-wrap`;
+
+      sel.onchange = () => updateOptionUI(sel);
+
+      row.appendChild(sel);
+      row.appendChild(optionWrap);
+      commandsWrap.appendChild(row);
+    }
+
     function addLikeCommand(btn) {
       const commandsWrap = btn.previousElementSibling;
 
@@ -463,7 +510,10 @@
       if (!select.value) return null;
       const wrap =
         select.parentElement.querySelector(".gift-option-wrap")
-        || select.parentElement.querySelector(".like-option-wrap");
+        || select.parentElement.querySelector(".like-option-wrap")
+        || select.parentElement.querySelector(".follow-option-wrap")
+        || select.parentElement.querySelector(".share-option-wrap")
+        || select.parentElement.querySelector(".subscribe-option-wrap");
       if (!wrap) return select.value;
       const msg = wrap.querySelector(".option-msg");
       if (msg) return `${select.value} ${msg.value}`;
@@ -516,9 +566,22 @@
       });
 
       // follow / share / subscribe
-      y.push(`  follow:\n    - command: "${cmd_follow.value}"`);
-      y.push(`  share:\n    - command: "${cmd_share.value}"`);
-      y.push(`  subscribe:\n    - command: "${cmd_subscribe.value}"`);
+      ["follow", "share", "subscribe"].forEach(e => {
+        y.push(`  ${e}:`);
+
+        const cmds = Array.from(
+          document.querySelectorAll(`.${e}-command`)
+        ).map(buildCommand).filter(v => v);
+
+        if (cmds.length === 1) {
+          y.push(`    - command: "${cmds[0]}"`);
+        } else if (cmds.length > 1) {
+          y.push(`    - commands:`);
+          cmds.forEach(c => {
+            y.push(`        - "${c}"`);
+          });
+        }
+      });
 
       // gift
       y.push("  gift:");
@@ -551,7 +614,9 @@
     const COMMAND_CSV_URL = "https://raw.githubusercontent.com/maron-gt123/jamming-minecraft-stream/refs/heads/main/configcreate/command.csv";
 
     function populateCommandSelects() {
-      document.querySelectorAll(".gift-command, .like-command").forEach(sel => {
+      document.querySelectorAll(
+        ".gift-command, .like-command, .follow-command, .share-command, .subscribe-command"
+      ).forEach(sel => {
         const current = sel.value;
         sel.innerHTML = "<option value=''>コマンド選択</option>";
         Object.keys(commandMap).forEach(cmd => {
