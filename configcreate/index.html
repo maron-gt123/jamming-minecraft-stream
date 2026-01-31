@@ -237,21 +237,6 @@
       });
     }
 
-    function updateOptionSelect(commandSelect) {
-      const wrapper = commandSelect.parentElement;
-      const optionSelect = wrapper.querySelector(".gift-option, .like-option");
-      if (!optionSelect) return;
-      const cmd = commandSelect.value;
-      optionSelect.innerHTML = "<option value=''>（オプションなし）</option>";
-      if (!cmd || !commandMap[cmd]) return;
-      commandMap[cmd].forEach(optVal => {
-        const opt = document.createElement("option");
-        opt.value = optVal;
-        opt.textContent = optVal;
-        optionSelect.appendChild(opt);
-      });
-    }
-
     fetch(CSV_URL)
       .then(r => r.text())
       .then(parseCSV);
@@ -349,10 +334,8 @@
             ${isStreak ? `連続 <input type="number" class="gift-count" value="1" min="1"><br>` : ``}
             コマンド<br>
             <div class="gift-commands">
-              <select class="gift-command" onchange="updateOptionSelect(this)"></select>
-              <select class="gift-option">
-                <option value="">（オプションなし）</option>
-              </select>
+              <select class="gift-command" onchange="updateOptionUI(this)"></select>
+              <span class="gift-option-wrap"></span>
             </div>
             <button onclick="addGiftCommand(this)">＋ command</button>
           </div>
@@ -362,12 +345,52 @@
       });
     }
 
+    function updateOptionUI(commandSelect) {
+      const wrap =
+        commandSelect.parentElement.querySelector(".gift-option-wrap")
+        || commandSelect.parentElement.querySelector(".like-option-wrap");
+      wrap.innerHTML = "";
+
+      const cmd = commandSelect.value;
+      if (!cmd || !commandMap[cmd]) return;
+
+      const info = commandMap[cmd];
+
+      if (info.type === "msg") {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "option-msg";
+        input.placeholder = "メッセージ";
+        wrap.appendChild(input);
+      }
+      else if (info.type === "index") {
+        const input = document.createElement("input");
+        input.type = "number";
+        input.className = "option-index";
+        input.min = 1;
+        wrap.appendChild(input);
+      }
+
+      else if (info.type === "select") {
+        const sel = document.createElement("select");
+        sel.className = "option-select";
+        info.values.forEach(v => {
+          const o = document.createElement("option");
+          o.value = v;
+          o.textContent = v;
+          sel.appendChild(o);
+        });
+        wrap.appendChild(sel);
+      }
+    }
+
     function addGiftCommand(btn) {
-      const wrap = btn.previousElementSibling;
-      wrap.appendChild(document.createElement("br"));
+      const commandsWrap = btn.previousElementSibling;
+
+      const row = document.createElement("div");
+
       const sel = document.createElement("select");
       sel.className = "gift-command";
-      sel.onchange = () => updateOptionSelect(sel);
       sel.innerHTML = "<option value=''>コマンド選択</option>";
       Object.keys(commandMap).forEach(cmd => {
         const opt = document.createElement("option");
@@ -375,7 +398,15 @@
         opt.textContent = cmd;
         sel.appendChild(opt);
       });
-      wrap.appendChild(sel);
+
+      const optionWrap = document.createElement("span");
+      optionWrap.className = "gift-option-wrap";
+
+      sel.onchange = () => updateOptionUI(sel);
+
+      row.appendChild(sel);
+      row.appendChild(optionWrap);
+      commandsWrap.appendChild(row);
     }
 
     function addLikeRule() {
@@ -385,10 +416,8 @@
         count <input type="number" class="like-count" min="1"><br><br>
         commands:<br>
         <div class="like-commands">
-          <select class="like-command" onchange="updateOptionSelect(this)"></select>
-          <select class="like-option">
-            <option value="">（オプションなし）</option>
-          </select>
+          <select class="like-command" onchange="updateOptionUI(this)"></select>
+          <span class="like-option-wrap"></span>
         </div>
         <button onclick="addLikeCommand(this)">＋ command</button>
         <button onclick="this.parentElement.remove()">削除</button>
@@ -406,11 +435,12 @@
     }
 
     function addLikeCommand(btn) {
-      const wrap = btn.previousElementSibling;
-      wrap.appendChild(document.createElement("br"));
+      const commandsWrap = btn.previousElementSibling;
+
+      const row = document.createElement("div");
+
       const sel = document.createElement("select");
       sel.className = "like-command";
-      sel.onchange = () => updateOptionSelect(sel);
       sel.innerHTML = "<option value=''>コマンド選択</option>";
       Object.keys(commandMap).forEach(cmd => {
         const opt = document.createElement("option");
@@ -418,8 +448,30 @@
         opt.textContent = cmd;
         sel.appendChild(opt);
       });
-      wrap.appendChild(sel);
-      populateCommandSelects();
+
+      const optionWrap = document.createElement("span");
+      optionWrap.className = "like-option-wrap";
+
+      sel.onchange = () => updateOptionUI(sel);
+
+      row.appendChild(sel);
+      row.appendChild(optionWrap);
+      commandsWrap.appendChild(row);
+    }
+
+    function buildCommand(select) {
+      if (!select.value) return null;
+      const wrap =
+        select.parentElement.querySelector(".gift-option-wrap")
+        || select.parentElement.querySelector(".like-option-wrap");
+      if (!wrap) return select.value;
+      const msg = wrap.querySelector(".option-msg");
+      if (msg) return `${select.value} ${msg.value}`;
+      const index = wrap.querySelector(".option-index");
+      if (index) return `${select.value} ${index.value}`;
+      const sel = wrap.querySelector(".option-select");
+      if (sel) return `${select.value} ${sel.value}`;
+      return select.value;
     }
 
     function generateYaml() {
@@ -449,7 +501,7 @@
       document.querySelectorAll("#like-rules .rule").forEach(rule => {
         const count = rule.querySelector(".like-count").value;
         const cmds = Array.from(rule.querySelectorAll(".like-command"))
-          .map(i => i.value)
+          .map(buildCommand)
           .filter(v => v);
 
         y.push(`    - count: ${count}`);
@@ -480,7 +532,9 @@
           y.push(`      count: ${count.value}`);
         }
 
-        const cmds = Array.from(d.querySelectorAll(".gift-command")).map(i => i.value).filter(v => v);
+        const cmds = Array.from(d.querySelectorAll(".gift-command"))
+          .map(buildCommand)
+          .filter(v => v);
 
         if (cmds.length === 1) {
           y.push(`      command: "${cmds[0]}"`);
@@ -507,7 +561,7 @@
           sel.appendChild(opt);
         });
         sel.value = current;
-        sel.onchange = () => updateOptionSelect(sel);
+        sel.onchange = () => updateOptionUI(sel);
       });
     }
 
@@ -515,17 +569,29 @@
       fetch(COMMAND_CSV_URL)
         .then(r => r.text())
         .then(text => {
-          const lines = text.trim().split("\n").slice(1);
           commandMap = {};
+          const lines = text.trim().split("\n").slice(1);
+
           lines.forEach(l => {
-            const [cmd, option] = l.split(",");
+            const [cmd, opt] = l.split(",");
             const c = cmd.trim();
-            const o = option.trim();
-            if (!commandMap[c]) commandMap[c] = [];
-            if (!commandMap[c].includes(o)) {
-              commandMap[c].push(o);
+            const o = opt.trim();
+
+            if (o.toLowerCase() === "msg") {
+              commandMap[c] = { type: "msg" };
+            }
+            else if (o.toLowerCase() === "index") {
+              commandMap[c] = { type: "index" };
+            }
+            else {
+              if (!commandMap[c]) {
+                commandMap[c] = { type: "select", values: [] };
+              }
+              commandMap[c].values.push(o);
             }
           });
+
+          populateCommandSelects();
 
           ["follow", "share", "subscribe"].forEach(e => {
             const sel = document.getElementById("cmd_" + e);
@@ -537,9 +603,9 @@
               sel.appendChild(opt);
             });
           });
-          populateCommandSelects();
         });
     }
+
     loadBlocks();
     loadCommands();
     populateCommandSelects();
