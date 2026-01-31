@@ -186,6 +186,49 @@ public class JammingBoxManager {
         }
     }
 
+    /** AIR の最下部を起点に指定レベル分埋める */
+    public void fillColumnsFromAir(int levels, Material material) {
+        if (!hasBox()) return;
+        JammingBox b = box;
+
+        Location center = b.getCenter();
+        int half = b.getHalf();
+        World w = b.getWorld();
+
+        int minX = center.getBlockX() - half + 1;
+        int maxX = center.getBlockX() + half - 1;
+        int minZ = center.getBlockZ() - half + 1;
+        int maxZ = center.getBlockZ() + half - 1;
+        int floorY = center.getBlockY() - half; // 床のY座標
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+
+                // 床のYから上に向かって最初にAIRがあるYを探す
+                int startY = -1;
+                for (int y = floorY + 1; y <= center.getBlockY() + half - 1; y++) {
+                    if (w.getBlockAt(x, y, z).getType() == Material.AIR) {
+                        startY = y;
+                        break;
+                    }
+                }
+
+                if (startY == -1) continue; // AIR列がない場合はスキップ
+
+                // levels分上にブロックを積む
+                for (int y = startY; y < startY + levels; y++) {
+                    if (y > center.getBlockY() + half - 1) break;
+
+                    // 置換機能が有効なら replaceBlockType を取得
+                    Material blockType = isReplaceEnabled()
+                            ? getReplaceBlockType(b, y)
+                            : Material.STONE; // デフォルトブロック
+
+                    w.getBlockAt(x, y, z).setType(blockType, false);
+                }
+            }
+        }
+    }
     // =========================================================
     // Walls（壁・床ブロック管理）
     // =========================================================

@@ -100,7 +100,9 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 result.add("text");
                 result.add("title");
                 result.add("tnt");
+                result.add("extnt");
                 result.add("reset");
+                result.add("fillblock");
                 return result;
             }
 
@@ -124,10 +126,26 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 return result;
             }
 
+            // /jammingevent extnt [count]
+            if (args.length == 2 && args[0].equalsIgnoreCase("extnt")) {
+                result.add("1");
+                result.add("3");
+                result.add("5");
+                return result;
+            }
+
             // /jammingevent reset <dragon|wither>
             if (args.length == 2 && args[0].equalsIgnoreCase("reset")) {
                 result.add("dragon");
                 result.add("wither");
+                return result;
+            }
+
+            // /jammingevent fillblock
+            if (args.length == 2 && args[0].equalsIgnoreCase("fillblock")) {
+                result.add("1");
+                result.add("3");
+                result.add("5");
                 return result;
             }
         }

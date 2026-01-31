@@ -78,6 +78,7 @@ public class JammingBoxCommand implements CommandExecutor {
             case "tnt"  -> handleTnt(sender, args);
             case "extnt" -> handleEXTnt(sender, args);
             case "reset" -> handleReset(sender, args);
+            case "fillblock" -> handleFillBlock(sender, args);
             default -> sendHelpPage2(sender);
         }
         return true;
@@ -452,6 +453,33 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§c§l[EXTNT] §f" + count + " 個投下 💣 爆発力固定: " + exPower);
     }
     /* =======================
+   fillblock
+   ======================= */
+    private void handleFillBlock(CommandSender sender, String[] args) {
+        if (!manager.hasBox()) {
+            sender.sendMessage("§cJammingBoxが存在しません");
+            return;
+        }
+
+        int levels = 1; // デフォルト1列
+        if (args.length >= 2) {
+            try {
+                levels = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§c埋める段数は 1～3 の数字で指定してください");
+                return;
+            }
+        }
+
+        if (levels < 1) levels = 1;
+        if (levels > 3) levels = 3;
+
+        manager.fillColumnsFromAir(levels, Material.STONE);
+
+        sender.sendMessage("§aJammingBoxを下から " + levels + " 列分埋めました" +
+                (manager.isReplaceEnabled() ? "（自動置換ルール適用）" : ""));
+    }
+    /* =======================
        help
        ======================= */
     private void handleHelp(CommandSender sender, String[] args) {
@@ -487,9 +515,10 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§6==== JammingEvent Help ====");
         sender.sendMessage("§e/jammingevent text <msg> §7- 全体メッセージ");
         sender.sendMessage("§e/jammingevent title <msg> §7- タイトル表示");
-        sender.sendMessage("§e/jammingevent tnt [count] §7- TNT投下");
-        sender.sendMessage("§e/jammingevent extnt [count] §7- 強化版TNT投下");
+        sender.sendMessage("§e/jammingevent tnt <1|2|3> §7- TNT投下");
+        sender.sendMessage("§e/jammingevent extnt <1|2|3> §7- 強化版TNT投下");
         sender.sendMessage("§e/jammingevent reset <dragon|wither> §7- 演出付きリセット");
+        sender.sendMessage("§e/jammingevent fillblock <1|2|3> §7- JammingBox内の下から指定列数を埋める");
         sender.sendMessage("§7◀ help 1   help 3 ▶");
     }
     private void sendHelpPage3(CommandSender sender) {
