@@ -17,12 +17,24 @@
         h1, h2 { color: #fff; margin-top: 0; }
 
         .panel {
+          position: relative;
           background: rgba(255,255,255,0.08);
-          backdrop-filter: blur(10px);
           border-radius: 14px;
           padding: 16px;
           margin-bottom: 24px;
           box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+          overflow: hidden;
+        }
+
+        .panel::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: rgba(255,255,255,0.08);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          z-index: -1;
+          pointer-events: none;
         }
 
         .event-row {
@@ -190,7 +202,7 @@
       `https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/${MC_VERSION}/assets/minecraft/lang/ja_jp.json`;
     let BLOCKS = [];
     let JA_LANG = {};
-    let commands = [];
+    let commandMap = {};
 
     function changeVersion() {
       MC_VERSION = document.getElementById("mcVersion").value;
@@ -225,6 +237,20 @@
       });
     }
 
+    function updateOptionSelect(commandSelect) {
+      const wrapper = commandSelect.parentElement;
+      const optionSelect = wrapper.querySelector(".gift-option, .like-option");
+      if (!optionSelect) return;
+      const cmd = commandSelect.value;
+      optionSelect.innerHTML = "<option value=''>（オプションなし）</option>";
+      if (!cmd || !commandMap[cmd]) return;
+      commandMap[cmd].forEach(optVal => {
+        const opt = document.createElement("option");
+        opt.value = optVal;
+        opt.textContent = optVal;
+        optionSelect.appendChild(opt);
+      });
+    }
 
     fetch(CSV_URL)
       .then(r => r.text())
@@ -323,8 +349,9 @@
             ${isStreak ? `連続 <input type="number" class="gift-count" value="1" min="1"><br>` : ``}
             コマンド<br>
             <div class="gift-commands">
-              <select class="gift-command">
-                <option value="">コマンド選択</option>
+              <select class="gift-command" onchange="updateOptionSelect(this)"></select>
+              <select class="gift-option">
+                <option value="">（オプションなし）</option>
               </select>
             </div>
             <button onclick="addGiftCommand(this)">＋ command</button>
@@ -340,11 +367,12 @@
       wrap.appendChild(document.createElement("br"));
       const sel = document.createElement("select");
       sel.className = "gift-command";
+      sel.onchange = () => updateOptionSelect(sel);
       sel.innerHTML = "<option value=''>コマンド選択</option>";
-      commands.forEach(c => {
+      Object.keys(commandMap).forEach(cmd => {
         const opt = document.createElement("option");
-        opt.value = c;
-        opt.textContent = c;
+        opt.value = cmd;
+        opt.textContent = cmd;
         sel.appendChild(opt);
       });
       wrap.appendChild(sel);
@@ -357,8 +385,9 @@
         count <input type="number" class="like-count" min="1"><br><br>
         commands:<br>
         <div class="like-commands">
-          <select class="like-command">
-            <option value="">コマンド選択</option>
+          <select class="like-command" onchange="updateOptionSelect(this)"></select>
+          <select class="like-option">
+            <option value="">（オプションなし）</option>
           </select>
         </div>
         <button onclick="addLikeCommand(this)">＋ command</button>
@@ -366,14 +395,14 @@
       `;
       document.getElementById("like-rules").appendChild(div);
       const sel = div.querySelector(".like-command");
-      commands.forEach(c => {
+      Object.keys(commandMap).forEach(cmd => {
         const opt = document.createElement("option");
-        opt.value = c;
-        opt.textContent = c;
+        opt.value = cmd;
+        opt.textContent = cmd;
         sel.appendChild(opt);
       });
       sel.value = "";
-      //if (commands.length > 0) sel.value = commands[0];
+      populateCommandSelects();
     }
 
     function addLikeCommand(btn) {
@@ -381,14 +410,16 @@
       wrap.appendChild(document.createElement("br"));
       const sel = document.createElement("select");
       sel.className = "like-command";
+      sel.onchange = () => updateOptionSelect(sel);
       sel.innerHTML = "<option value=''>コマンド選択</option>";
-      commands.forEach(c => {
+      Object.keys(commandMap).forEach(cmd => {
         const opt = document.createElement("option");
-        opt.value = c;
-        opt.textContent = c;
+        opt.value = cmd;
+        opt.textContent = cmd;
         sel.appendChild(opt);
       });
       wrap.appendChild(sel);
+      populateCommandSelects();
     }
 
     function generateYaml() {
@@ -417,14 +448,18 @@
       y.push("  like:");
       document.querySelectorAll("#like-rules .rule").forEach(rule => {
         const count = rule.querySelector(".like-count").value;
-        const cmds = Array.from(rule.querySelectorAll(".like-command")).map(i => i.value).filter(v => v);
-        y.push(`    - count: ${count}`);
+        const cmds = Array.from(rule.querySelectorAll(".like-command"))
+          .map(i => i.value)
+          .filter(v => v);
 
+        y.push(`    - count: ${count}`);
         if (cmds.length === 1) {
           y.push(`      command: "${cmds[0]}"`);
         } else if (cmds.length > 1) {
           y.push(`      commands:`);
-          cmds.forEach(c => y.push(`        - "${c}"`));
+          cmds.forEach(c => {
+            y.push(`        - "${c}"`);
+          });
         }
       });
 
@@ -451,7 +486,9 @@
           y.push(`      command: "${cmds[0]}"`);
         } else if (cmds.length > 1) {
           y.push(`      commands:`);
-          cmds.forEach(c => y.push(`        - "${c}"`));
+          cmds.forEach(c => {
+            y.push(`        - "${c}"`);
+          });
         }
       });
 
@@ -459,36 +496,53 @@
     }
     const COMMAND_CSV_URL = "https://raw.githubusercontent.com/maron-gt123/jamming-minecraft-stream/refs/heads/main/configcreate/command.csv";
 
+    function populateCommandSelects() {
+      document.querySelectorAll(".gift-command, .like-command").forEach(sel => {
+        const current = sel.value;
+        sel.innerHTML = "<option value=''>コマンド選択</option>";
+        Object.keys(commandMap).forEach(cmd => {
+          const opt = document.createElement("option");
+          opt.value = cmd;
+          opt.textContent = cmd;
+          sel.appendChild(opt);
+        });
+        sel.value = current;
+        sel.onchange = () => updateOptionSelect(sel);
+      });
+    }
+
     function loadCommands() {
       fetch(COMMAND_CSV_URL)
         .then(r => r.text())
         .then(text => {
-          const lines = text.trim().split("\n");
-          commands = lines.map(l => l.split(",")[0]);
+          const lines = text.trim().split("\n").slice(1);
+          commandMap = {};
+          lines.forEach(l => {
+            const [cmd, option] = l.split(",");
+            const c = cmd.trim();
+            const o = option.trim();
+            if (!commandMap[c]) commandMap[c] = [];
+            if (!commandMap[c].includes(o)) {
+              commandMap[c].push(o);
+            }
+          });
 
           ["follow", "share", "subscribe"].forEach(e => {
             const sel = document.getElementById("cmd_" + e);
             sel.innerHTML = "<option value=''>コマンド選択</option>";
-            commands.forEach(c => {
+            Object.keys(commandMap).forEach(cmd => {
               const opt = document.createElement("option");
-              opt.value = c;
-              opt.textContent = c;
+              opt.value = cmd;
+              opt.textContent = cmd;
               sel.appendChild(opt);
             });
           });
-          document.querySelectorAll(".gift-command, .like-command").forEach(sel => {
-            sel.innerHTML = "<option value=''>コマンド選択</option>";
-            commands.forEach(c => {
-              const opt = document.createElement("option");
-              opt.value = c;
-              opt.textContent = c;
-              sel.appendChild(opt);
-            });
-          });
+          populateCommandSelects();
         });
     }
     loadBlocks();
     loadCommands();
+    populateCommandSelects();
 </script>
 </body>
 </html>
