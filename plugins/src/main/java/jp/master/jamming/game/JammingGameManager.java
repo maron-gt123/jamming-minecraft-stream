@@ -147,6 +147,7 @@ public class JammingGameManager {
 
     private void onGameClearComplete() {
         effects.playClear();
+        effects.playClearFireworks(boxManager.getBox(), plugin);
         boxManager.clearInside();
         clearSequenceRunning = false;
     }

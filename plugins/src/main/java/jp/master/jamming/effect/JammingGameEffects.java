@@ -14,6 +14,12 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
+import org.bukkit.entity.Firework;
+import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.FireworkEffect;
+import org.bukkit.Color;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -81,6 +87,70 @@ public class JammingGameEffects {
                     Sound.BLOCK_ANVIL_LAND, 0.6f, 0.8f);
         }
     }
+
+    // ===== ゲームクリア花火演出 =====
+    public void playClearFireworks(JammingBox box, JavaPlugin plugin) {
+        World world = box.getWorld();
+        Location center = box.getCenter().clone().add(0, box.getHalf() + 3, 0);
+
+        new BukkitRunnable() {
+            int fired = 0;
+
+            @Override
+            public void run() {
+                // 合計発射数
+                if (fired >= 30) {
+                    cancel();
+                    return;
+                }
+
+                // 1回でまとめて撃つ
+                int burst = 3;
+
+                for (int i = 0; i < burst; i++) {
+                    Location spawn = center.clone().add(
+                            (Math.random() - 0.5) * 4,
+                            Math.random() * 3,
+                            (Math.random() - 0.5) * 4
+                    );
+
+                    Firework fw = world.spawn(spawn, Firework.class);
+                    FireworkMeta meta = fw.getFireworkMeta();
+
+                    meta.addEffect(
+                            FireworkEffect.builder()
+                                    .with(FireworkEffect.Type.BALL_LARGE)
+                                    .withColor(
+                                            Color.LIME,
+                                            Color.YELLOW,
+                                            Color.AQUA,
+                                            Color.ORANGE
+                                    )
+                                    .withFade(Color.WHITE)
+                                    .trail(true)
+                                    .flicker(true)
+                                    .build()
+                    );
+
+                    meta.setPower(2);
+                    fw.setFireworkMeta(meta);
+
+                    // ほぼ即爆
+                    Bukkit.getScheduler().runTaskLater(plugin, fw::detonate, 1L);
+
+                    fired++;
+                }
+
+                // 低めピッチで連射音
+                world.playSound(center,
+                        Sound.ENTITY_FIREWORK_ROCKET_LAUNCH,
+                        3.0f,
+                        0.7f
+                );
+            }
+        }.runTaskTimer(plugin, 0L, 2L); // ← 2tick（0.1秒）
+    }
+
     // ===== ドラゴン演出 =====
     public void playDragonEffect(
             Player player,
@@ -148,8 +218,30 @@ public class JammingGameEffects {
             }
         }, 0L, 2L);
 
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.addPotionEffect(new PotionEffect(
+                    PotionEffectType.BLINDNESS,
+                    10, // 0.5秒
+                    1,
+                    false,
+                    false,
+                    true
+            ));
+        }
+
         // 終了処理
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            for (int i = 0; i < 3; i++) {
+                world.spawnParticle(
+                        Particle.EXPLOSION_HUGE,
+                        center.clone().add(
+                                (Math.random() - 0.5) * 2,
+                                Math.random(),
+                                (Math.random() - 0.5) * 2
+                        ),
+                        1
+                );
+            }
             world.spawnParticle(Particle.EXPLOSION_HUGE, center, 1);
             world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 3.0f, 0.8f);
 
