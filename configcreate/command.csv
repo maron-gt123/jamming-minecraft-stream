@@ -1,0 +1,8 @@
+command,option
+jammingevent text,msg
+jammingevent title,msg
+jammingevent tnt,Index
+jammingevent extnt,Index
+jammingevent fillblock,Index
+jammingevent reset,dragon
+jammingevent reset,wither
