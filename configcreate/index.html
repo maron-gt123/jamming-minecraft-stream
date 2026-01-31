@@ -140,17 +140,17 @@
     <div class="event-row">
         <span class="icon">➕</span>
         <label><input type="checkbox" id="ev_follow" checked> Follow</label>
-        コマンド <input type="text" id="cmd_follow" value="say {nickname} follow">
+        コマンド <select id="cmd_follow"></select>
     </div>
     <div class="event-row">
         <span class="icon">🔁</span>
         <label><input type="checkbox" id="ev_share" checked> Share</label>
-        コマンド <input type="text" id="cmd_share" value="say {nickname} share">
+        コマンド <select id="cmd_share"></select>
     </div>
     <div class="event-row">
         <span class="icon">⭐</span>
         <label><input type="checkbox" id="ev_subscribe" checked> Subscribe</label>
-        コマンド <input type="text" id="cmd_subscribe" value="say {nickname} subscribe">
+        コマンド <select id="cmd_subscribe"></select>
     </div>
 </div>
 
@@ -190,6 +190,7 @@
       `https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/${MC_VERSION}/assets/minecraft/lang/ja_jp.json`;
     let BLOCKS = [];
     let JA_LANG = {};
+    let commands = [];
 
     function changeVersion() {
       MC_VERSION = document.getElementById("mcVersion").value;
@@ -322,7 +323,9 @@
             ${isStreak ? `連続 <input type="number" class="gift-count" value="1" min="1"><br>` : ``}
             コマンド<br>
             <div class="gift-commands">
-              <input type="text" class="gift-command" value="say {nickname} sent ${g.gift_name}">
+              <select class="gift-command">
+                <option value="">コマンド選択</option>
+              </select>
             </div>
             <button onclick="addGiftCommand(this)">＋ command</button>
           </div>
@@ -335,10 +338,16 @@
     function addGiftCommand(btn) {
       const wrap = btn.previousElementSibling;
       wrap.appendChild(document.createElement("br"));
-      const input = document.createElement("input");
-      input.type = "text";
-      input.className = "gift-command";
-      wrap.appendChild(input);
+      const sel = document.createElement("select");
+      sel.className = "gift-command";
+      sel.innerHTML = "<option value=''>コマンド選択</option>";
+      commands.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        sel.appendChild(opt);
+      });
+      wrap.appendChild(sel);
     }
 
     function addLikeRule() {
@@ -348,21 +357,38 @@
         count <input type="number" class="like-count" min="1"><br><br>
         commands:<br>
         <div class="like-commands">
-          <input type="text" class="like-command">
+          <select class="like-command">
+            <option value="">コマンド選択</option>
+          </select>
         </div>
         <button onclick="addLikeCommand(this)">＋ command</button>
         <button onclick="this.parentElement.remove()">削除</button>
       `;
       document.getElementById("like-rules").appendChild(div);
+      const sel = div.querySelector(".like-command");
+      commands.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        sel.appendChild(opt);
+      });
+      sel.value = "";
+      //if (commands.length > 0) sel.value = commands[0];
     }
 
     function addLikeCommand(btn) {
       const wrap = btn.previousElementSibling;
       wrap.appendChild(document.createElement("br"));
-      const input = document.createElement("input");
-      input.type = "text";
-      input.className = "like-command";
-      wrap.appendChild(input);
+      const sel = document.createElement("select");
+      sel.className = "like-command";
+      sel.innerHTML = "<option value=''>コマンド選択</option>";
+      commands.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        sel.appendChild(opt);
+      });
+      wrap.appendChild(sel);
     }
 
     function generateYaml() {
@@ -431,8 +457,38 @@
 
       output.value = y.join("\n");
     }
+    const COMMAND_CSV_URL = "https://raw.githubusercontent.com/maron-gt123/jamming-minecraft-stream/refs/heads/main/configcreate/command.csv";
 
+    function loadCommands() {
+      fetch(COMMAND_CSV_URL)
+        .then(r => r.text())
+        .then(text => {
+          const lines = text.trim().split("\n");
+          commands = lines.map(l => l.split(",")[0]);
+
+          ["follow", "share", "subscribe"].forEach(e => {
+            const sel = document.getElementById("cmd_" + e);
+            sel.innerHTML = "<option value=''>コマンド選択</option>";
+            commands.forEach(c => {
+              const opt = document.createElement("option");
+              opt.value = c;
+              opt.textContent = c;
+              sel.appendChild(opt);
+            });
+          });
+          document.querySelectorAll(".gift-command, .like-command").forEach(sel => {
+            sel.innerHTML = "<option value=''>コマンド選択</option>";
+            commands.forEach(c => {
+              const opt = document.createElement("option");
+              opt.value = c;
+              opt.textContent = c;
+              sel.appendChild(opt);
+            });
+          });
+        });
+    }
     loadBlocks();
+    loadCommands();
 </script>
 </body>
 </html>
