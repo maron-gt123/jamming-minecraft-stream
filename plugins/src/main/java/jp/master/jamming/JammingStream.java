@@ -5,11 +5,13 @@ import jp.master.jamming.config.ConfigManager;
 import jp.master.jamming.game.JammingGameManager;
 import jp.master.jamming.http.HttpServerManager;
 import jp.master.jamming.box.JammingBoxManager;
+import jp.master.jamming.prison.JammingPrisonManager;
 import jp.master.jamming.command.JammingBoxCommand;
 import jp.master.jamming.command.JammingBoxTabCompleter;
 import jp.master.jamming.listener.JammingBoxPlaceListener;
 import jp.master.jamming.listener.JammingBoxProtectListener;
 import jp.master.jamming.listener.JammingBoxClickDelay;
+import jp.master.jamming.listener.JammingPrisonProtectListener;
 
 public final class JammingStream extends JavaPlugin {
 
@@ -17,6 +19,7 @@ public final class JammingStream extends JavaPlugin {
     private JammingGameManager gameManager;
     private JammingBoxManager boxManager;
     private JammingBoxClickDelay clickDelay;
+    private JammingPrisonManager prisonManager;
 
     @Override
     public void onEnable() {
@@ -26,11 +29,12 @@ public final class JammingStream extends JavaPlugin {
         boxManager = new JammingBoxManager(this);
         gameManager = new JammingGameManager(this, boxManager);
         clickDelay = new JammingBoxClickDelay();
+        prisonManager = new JammingPrisonManager(this);
 
         httpServerManager = new HttpServerManager(this);
         httpServerManager.start();
 
-        JammingBoxCommand command = new JammingBoxCommand(boxManager, gameManager, clickDelay);
+        JammingBoxCommand command = new JammingBoxCommand(boxManager, gameManager, clickDelay, prisonManager);
         getCommand("jammingbox").setExecutor(command);
         getCommand("jammingevent").setExecutor(command);
         getCommand("jammingbox").setTabCompleter(new JammingBoxTabCompleter(boxManager));
@@ -41,6 +45,9 @@ public final class JammingStream extends JavaPlugin {
         );
         getServer().getPluginManager().registerEvents(
                 new JammingBoxPlaceListener(boxManager, gameManager), this
+        );
+        getServer().getPluginManager().registerEvents(
+                new JammingPrisonProtectListener(prisonManager), this
         );
         getServer().getPluginManager().registerEvents(clickDelay, this);
 

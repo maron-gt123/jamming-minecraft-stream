@@ -4,6 +4,7 @@ import jp.master.jamming.box.JammingBoxManager;
 import jp.master.jamming.game.JammingGameManager;
 import jp.master.jamming.config.ConfigManager;
 import jp.master.jamming.listener.JammingBoxClickDelay;
+import jp.master.jamming.prison.JammingPrisonManager;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.Material;
@@ -12,6 +13,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import java.util.Random;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.text.Component;
 
@@ -20,15 +22,19 @@ public class JammingBoxCommand implements CommandExecutor {
     private final JammingBoxManager manager;
     private final JammingGameManager gameManager;
     private final JammingBoxClickDelay clickDelay;
+    private final JammingPrisonManager prisonManager;
+    private final Random random = new Random();
 
     public JammingBoxCommand(
             JammingBoxManager manager,
             JammingGameManager gameManager,
-            JammingBoxClickDelay clickDelay
+            JammingBoxClickDelay clickDelay,
+            JammingPrisonManager prisonManager
     ) {
         this.manager = manager;
         this.gameManager = gameManager;
         this.clickDelay = clickDelay;
+        this.prisonManager = prisonManager;
     }
 
     @Override
@@ -79,6 +85,7 @@ public class JammingBoxCommand implements CommandExecutor {
             case "extnt" -> handleEXTnt(sender, args);
             case "reset" -> handleReset(sender, args);
             case "fillblock" -> handleFillBlock(sender, args);
+            case "prison" -> handlePrison(sender, args);
             default -> sendHelpPage2(sender);
         }
         return true;
@@ -480,6 +487,66 @@ public class JammingBoxCommand implements CommandExecutor {
                 (manager.isReplaceEnabled() ? "（自動置換ルール適用）" : ""));
     }
     /* =======================
+       Prison
+       ======================= */
+    private void handlePrison(CommandSender sender, String[] args) {
+
+        if (!manager.hasBox()) {
+            sender.sendMessage("§cJammingBoxが存在しません");
+            return;
+        }
+
+        if (!gameManager.isGameActive()) {
+            sender.sendMessage("§cゲーム中のみ実行できます");
+            return;
+        }
+
+        if (args.length < 2) {
+            sender.sendMessage("§e/jammingevent prison <秒数>");
+            return;
+        }
+
+        int seconds;
+        try {
+            seconds = Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage("§c秒数は数値で指定してください");
+            return;
+        }
+
+        Player player;
+        if (sender instanceof Player p) {
+            player = p;
+        } else {
+            player = sender.getServer().getOnlinePlayers()
+                    .stream().findFirst().orElse(null);
+        }
+        if (player == null) return;
+
+        var box = manager.getBox();
+        var c = box.getCenter();
+        int h = box.getHalf();
+
+        // 天井左上
+        Location base = new Location(
+                box.getWorld(),
+                c.getBlockX() - h,
+                c.getBlockY() + h,
+                c.getBlockZ() - h
+        );
+
+        // 20マス範囲
+        Location prisonCenter = base.clone().add(
+                1 + random.nextInt(20), // X
+                10,                       // Y: 箱の上端+10
+                1 + random.nextInt(20)  // Z
+        );
+
+        prisonManager.imprison(player, prisonCenter, seconds);
+
+        sender.sendMessage("§c§l[PRISON] §f" + seconds + "秒間投獄 ⛓");
+    }
+    /* =======================
        help
        ======================= */
     private void handleHelp(CommandSender sender, String[] args) {
@@ -503,7 +570,7 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§6==== JammingBox Help (1/3) ====");
         sender.sendMessage("§e/jammingbox create [size] §7- jammingboxを作成");
         sender.sendMessage("§e/jammingbox remove        §7- jammingboxを削除");
-        sender.sendMessage("§e/jammingbox start [count] §7- ゲーム開始");
+        sender.sendMessage("§e/jammingbox start [time] §7- ゲーム開始");
         sender.sendMessage("§e/jammingbox stop         §7- ゲーム停止");
         sender.sendMessage("§e/jammingbox replace true | false §7- ブロック置換切替");
         sender.sendMessage("§e/jammingbox fill         §7- jammingboxを埋める");
@@ -519,6 +586,7 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§e/jammingevent extnt <1|2|3> §7- 強化版TNT投下");
         sender.sendMessage("§e/jammingevent reset <dragon|wither> §7- 演出付きリセット");
         sender.sendMessage("§e/jammingevent fillblock <1|2|3> §7- JammingBox内の下から指定列数を埋める");
+        sender.sendMessage("§e/jammingevent prison [time] §7- 牢獄に投獄");
         sender.sendMessage("§7◀ help 1   help 3 ▶");
     }
     private void sendHelpPage3(CommandSender sender) {

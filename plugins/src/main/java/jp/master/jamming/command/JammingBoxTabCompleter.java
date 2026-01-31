@@ -103,6 +103,7 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 result.add("extnt");
                 result.add("reset");
                 result.add("fillblock");
+                result.add("prison");
                 return result;
             }
 
@@ -146,6 +147,14 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 result.add("1");
                 result.add("3");
                 result.add("5");
+                return result;
+            }
+
+            // /jammingevent prison
+            if (args.length == 2 && args[0].equalsIgnoreCase("prison")) {
+                result.add("1");
+                result.add("5");
+                result.add("10");
                 return result;
             }
         }
