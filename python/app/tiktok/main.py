@@ -21,6 +21,19 @@ RECONNECT_WAIT = 30
 LIKE_RESET_INTERVAL = config.get("reset_interval_seconds", 60 * 60 * 24)
 like_user_total = {}
 
+# =====================
+# Anti-spam / Rate limiting
+# =====================
+# event cooldown[sec]
+FOLLOW_COOLDOWN = 120
+SHARE_COOLDOWN = 120
+SUBSCRIBE_COOLDOWN = 120
+
+# last event time
+last_follow_time = {}
+last_share_time = {}
+last_subscribe_time = {}
+
 print(f"[INFO] LIKE_RESET_INTERVAL = {LIKE_RESET_INTERVAL}")
 
 # =====================
@@ -129,6 +142,13 @@ def create_client():
     # ---- Follow ----
     @client.on(FollowEvent)
     async def on_follow(event: FollowEvent):
+        uid = event.user.unique_id
+        now = time.time()
+        if uid in last_follow_time and now - last_follow_time[uid] < FOLLOW_COOLDOWN:
+            print(f"[{datetime.now()}] [FOLLOW SPAM BLOCKED] {uid}")
+            return
+        last_follow_time[uid] = now
+
         data = {
             "user": event.user.unique_id,
             "nickname": clean_nickname(event.user.nickname),
@@ -140,8 +160,15 @@ def create_client():
     # ---- Share ----
     @client.on(ShareEvent)
     async def on_share(event: ShareEvent):
+        uid = event.user.unique_id
+        now = time.time()
+        if uid in last_share_time and now - last_share_time[uid] < SHARE_COOLDOWN:
+            print(f"[{datetime.now()}] [SHARE SPAM BLOCKED] {uid}")
+            return
+        last_share_time[uid] = now
+
         data = {
-            "user": event.user.unique_id,
+            "user": uid,
             "nickname": clean_nickname(event.user.nickname),
         }
 
@@ -151,8 +178,15 @@ def create_client():
     # ---- Subscribe ----
     @client.on(SubscribeEvent)
     async def on_subscribe(event: SubscribeEvent):
+        uid = event.user.unique_id
+        now = time.time()
+        if uid in last_subscribe_time and now - last_subscribe_time[uid] < SUBSCRIBE_COOLDOWN:
+            print(f"[{datetime.now()}] [SUBSCRIBE SPAM BLOCKED] {uid}")
+            return
+        last_subscribe_time[uid] = now
+
         data = {
-            "user": event.user.unique_id,
+            "user": uid,
             "nickname": clean_nickname(event.user.nickname),
         }
 
