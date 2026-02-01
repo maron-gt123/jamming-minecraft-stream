@@ -1,13 +1,11 @@
 # TikTok Stream config.yml Generator
 
-
-このツールは、Minecraftサーバー用の `config.yml` を簡単に生成できるWeb UIです。TikTokのストリームイベントに応じた自動処理設定を作成できます。  
-➡ [ツールはこちらから利用可能](https://maron-gt123.github.io/jamming-minecraft-stream/configcreate/)
----
-
 ## 概要
 
+このツールは、Minecraftサーバー用の `config.yml` を簡単に生成できるWeb UIです。TikTokのストリームイベントに応じた自動処理設定を作成できます。  
+➡ [ツールはこちらから利用可能](https://maron-gt123.github.io/jamming-minecraft-stream/configcreate/)<br>
 このツールを使うと以下の設定が可能です：
+
 
 - **BOX内部の自動変換設定**
     - Minecraftのバージョン選択
