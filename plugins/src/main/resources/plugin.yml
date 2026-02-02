@@ -1,6 +1,6 @@
 name: JammingStream
 main: jp.master.jamming.JammingStream
-version: 0.0.2
+version: 0.2
 api-version: 1.20
 commands:
   jammingbox:
