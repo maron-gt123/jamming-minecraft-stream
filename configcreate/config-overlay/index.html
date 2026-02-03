@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <title>Gift Overlay + Copy</title>
+    <style>
+        body {
+          margin: 0;
+          background: #fff;
+          font-family: sans-serif;
+        }
+
+        .container {
+          display: flex;
+          height: 100vh;
+        }
+
+        .editor {
+          width: 40%;
+          padding: 16px;
+          background: #1e1e1e;
+          color: #fff;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+        }
+        textarea {
+          flex: 1;
+          width: 100%;
+          background: #111;
+          color: #fff;
+          border: none;
+          padding: 12px;
+          box-sizing: border-box;
+          font-family: monospace;
+          font-size: 14px;
+        }
+
+        .preview {
+          width: 60%;
+          padding: 16px;
+          background: #fff;
+          box-sizing: border-box;
+          overflow-x: auto;
+        }
+
+        .overlay {
+          display: flex;
+          gap: 0;
+          align-items: center;
+          white-space: nowrap;
+        }
+
+        .gift {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 4px;
+          cursor: pointer;
+          padding: 0 2px;
+          height: 140px;
+          box-sizing: border-box;
+        }
+
+        .gift img {
+          width: 80px;
+          height: 80px;
+          object-fit: contain;
+          border: 1px solid #ddd;
+          background: #fff;
+        }
+
+        .gift-name {
+          font-size: 14px;
+          color: #333;
+          height: 18px;
+          line-height: 18px;
+        }
+
+        .gift-count {
+          font-size: 14px;
+          color: #333;
+          font-weight: bold;
+          height: 18px;
+          line-height: 18px;
+          visibility: visible;
+        }
+
+        .toast {
+          position: fixed;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #000;
+          color: #fff;
+          padding: 10px 16px;
+          border-radius: 8px;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        }
+        .toast.show {
+          opacity: 1;
+        }
+
+        /* 追加：ボタン */
+        .btn-area {
+          margin-top: 8px;
+        }
+        .btn {
+          padding: 8px 12px;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          background: #4caf50;
+          color: #fff;
+          font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="editor">
+        <div>config.yml を貼り付けてください</div>
+        <textarea id="yamlInput"></textarea>
+        <!-- 追加：画像化ボタン -->
+        <div class="btn-area">
+            <button id="exportBtn" class="btn">画像として保存 (PNG)</button>
+        </div>
+    </div>
+
+    <div class="preview">
+        <div id="overlay" class="overlay"></div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<!-- 追加：html2canvas -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+    (async function() {
+
+      // CSV読み込み（PapaParseで正確に）
+      const csvUrl = "https://raw.githubusercontent.com/maron-gt123/jamming-minecraft-stream/refs/heads/main/configcreate/gifts.csv";
+      const csvText = await fetch(csvUrl).then(r => r.text());
+
+      const parsed = Papa.parse(csvText, { header: true });
+      const giftMap = {};
+      parsed.data.forEach(row => {
+        if (row.gift_name && row.image_url) {
+          giftMap[row.gift_name] = row.image_url;
+        }
+      });
+
+      const yamlInput = document.getElementById("yamlInput");
+      const overlay = document.getElementById("overlay");
+
+      yamlInput.value = `...`; // 省略（あなたのまま）
+
+      function showToast(text) {
+        const toast = document.getElementById("toast");
+        toast.textContent = text;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 1200);
+      }
+
+      function render() {
+        overlay.innerHTML = "";
+
+        let config;
+        try {
+          config = jsyaml.load(yamlInput.value);
+        } catch (e) {
+          overlay.innerHTML = `<div>YAML 解析エラー</div>`;
+          return;
+        }
+
+        const gifts = config.commands?.gift;
+        if (!gifts) {
+          overlay.innerHTML = `<div>commands.gift が見つかりません</div>`;
+          return;
+        }
+
+        gifts.forEach(item => {
+          const name = item.gift_name;
+          const imgUrl = giftMap[name];
+
+          const div = document.createElement("div");
+          div.className = "gift";
+
+          if (imgUrl) {
+            const img = document.createElement("img");
+            img.src = imgUrl;
+            div.appendChild(img);
+          } else {
+            const noImg = document.createElement("div");
+            noImg.textContent = "画像なし";
+            div.appendChild(noImg);
+          }
+
+          const label = document.createElement("div");
+          label.className = "gift-name";
+          label.textContent = name;
+          div.appendChild(label);
+
+          const countValue = item.count ?? null;
+          const countEl = document.createElement("div");
+          countEl.className = "gift-count";
+          countEl.textContent = countValue ? "×" + countValue : "";
+          div.appendChild(countEl);
+
+          div.addEventListener("click", async () => {
+            let text = "";
+            if (item.command) text = item.command;
+            if (item.commands) text = item.commands.join("\n");
+
+            if (!text) {
+              showToast("コピーするコマンドがありません");
+              return;
+            }
+
+            await navigator.clipboard.writeText(text);
+            showToast("コピーしました: " + name);
+          });
+
+          overlay.appendChild(div);
+        });
+      }
+
+      yamlInput.addEventListener("input", render);
+      render();
+
+      // 追加：画像として保存
+      document.getElementById("exportBtn").addEventListener("click", async () => {
+        try {
+          const canvas = await html2canvas(overlay, {
+            useCORS: true,
+            backgroundColor: null
+          });
+          const dataURL = canvas.toDataURL("image/png");
+
+          const a = document.createElement("a");
+          a.href = dataURL;
+          a.download = "overlay.png";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+
+          showToast("画像を保存しました");
+        } catch (e) {
+          showToast("画像保存に失敗しました（CORSの可能性）");
+          console.error(e);
+        }
+      });
+    })();
+</script>
+</body>
+</html>
