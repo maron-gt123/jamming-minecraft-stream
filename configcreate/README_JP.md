@@ -4,6 +4,7 @@
 
 このツールは、Minecraftサーバー用の `config.yml` を簡単に生成できるWeb UIです。TikTokのストリームイベントに応じた自動処理設定を作成できます。  
 ➡ [ツールはこちらから利用可能](https://maron-gt123.github.io/jamming-minecraft-stream/configcreate/)<br>
+➡ [作成したconfigのプリセット表は以下で作成](https://maron-gt123.github.io/jamming-minecraft-stream/configcreate/config-overlay/)<br>
 このツールを使うと以下の設定が可能です：
 
 

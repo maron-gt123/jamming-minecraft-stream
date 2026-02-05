@@ -4,7 +4,8 @@
 
 This tool is a web UI that allows you to easily generate a `config.yml` for Minecraft servers.  
 It enables automatic handling based on TikTok stream events.  
-➡ [Access the tool here](https://maron-gt123.github.io/jamming-minecraft-stream/configcreate/)
+➡ [Access the tool here](https://maron-gt123.github.io/jamming-minecraft-stream/configcreate/)<br>
+➡ [The preset table for the generated config can be created here](https://maron-gt123.github.io/jamming-minecraft-stream/configcreate/config-overlay/)<br>
 
 Using this tool, you can configure the following:
 
