@@ -45,10 +45,11 @@
         }
 
         .overlay {
-          display: flex;
+          display: inline-flex;
           gap: 0;
           align-items: center;
           white-space: nowrap;
+          padding: 8px;
         }
 
         .gift {
@@ -67,8 +68,8 @@
           width: 80px;
           height: 80px;
           object-fit: contain;
-          border: 1px solid #ddd;
-          background: #fff;
+          background: transparent;
+          display: block;
         }
 
         .gift-name {
@@ -126,6 +127,8 @@
         <textarea id="yamlInput"></textarea>
         <!-- 追加：画像化ボタン -->
         <div class="btn-area">
+            <label>背景色：</label>
+            <input type="color" id="bgColor" value="#ffffff">
             <button id="exportBtn" class="btn">画像として保存 (PNG)</button>
         </div>
     </div>
@@ -159,6 +162,8 @@
 
       const yamlInput = document.getElementById("yamlInput");
       const overlay = document.getElementById("overlay");
+      const bgColorInput = document.getElementById("bgColor");
+      const preview = document.querySelector(".preview");
 
       yamlInput.value = `...`; // 省略（あなたのまま）
 
@@ -174,14 +179,19 @@
 
         let config;
         try {
-          config = jsyaml.load(yamlInput.value);
+          config = jsyaml.load(yamlInput.value) || {};
         } catch (e) {
           overlay.innerHTML = `<div>YAML 解析エラー</div>`;
           return;
         }
 
+        if (!config || typeof config !== "object") {
+          overlay.innerHTML = `<div>YAMLを入力してください</div>`;
+          return;
+        }
+
         const gifts = config.commands?.gift;
-        if (!gifts) {
+        if (!gifts || !Array.isArray(gifts)) {
           overlay.innerHTML = `<div>commands.gift が見つかりません</div>`;
           return;
         }
@@ -195,7 +205,8 @@
 
           if (imgUrl) {
             const img = document.createElement("img");
-            img.src = imgUrl;
+            img.crossOrigin = "anonymous";
+            img.src = imgUrl + "?v=" + Date.now();
             div.appendChild(img);
           } else {
             const noImg = document.createElement("div");
@@ -234,27 +245,47 @@
 
       yamlInput.addEventListener("input", render);
       render();
+      bgColorInput.addEventListener("input", (e) => {
+        overlay.style.background = e.target.value;
+        preview.style.background = e.target.value;
+      });
 
       // 追加：画像として保存
       document.getElementById("exportBtn").addEventListener("click", async () => {
         try {
+
+          // ===== ここ追加（超重要）=====
+          const imgs = overlay.querySelectorAll("img");
+          await Promise.all([...imgs].map(img => {
+            if (img.complete) return Promise.resolve();
+            return new Promise(res => {
+              img.onload = img.onerror = res;
+            });
+          }));
+          // ============================
+
+          const bgColor = bgColorInput.value;
+
+          const rect = overlay.getBoundingClientRect();
           const canvas = await html2canvas(overlay, {
             useCORS: true,
-            backgroundColor: null
+            allowTaint: false,
+            backgroundColor: bgColor === "#ffffff" ? null : bgColor,
+            width: rect.width,
+            height: rect.height,
+            scale: 2
           });
-          const dataURL = canvas.toDataURL("image/png");
 
           const a = document.createElement("a");
-          a.href = dataURL;
+          a.href = canvas.toDataURL("image/png");
           a.download = "overlay.png";
-          document.body.appendChild(a);
           a.click();
-          a.remove();
 
           showToast("画像を保存しました");
+
         } catch (e) {
-          showToast("画像保存に失敗しました（CORSの可能性）");
           console.error(e);
+          showToast("画像保存に失敗しました");
         }
       });
     })();
