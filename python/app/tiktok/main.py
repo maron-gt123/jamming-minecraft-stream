@@ -52,32 +52,30 @@ def forward_event(event_type: str, data: dict):
             "timestamp": datetime.now().isoformat(),
             "data": data,
         }
-
         res = requests.post(
             HTTP_CONF["endpoint"],
             json=payload,
             timeout=HTTP_CONF.get("timeout", 3),
         )
-
         print(
             f"[{datetime.now()}] [HTTP] {event_type} forwarded "
             f"status={res.status_code}"
         )
-
     except Exception as e:
         print(f"[{datetime.now()}] [HTTP ERROR] {event_type}: {e}")
-
 
 # =====================
 # TikTok Client
 # =====================
 def create_client():
     client = TikTokLiveClient(unique_id=USERNAME)
-
     @client.on(ConnectEvent)
     async def on_connect(event: ConnectEvent):
-        print(f"[{datetime.now()}] [INFO] TikTok Live connected")
-
+        data = {
+            "user": USERNAME
+        }
+        print(f"[{datetime.now()}] [CONNECT] {data}")
+        forward_event("connect", data)
     # ---- Gift ----
     @client.on(GiftEvent)
     async def on_gift(event: GiftEvent):
@@ -87,7 +85,6 @@ def create_client():
             streakable = getattr(gift, "combo", False)
             if streakable and event.repeat_end != 1:
                 return
-
             data = {
                 "user": event.user.unique_id,
                 "nickname": clean_nickname(event.user.nickname),
@@ -96,17 +93,14 @@ def create_client():
                 "streakable": streakable,
                 "repeat_end": event.repeat_end,
             }
-
             print(f"[{datetime.now()}] [GIFT] {data}")
             forward_event("gift", data)
-
     # ---- Like ----
     @client.on(LikeEvent)
     async def on_like(event: LikeEvent):
         uid = event.user.unique_id
         nickname = clean_nickname(event.user.nickname)
         count = event.count
-
         # ---- initialize user ----
         if uid not in like_user_total:
             like_user_total[uid] = {
@@ -114,12 +108,10 @@ def create_client():
                 "nickname": nickname
             }
         user_data = like_user_total[uid]
-
         # ---- accumulate ----
         prev_total = user_data["total"]
         user_data["total"] += count
         user_total = user_data["total"]
-
         data = {
             "user": event.user.unique_id,
             "nickname": nickname,
@@ -128,10 +120,8 @@ def create_client():
             "user_total": user_total,
             "count_total": event.total,
         }
-
         print(f"[{datetime.now()}] [LIKE] {data}")
         forward_event("like", data)
-
     # ---- Follow ----
     @client.on(FollowEvent)
     async def on_follow(event: FollowEvent):
@@ -141,15 +131,12 @@ def create_client():
             print(f"[{datetime.now()}] [FOLLOW SPAM BLOCKED] {uid}")
             return
         last_follow_time[uid] = now
-
         data = {
             "user": event.user.unique_id,
             "nickname": clean_nickname(event.user.nickname),
         }
-
         print(f"[{datetime.now()}] [FOLLOW] {data}")
         forward_event("follow", data)
-
     # ---- Share ----
     @client.on(ShareEvent)
     async def on_share(event: ShareEvent):
@@ -159,15 +146,12 @@ def create_client():
             print(f"[{datetime.now()}] [SHARE SPAM BLOCKED] {uid}")
             return
         last_share_time[uid] = now
-
         data = {
             "user": uid,
             "nickname": clean_nickname(event.user.nickname),
         }
-
         print(f"[{datetime.now()}] [SHARE] {data}")
         forward_event("share", data)
-
     # ---- Subscribe ----
     @client.on(SubscribeEvent)
     async def on_subscribe(event: SubscribeEvent):
@@ -177,32 +161,25 @@ def create_client():
             print(f"[{datetime.now()}] [SUBSCRIBE SPAM BLOCKED] {uid}")
             return
         last_subscribe_time[uid] = now
-
         data = {
             "user": uid,
             "nickname": clean_nickname(event.user.nickname),
         }
-
         print(f"[{datetime.now()}] [SUBSCRIBE] {data}")
         forward_event("subscribe", data)
-
     # ---- Comment ----
     @client.on(CommentEvent)
     async def on_comment(event: CommentEvent):
         nickname = clean_nickname(event.user.nickname)
         comment = event.comment
-
         data = {
             "user": event.user.unique_id,
             "nickname": nickname,
             "comment": comment,
         }
-
         print(f"[{datetime.now()}] [COMMENT] {data}")
         forward_event("comment", data)
-
     return client
-
 
 # =====================
 # Main Loop
@@ -212,15 +189,18 @@ while True:
         print(f"[{datetime.now()}] [INFO] Starting TikTok client")
         client = create_client()
         client.run()
-
         print(f"[{datetime.now()}] [WARN] client.run() exited, restarting")
         time.sleep(10)
 
     except UserOfflineError:
         print(f"[{datetime.now()}] [INFO] Stream offline")
+        data = {
+                "user": USERNAME
+            }
+        forward_event("offline", data)
         reset_like_totals()
         print(f"[{datetime.now()}] [INFO] retry in {RECONNECT_WAIT}s")
-        time.sleep(RECONNECT_WAIT)
+            time.sleep(RECONNECT_WAIT)
 
     except KeyboardInterrupt:
         print("Shutdown requested (KeyboardInterrupt)")
