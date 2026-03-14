@@ -1,12 +1,11 @@
 import time
 import yaml
 import re
-import signal
 from datetime import datetime
 
 import requests
 from TikTokLive import TikTokLiveClient
-from TikTokLive.events import GiftEvent, LikeEvent, FollowEvent, ShareEvent, SubscribeEvent, ConnectEvent
+from TikTokLive.events import GiftEvent, LikeEvent, FollowEvent, ShareEvent, SubscribeEvent, CommentEvent, ConnectEvent
 from TikTokLive.client.errors import UserOfflineError
 
 # =====================
@@ -18,7 +17,6 @@ with open("config/config.yml", "r", encoding="utf-8") as f:
 USERNAME = config["tiktok"]["user"]
 HTTP_CONF = config["http"]
 RECONNECT_WAIT = 30
-LIKE_RESET_INTERVAL = config.get("reset_interval_seconds", 60 * 60 * 24)
 like_user_total = {}
 
 # =====================
@@ -34,8 +32,6 @@ last_follow_time = {}
 last_share_time = {}
 last_subscribe_time = {}
 
-print(f"[INFO] LIKE_RESET_INTERVAL = {LIKE_RESET_INTERVAL}")
-
 # =====================
 # Utilities
 # =====================
@@ -44,6 +40,10 @@ def clean_nickname(nick: str) -> str:
     nick = re.sub(r'[\u2000-\u2FFF]', '', nick)
     return nick.strip()
 
+def reset_like_totals():
+    global like_user_total
+    like_user_total = {}
+    print(f"[{datetime.now()}] [LIKE RESET] Stream offline → totals cleared")
 
 def forward_event(event_type: str, data: dict):
     try:
@@ -103,24 +103,17 @@ def create_client():
     # ---- Like ----
     @client.on(LikeEvent)
     async def on_like(event: LikeEvent):
+        uid = event.user.unique_id
         nickname = clean_nickname(event.user.nickname)
-        now = time.time()
         count = event.count
 
         # ---- initialize user ----
-        if nickname not in like_user_total:
-            like_user_total[nickname] = {
+        if uid not in like_user_total:
+            like_user_total[uid] = {
                 "total": 0,
-                "last_reset": now,
+                "nickname": nickname
             }
-
-        user_data = like_user_total[nickname]
-
-        # ---- reset if interval passed ----
-        if now - user_data["last_reset"] >= LIKE_RESET_INTERVAL:
-            print(f"[{datetime.now()}] [LIKE RESET] {nickname}")
-            user_data["total"] = 0
-            user_data["last_reset"] = now
+        user_data = like_user_total[uid]
 
         # ---- accumulate ----
         prev_total = user_data["total"]
@@ -193,6 +186,21 @@ def create_client():
         print(f"[{datetime.now()}] [SUBSCRIBE] {data}")
         forward_event("subscribe", data)
 
+    # ---- Comment ----
+    @client.on(CommentEvent)
+    async def on_comment(event: CommentEvent):
+        nickname = clean_nickname(event.user.nickname)
+        comment = event.comment
+
+        data = {
+            "user": event.user.unique_id,
+            "nickname": nickname,
+            "comment": comment,
+        }
+
+        print(f"[{datetime.now()}] [COMMENT] {data}")
+        forward_event("comment", data)
+
     return client
 
 
@@ -209,9 +217,9 @@ while True:
         time.sleep(10)
 
     except UserOfflineError:
-        print(
-            f"[{datetime.now()}] [INFO] Stream offline, retry in {RECONNECT_WAIT}s"
-        )
+        print(f"[{datetime.now()}] [INFO] Stream offline")
+        reset_like_totals()
+        print(f"[{datetime.now()}] [INFO] retry in {RECONNECT_WAIT}s")
         time.sleep(RECONNECT_WAIT)
 
     except KeyboardInterrupt:
