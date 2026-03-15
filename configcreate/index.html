@@ -66,6 +66,12 @@
           border: 2px solid transparent;
         }
 
+        .arrow{
+          margin-right:6px;
+          font-size:14px;
+          opacity:0.8;
+        }
+
         .gift.streakable { border-color: #25f4ee; }
         .gift.non-streakable { border-color: #fe2c55; opacity: 0.85; }
 
@@ -140,7 +146,14 @@
         <input type="text" placeholder="検索" oninput="searchBlock('bottom', this.value)">
         <select id="block_bottom" onchange="updateBlockImage('bottom')"></select>
     </div>
-    <h2>イベント設定</h2>
+    <h2>⏳ クリアカウントダウン数設定</h2>
+    <div class="event-row">
+        <input type="number" id="clear_countdown" value="15" min="0">
+    </div>
+    <h2>🎮 イベント設定</h2>
+    <div class="event-note">
+        チェック(有効)にするとTikTokの該当イベントをMinecraftに転送できます
+    </div>
     <div class="event-row">
         <span class="icon">🎁</span>
         <label><input type="checkbox" id="ev_gift" checked> Gift</label>
@@ -154,61 +167,59 @@
         <label><input type="checkbox" id="ev_follow" checked> Follow</label>
     </div>
     <div class="event-row">
-        <div class="follow-commands">
-            <select class="follow-command" onchange="updateOptionUI(this)"></select>
-            <span class="follow-option-wrap"></span>
-        </div>
-        <button onclick="addEventCommand('follow', this)">＋ command</button>
-    </div>
-    <div class="event-row">
         <span class="icon">🔁</span>
         <label><input type="checkbox" id="ev_share" checked> Share</label>
-    </div>
-    <div class="event-row">
-        <div class="share-commands">
-            <select class="share-command" onchange="updateOptionUI(this)"></select>
-            <span class="share-option-wrap"></span>
-        </div>
-        <button onclick="addEventCommand('share', this)">＋ command</button>
     </div>
     <div class="event-row">
         <span class="icon">⭐</span>
         <label><input type="checkbox" id="ev_subscribe" checked> Subscribe</label>
     </div>
     <div class="event-row">
-        <div class="subscribe-commands">
-            <select class="subscribe-command" onchange="updateOptionUI(this)"></select>
-            <span class="subscribe-option-wrap"></span>
-        </div>
-        <button onclick="addEventCommand('subscribe', this)">＋ command</button>
-    </div>
-    <div class="event-row">
         <span class="icon">💬</span>
         <label><input type="checkbox" id="ev_comment" checked> Comment</label>
     </div>
-    <div class="event-row">
-        <div class="comment-commands">
-            <select class="comment-command" onchange="updateOptionUI(this)"></select>
-            <span class="comment-option-wrap"></span>
-        </div>
-        <button onclick="addEventCommand('comment', this)">＋ command</button>
+    <div class="event-note">
+      ※ commentにチェックを入れるとMinecraftのチャット欄にリスナーのコメントが「[TikTok]【名前】{コメント内容}」のフォーマットで表示されます
     </div>
 </div>
 
 <div class="panel">
-    <h2>🎁 ギフト設定（連続不可）</h2>
-    <div id="gifts-nonstreak" class="gift-grid"></div>
+    <h2 onclick="toggleSection(this,'gifts-nonstreak')" style="cursor:pointer;">
+        <span class="arrow">▶</span> 🎁 ギフト設定（連続なし）
+    </h2>
+    <div id="gifts-nonstreak" class="gift-grid" style="display:none;"></div>
 </div>
 
 <div class="panel">
-    <h2>🎁 ギフト設定（連続可）</h2>
-    <div id="gifts-streak" class="gift-grid"></div>
+    <h2 onclick="toggleSection(this,'gifts-streak')" style="cursor:pointer;">
+    <span class="arrow">▶</span> 🎁 ギフト設定（連続あり）｜　コマンド×連続ギフト数　のイベントになります
+    </h2>
+
+    <div id="gifts-streak" class="gift-grid" style="display:none;"></div>
 </div>
 
 <div class="panel">
     <h2>❤️ Like 設定（count条件）</h2>
     <button onclick="addLikeRule()">＋ ルール追加</button>
     <div id="like-rules"></div>
+</div>
+
+<div class="panel">
+    <h2>📢 Follow 設定</h2>
+    <button onclick="addEventCommand('follow', this)">＋ command</button>
+    <div class="follow-commands"></div>
+</div>
+
+<div class="panel">
+    <h2>🔁 Share 設定</h2>
+    <button onclick="addEventCommand('share', this)">＋ command</button>
+    <div class="share-commands"></div>
+</div>
+
+<div class="panel">
+    <h2>⭐ Subscribe 設定</h2>
+    <button onclick="addEventCommand('subscribe', this)">＋ command</button>
+    <div class="subscribe-commands"></div>
 </div>
 
 <button onclick="generateYaml()">YAML生成</button>
@@ -418,10 +429,9 @@
     }
 
     function addGiftCommand(btn) {
-      const commandsWrap = btn.previousElementSibling;
-
+      const gift = btn.closest(".gift");
+      const commandsWrap = gift.querySelector(".gift-commands");
       const row = document.createElement("div");
-
       const sel = document.createElement("select");
       sel.className = "gift-command";
       sel.innerHTML = "<option value=''>コマンド選択</option>";
@@ -431,15 +441,26 @@
         opt.textContent = cmd;
         sel.appendChild(opt);
       });
-
       const optionWrap = document.createElement("span");
       optionWrap.className = "gift-option-wrap";
-
       sel.onchange = () => updateOptionUI(sel);
-
       row.appendChild(sel);
       row.appendChild(optionWrap);
       commandsWrap.appendChild(row);
+    }
+
+    function toggleSection(header, id) {
+
+      const el = document.getElementById(id);
+      const arrow = header.querySelector(".arrow");
+
+      if (el.style.display === "none") {
+        el.style.display = "grid";
+        arrow.textContent = "▼";
+      } else {
+        el.style.display = "none";
+        arrow.textContent = "▶";
+      }
     }
 
     function addLikeRule() {
@@ -550,8 +571,9 @@
       });
 
       y.push("\njammingbox:");
+      const countdown = document.getElementById("clear_countdown").value || 15;
       y.push("  clear:");
-      y.push("    countdown: 15");
+      y.push(`    countdown: ${countdown}`);
       y.push("  replace:");
       y.push("    enabled: true");
       y.push(`    bottom: ${block_bottom.value}`);
