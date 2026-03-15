@@ -179,12 +179,6 @@ public class EventHttpHandler implements HttpHandler {
                 String giftName = (String) data.getOrDefault("gift_name", "");
                 if (!requiredName.equals(giftName)) return false;
             }
-
-            if (cmdConfig.containsKey("count")) {
-                double requiredCount = ((Number) cmdConfig.get("count")).doubleValue();
-                double count = ((Number) data.getOrDefault("count", 0)).doubleValue();
-                if (count < requiredCount) return false;
-            }
         }
 
         return true;

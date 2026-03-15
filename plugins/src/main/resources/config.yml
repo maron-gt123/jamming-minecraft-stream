@@ -42,12 +42,10 @@ commands:
 
   gift:
     - gift_name: "Heart Me"
-      command: "say {nickname} sent Heart Me"
-    - gift_name: "Rose"
-      count: 1
-      command: "say {nickname} sent Rose x{count}!"
-    - gift_name: "Popular Vote"
-      count: 1
       commands:
-        - "say {nickname} sent Popular Vote x{count}!"
-        - "jammingevent reset dragon"
+        - "jammingevent tnt"
+        - "jammingevent title Heart Me thanks"
+    - gift_name: "Rose"
+      commands:
+        - "jammingevent extnt"
+        - "jammingevent title test"
