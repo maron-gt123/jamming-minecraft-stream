@@ -72,6 +72,43 @@ public class EventHttpHandler implements HttpHandler {
     }
 
     private void executeCommands(String eventType, Object dataObj) {
+        Map<String, Object> data = dataObj instanceof Map ? (Map<String, Object>) dataObj : Map.of();
+        // ===== comment 強制チャット表示 =====
+        if (eventType.equals("comment")) {
+
+            String nickname = (String) data.getOrDefault("nickname", "???");
+            String comment = (String) data.getOrDefault("comment", "");
+
+            String command = "tellraw @a [" +
+                    "{\"text\":\"[\",\"color\":\"red\"}," +
+                    "{\"text\":\"T\",\"color\":\"red\"}," +
+                    "{\"text\":\"i\",\"color\":\"gold\"}," +
+                    "{\"text\":\"k\",\"color\":\"yellow\"}," +
+                    "{\"text\":\"T\",\"color\":\"green\"}," +
+                    "{\"text\":\"o\",\"color\":\"aqua\"}," +
+                    "{\"text\":\"k\",\"color\":\"light_purple\"}," +
+                    "{\"text\":\"]\",\"color\":\"red\"}," +
+                    "{\"text\":\"【" + nickname + "】\",\"color\":\"green\"}," +
+                    "{\"text\":\" " + comment + "\",\"color\":\"white\"}" +
+                    "]";
+
+            plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                @Override
+                public void run() {
+
+                    if (plugin.getServer().getOnlinePlayers().isEmpty()) {
+                        return;
+                    }
+
+                    plugin.getServer().dispatchCommand(
+                            plugin.getServer().getConsoleSender(),
+                            command
+                    );
+
+                }
+            });
+            return;
+        }
         if (plugin instanceof jp.master.jamming.JammingStream stream) {
             if (!stream.getGameManager().isGameActive()) {
                 plugin.getLogger().info(
@@ -84,39 +121,39 @@ public class EventHttpHandler implements HttpHandler {
                 ConfigManager.getCommands(eventType);
         if (commands.isEmpty()) return;
 
-        Map<String, Object> data = (Map<String, Object>) dataObj;
         ConfigManager.setLastNickname(
                 (String) data.getOrDefault("nickname", "???")
         );
         for (Map<String, Object> cmdConfig : commands) {
             if (!checkCondition(eventType, cmdConfig, data)) continue;
+            int repeat = 1;
+            // count回実行
+            if (eventType.equals("gift")) {
+                repeat = ((Number) data.getOrDefault("count", 1)).intValue();
+            }
 
-            // commands がある場合（複数）
-            if (cmdConfig.containsKey("commands")) {
-                List<String> commandList = (List<String>) cmdConfig.get("commands");
-
-                for (String rawCmd : commandList) {
+            for (int i = 0; i < repeat; i++) {
+                if (cmdConfig.containsKey("commands")) {
+                    List<String> commandList = (List<String>) cmdConfig.get("commands");
+                    for (String rawCmd : commandList) {
+                        final String command =
+                                replacePlaceholders(rawCmd, data);
+                        plugin.getServer().getScheduler().runTask(plugin, () ->
+                                plugin.getServer().dispatchCommand(
+                                        plugin.getServer().getConsoleSender(), command
+                                )
+                        );
+                    }
+                }
+                else if (cmdConfig.containsKey("command")) {
                     final String command =
-                            replacePlaceholders(rawCmd, data);
-
+                            replacePlaceholders((String) cmdConfig.get("command"), data);
                     plugin.getServer().getScheduler().runTask(plugin, () ->
                             plugin.getServer().dispatchCommand(
                                     plugin.getServer().getConsoleSender(), command
                             )
                     );
                 }
-            }
-
-            // 後方互換：command が1個だけの場合
-            else if (cmdConfig.containsKey("command")) {
-                final String command =
-                        replacePlaceholders((String) cmdConfig.get("command"), data);
-
-                plugin.getServer().getScheduler().runTask(plugin, () ->
-                        plugin.getServer().dispatchCommand(
-                                plugin.getServer().getConsoleSender(), command
-                        )
-                );
             }
         }
     }
@@ -167,6 +204,9 @@ public class EventHttpHandler implements HttpHandler {
         }
         if (data.containsKey("gift_name")) {
             command = command.replace("{gift_name}", (String) data.get("gift_name"));
+        }
+        if (data.containsKey("comment")) {
+            command = command.replace("{comment}", (String) data.get("comment"));
         }
 
         return command;

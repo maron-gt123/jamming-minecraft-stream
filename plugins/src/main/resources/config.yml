@@ -13,6 +13,8 @@ events:
     enabled: true
   subscribe:
     enabled: true
+  comment:
+    enabled: true
 
 jammingbox:
   clear:

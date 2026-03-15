@@ -196,11 +196,11 @@ while True:
         print(f"[{datetime.now()}] [INFO] Stream offline")
         data = {
                 "user": USERNAME
-            }
+        }
         forward_event("offline", data)
         reset_like_totals()
         print(f"[{datetime.now()}] [INFO] retry in {RECONNECT_WAIT}s")
-            time.sleep(RECONNECT_WAIT)
+        time.sleep(RECONNECT_WAIT)
 
     except KeyboardInterrupt:
         print("Shutdown requested (KeyboardInterrupt)")
