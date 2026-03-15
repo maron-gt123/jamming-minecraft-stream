@@ -34,7 +34,7 @@ public final class JammingStream extends JavaPlugin {
         httpServerManager = new HttpServerManager(this);
         httpServerManager.start();
 
-        JammingBoxCommand command = new JammingBoxCommand(boxManager, gameManager, clickDelay, prisonManager);
+        JammingBoxCommand command = new JammingBoxCommand(this, boxManager, gameManager, clickDelay, prisonManager);
         getCommand("jammingbox").setExecutor(command);
         getCommand("jammingevent").setExecutor(command);
         getCommand("jammingbox").setTabCompleter(new JammingBoxTabCompleter(boxManager));
@@ -67,4 +67,5 @@ public final class JammingStream extends JavaPlugin {
     public JammingBoxClickDelay getClickDelay() {
         return clickDelay;
     }
+    public HttpServerManager getHttpServerManager() {return httpServerManager;}
 }

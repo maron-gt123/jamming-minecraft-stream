@@ -5,6 +5,7 @@ import jp.master.jamming.game.JammingGameManager;
 import jp.master.jamming.config.ConfigManager;
 import jp.master.jamming.listener.JammingBoxClickDelay;
 import jp.master.jamming.prison.JammingPrisonManager;
+import jp.master.jamming.JammingStream;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.Material;
@@ -24,13 +25,16 @@ public class JammingBoxCommand implements CommandExecutor {
     private final JammingBoxClickDelay clickDelay;
     private final JammingPrisonManager prisonManager;
     private final Random random = new Random();
+    private final JammingStream plugin;
 
     public JammingBoxCommand(
+            JammingStream plugin,
             JammingBoxManager manager,
             JammingGameManager gameManager,
             JammingBoxClickDelay clickDelay,
             JammingPrisonManager prisonManager
     ) {
+        this.plugin = plugin;
         this.manager = manager;
         this.gameManager = gameManager;
         this.clickDelay = clickDelay;
@@ -59,6 +63,7 @@ public class JammingBoxCommand implements CommandExecutor {
             return true;
         }
         switch (args[0].toLowerCase()) {
+            case "reload" -> handleReload(sender);
             case "create" -> handleCreate(player, args);
             case "remove" -> handleRemove(player);
             case "start"  -> handleStart(player, args);
@@ -89,6 +94,17 @@ public class JammingBoxCommand implements CommandExecutor {
             default -> sendHelpPage2(sender);
         }
         return true;
+    }
+    /* =======================
+       reload
+       ======================= */
+    private void handleReload(CommandSender sender) {
+        ConfigManager.reload();
+        if (plugin.getHttpServerManager() != null) {
+            plugin.getHttpServerManager().stop();
+            plugin.getHttpServerManager().start();
+        }
+        sender.sendMessage("§aConfigを再読み込みしました");
     }
 
     /* =======================
@@ -568,6 +584,7 @@ public class JammingBoxCommand implements CommandExecutor {
     }
     private void sendHelpPage1(CommandSender sender) {
         sender.sendMessage("§6==== JammingBox Help (1/3) ====");
+        sender.sendMessage("§e/jammingbox reload        §7- configを再読込");
         sender.sendMessage("§e/jammingbox create [size] §7- jammingboxを作成");
         sender.sendMessage("§e/jammingbox remove        §7- jammingboxを削除");
         sender.sendMessage("§e/jammingbox start [time] §7- ゲーム開始");

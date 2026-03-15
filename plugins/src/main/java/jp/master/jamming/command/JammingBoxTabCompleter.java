@@ -30,6 +30,7 @@ public class JammingBoxTabCompleter implements TabCompleter {
         // /jammingbox
         if (root.equals("jammingbox")) {
             if (args.length == 1) {
+                result.add("reload");
                 result.add("create");
                 result.add("remove");
                 result.add("start");
