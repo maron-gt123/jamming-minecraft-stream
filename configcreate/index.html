@@ -182,6 +182,17 @@
         </div>
         <button onclick="addEventCommand('subscribe', this)">＋ command</button>
     </div>
+    <div class="event-row">
+        <span class="icon">💬</span>
+        <label><input type="checkbox" id="ev_comment" checked> Comment</label>
+    </div>
+    <div class="event-row">
+        <div class="comment-commands">
+            <select class="comment-command" onchange="updateOptionUI(this)"></select>
+            <span class="comment-option-wrap"></span>
+        </div>
+        <button onclick="addEventCommand('comment', this)">＋ command</button>
+    </div>
 </div>
 
 <div class="panel">
@@ -349,7 +360,6 @@
             <div class="streak-label">${isStreak ? "連続可" : "連続不可"}</div>
             <strong>${g.gift_name}</strong><br>
             💎 ${g.diamond}<br>
-            ${isStreak ? `連続 <input type="number" class="gift-count" value="1" min="1"><br>` : ``}
             コマンド<br>
             <div class="gift-commands">
               <select class="gift-command" onchange="updateOptionUI(this)"></select>
@@ -369,7 +379,8 @@
         || commandSelect.parentElement.querySelector(".like-option-wrap")
         || commandSelect.parentElement.querySelector(".follow-option-wrap")
         || commandSelect.parentElement.querySelector(".share-option-wrap")
-        || commandSelect.parentElement.querySelector(".subscribe-option-wrap");
+        || commandSelect.parentElement.querySelector(".subscribe-option-wrap")
+        || commandSelect.parentElement.querySelector(".comment-option-wrap");
       if (!wrap) return;
       wrap.innerHTML = "";
 
@@ -513,7 +524,8 @@
         || select.parentElement.querySelector(".like-option-wrap")
         || select.parentElement.querySelector(".follow-option-wrap")
         || select.parentElement.querySelector(".share-option-wrap")
-        || select.parentElement.querySelector(".subscribe-option-wrap");
+        || select.parentElement.querySelector(".subscribe-option-wrap")
+        || select.parentElement.querySelector(".comment-option-wrap");
       if (!wrap) return select.value;
       const msg = wrap.querySelector(".option-msg");
       if (msg) return `${select.value} ${msg.value}`;
@@ -532,7 +544,7 @@
       y.push("  path: /event\n");
 
       y.push("events:");
-      ["gift","like","follow","share","subscribe"].forEach(e => {
+      ["gift","like","follow","share","subscribe","comment"].forEach(e => {
         y.push(`  ${e}:`);
         y.push(`    enabled: ${document.getElementById("ev_"+e).checked}`);
       });
@@ -567,7 +579,7 @@
       });
 
       // follow / share / subscribe
-      ["follow", "share", "subscribe"].forEach(e => {
+      ["follow", "share", "subscribe", "comment"].forEach(e => {
         y.push(`  ${e}:`);
 
         const cmds = Array.from(
@@ -591,11 +603,6 @@
 
         y.push(`    - gift_name: "${d.dataset.name}"`);
 
-        const count = d.querySelector(".gift-count");
-        if (count) {
-          y.push(`      count: ${count.value}`);
-        }
-
         const cmds = Array.from(d.querySelectorAll(".gift-command"))
           .map(buildCommand)
           .filter(v => v);
@@ -616,7 +623,7 @@
 
     function populateCommandSelects() {
       document.querySelectorAll(
-        ".gift-command, .like-command, .follow-command, .share-command, .subscribe-command"
+        ".gift-command, .like-command, .follow-command, .share-command, .subscribe-command, .comment-command"
       ).forEach(sel => {
         const current = sel.value;
         sel.innerHTML = "<option value=''>コマンド選択</option>";
@@ -659,7 +666,7 @@
 
           populateCommandSelects();
 
-          ["follow", "share", "subscribe"].forEach(e => {
+          ["follow", "share", "subscribe", "comment"].forEach(e => {
             const sel = document.getElementById("cmd_" + e);
             sel.innerHTML = "<option value=''>コマンド選択</option>";
             Object.keys(commandMap).forEach(cmd => {
