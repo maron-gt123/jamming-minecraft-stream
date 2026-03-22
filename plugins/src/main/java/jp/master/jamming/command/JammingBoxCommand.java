@@ -495,7 +495,6 @@ public class JammingBoxCommand implements CommandExecutor {
         }
 
         if (levels < 1) levels = 1;
-        if (levels > 3) levels = 3;
 
         manager.fillColumnsFromAir(levels, Material.STONE);
 

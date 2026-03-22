@@ -22,6 +22,7 @@ public class JammingGameManager {
     private boolean gameActive = false;
     private long gameStartTime = 0L;
     private boolean clearSequenceRunning = false;
+    private int clearCount = 0;
 
     private BukkitTask actionBarTask;
     private BukkitTask countdownTask;
@@ -44,6 +45,7 @@ public class JammingGameManager {
     // Game control
     // =========================================================
     public void startGame() {
+        clearCount = 0;
         boxManager.getActiveBox().ifPresent(JammingBox::activate);
         gameActive = true;
         gameStartTime = System.currentTimeMillis();
@@ -146,6 +148,7 @@ public class JammingGameManager {
     }
 
     private void onGameClearComplete() {
+        clearCount++;
         effects.playClear();
         effects.playClearFireworks(boxManager.getBox(), plugin);
         boxManager.clearInside();
@@ -159,7 +162,11 @@ public class JammingGameManager {
         actionBarTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             if (!gameActive) return;
             long sec = (System.currentTimeMillis() - gameStartTime) / 1000;
-            effects.showActionBar("§a⏱ 経過時間: §e" + String.format("%02d:%02d", sec / 60, sec % 60));
+            String time = String.format("%02d:%02d", sec / 60, sec % 60);
+            effects.showActionBar(
+                    "§a⏱ 経過時間: §e" + time +
+                            " §7| §bクリア回数: §e" + clearCount
+            );
         }, 0L, 20L);
     }
 
