@@ -3,6 +3,7 @@ package jp.master.jamming;
 import org.bukkit.plugin.java.JavaPlugin;
 import jp.master.jamming.config.ConfigManager;
 import jp.master.jamming.game.JammingGameManager;
+import jp.master.jamming.scoreboard.JammingScoreboardManager;
 import jp.master.jamming.http.HttpServerManager;
 import jp.master.jamming.box.JammingBoxManager;
 import jp.master.jamming.prison.JammingPrisonManager;
@@ -12,12 +13,14 @@ import jp.master.jamming.listener.JammingBoxPlaceListener;
 import jp.master.jamming.listener.JammingBoxProtectListener;
 import jp.master.jamming.listener.JammingBoxClickDelay;
 import jp.master.jamming.listener.JammingPrisonProtectListener;
+import jp.master.jamming.listener.JammingScoreboardListener;
 
 public final class JammingStream extends JavaPlugin {
 
     private HttpServerManager httpServerManager;
     private JammingGameManager gameManager;
     private JammingBoxManager boxManager;
+    private JammingScoreboardManager scoreboardManager;
     private JammingBoxClickDelay clickDelay;
     private JammingPrisonManager prisonManager;
 
@@ -28,6 +31,8 @@ public final class JammingStream extends JavaPlugin {
 
         boxManager = new JammingBoxManager(this);
         gameManager = new JammingGameManager(this, boxManager);
+        scoreboardManager = new JammingScoreboardManager(this, gameManager);
+        gameManager.setOnClearCallback(() -> scoreboardManager.updateAll());
         clickDelay = new JammingBoxClickDelay();
         prisonManager = new JammingPrisonManager(this);
 
@@ -52,6 +57,12 @@ public final class JammingStream extends JavaPlugin {
         getServer().getPluginManager().registerEvents(clickDelay, this);
 
         getLogger().info("JammingStream enabled");
+
+        JammingScoreboardListener scoreboardListener =
+                new JammingScoreboardListener(scoreboardManager);
+        getServer().getPluginManager().registerEvents(scoreboardListener, this);
+        // 既存プレイヤーにも適用（重要）
+        scoreboardListener.applyToOnlinePlayers();
     }
 
     @Override

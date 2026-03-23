@@ -4,6 +4,7 @@ import jp.master.jamming.box.JammingBox;
 import jp.master.jamming.box.JammingBoxManager;
 import jp.master.jamming.effect.JammingGameEffects;
 import jp.master.jamming.config.ConfigManager;
+import jp.master.jamming.scoreboard.JammingScoreboardManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -23,6 +24,7 @@ public class JammingGameManager {
     private long gameStartTime = 0L;
     private boolean clearSequenceRunning = false;
     private int clearCount = 0;
+    private Runnable onClearCallback;
 
     private BukkitTask actionBarTask;
     private BukkitTask countdownTask;
@@ -149,10 +151,20 @@ public class JammingGameManager {
 
     private void onGameClearComplete() {
         clearCount++;
+        if (onClearCallback != null) {
+            onClearCallback.run();
+        }
         effects.playClear();
         effects.playClearFireworks(boxManager.getBox(), plugin);
         boxManager.clearInside();
         clearSequenceRunning = false;
+    }
+
+    public int getClearCount() {
+        return clearCount;
+    }
+    public void setOnClearCallback(Runnable callback) {
+        this.onClearCallback = callback;
     }
 
     // =========================================================
@@ -162,11 +174,7 @@ public class JammingGameManager {
         actionBarTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             if (!gameActive) return;
             long sec = (System.currentTimeMillis() - gameStartTime) / 1000;
-            String time = String.format("%02d:%02d", sec / 60, sec % 60);
-            effects.showActionBar(
-                    "§a⏱ 経過時間: §e" + time +
-                            " §7| §bクリア回数: §e" + clearCount
-            );
+            effects.showActionBar("§a⏱ 経過時間: §e" + String.format("%02d:%02d", sec / 60, sec % 60));
         }, 0L, 20L);
     }
 
