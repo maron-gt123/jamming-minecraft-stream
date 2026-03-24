@@ -6,14 +6,17 @@ import jp.master.jamming.config.ConfigManager;
 import jp.master.jamming.listener.JammingBoxClickDelay;
 import jp.master.jamming.prison.JammingPrisonManager;
 import jp.master.jamming.JammingStream;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.Particle;
 import org.bukkit.Material;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import java.util.Random;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.text.Component;
@@ -71,6 +74,7 @@ public class JammingBoxCommand implements CommandExecutor {
             case "replace" -> handleReplace(player, args);
             case "fill" -> handleFill(player);
             case "clear" -> handleClear(player);
+            case "goal" -> handleTarget(player, args);
             case "set_block_interaction_range" -> handleSetBlockInteractionRange(player, args);
             case "clickdelay" -> handleClickDelay(player, args);
             default -> sendHelpPage1(sender);
@@ -91,6 +95,7 @@ public class JammingBoxCommand implements CommandExecutor {
             case "reset" -> handleReset(sender, args);
             case "fillblock" -> handleFillBlock(sender, args);
             case "prison" -> handlePrison(sender, args);
+            case "rocket" -> handleRocket(sender, args);
             default -> sendHelpPage2(sender);
         }
         return true;
@@ -257,6 +262,31 @@ public class JammingBoxCommand implements CommandExecutor {
         }
         manager.clearInside();
         player.sendMessage("§aJammingBox内のブロックを削除しました");
+    }
+    /* =======================
+   goal (クリア目標数設定)
+   ======================= */
+    private void handleTarget(Player player, String[] args) {
+        if (args.length < 2) {
+            player.sendMessage("§e/jammingbox goal <数値>  - クリア目標数を設定");
+            return;
+        }
+
+        int target;
+        try {
+            target = Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            player.sendMessage("§c数値を指定してください");
+            return;
+        }
+
+        if (target <= 0) {
+            player.sendMessage("§cクリア目標数は1以上を指定してください");
+            return;
+        }
+
+        gameManager.setClearGoal(target); // JammingGameManager 側のメソッド呼び出し
+        player.sendMessage("§aクリア目標数を " + target + " に設定しました");
     }
     /* =======================
     reset
@@ -562,6 +592,49 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§c§l[PRISON] §f" + seconds + "秒間投獄 ⛓");
     }
     /* =======================
+       rocket
+       ======================= */
+    private void handleRocket(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("§cこのコマンドはプレイヤーのみ実行できます");
+            return;
+        }
+
+        int count = 1;
+        if (args.length >= 2) {
+            try {
+                count = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                player.sendMessage("§c回数は数字で指定してください");
+                return;
+            }
+        }
+        if (count < 1) count = 1;
+        if (count > 30) count = 30;
+
+        final Location startLocation = player.getLocation().clone();
+        final double rocketPower = 3.0;
+
+        for (int i = 0; i < count; i++) {
+            final int index = i; // ループ変数も final に
+
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    // ロケット発射
+                    player.setVelocity(player.getLocation().getDirection().multiply(0.1).setY(rocketPower));
+
+                    // パーティクル
+                    player.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0, 0.5, 0), 10, 0.2, 0.2, 0.2, 0.05);
+
+                    // サウンド
+                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 2.5f, 1.0f);
+
+                }
+            }.runTaskLater(plugin, i);
+        }
+    }
+    /* =======================
        help
        ======================= */
     private void handleHelp(CommandSender sender, String[] args) {
@@ -591,6 +664,7 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§e/jammingbox replace true | false §7- ブロック置換切替");
         sender.sendMessage("§e/jammingbox fill         §7- jammingboxを埋める");
         sender.sendMessage("§e/jammingbox clear        §7- jammingboxを空にする");
+        sender.sendMessage("§e/jammingbox goal <数値>  §7- クリア目標数を設定");
         sender.sendMessage("§e/jammingbox set_block_interaction_range <v>  §7- ブロック設置の長さ");
         sender.sendMessage("§e/jammingbox clickdelay <true|false> §7- クリック遅延の有効化/無効化");
     }
@@ -603,6 +677,7 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§e/jammingevent reset <dragon|wither> §7- 演出付きリセット");
         sender.sendMessage("§e/jammingevent fillblock <1|2|3> §7- JammingBox内の下から指定列数を埋める");
         sender.sendMessage("§e/jammingevent prison [time] §7- 牢獄に投獄");
+        sender.sendMessage("§e/jammingevent rocket <power> §7- プレイヤーをロケットで打ち上げ");
         sender.sendMessage("§7◀ help 1   help 3 ▶");
     }
     private void sendHelpPage3(CommandSender sender) {

@@ -5,6 +5,9 @@ import jp.master.jamming.box.JammingBoxManager;
 import jp.master.jamming.effect.JammingGameEffects;
 import jp.master.jamming.config.ConfigManager;
 import jp.master.jamming.scoreboard.JammingScoreboardManager;
+import org.bukkit.boss.BossBar;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -25,6 +28,7 @@ public class JammingGameManager {
     private boolean clearSequenceRunning = false;
     private int clearCount = 0;
     private Runnable onClearCallback;
+    private BossBar bossBar;
 
     private BukkitTask actionBarTask;
     private BukkitTask countdownTask;
@@ -32,6 +36,7 @@ public class JammingGameManager {
     private BukkitTask clearCountdownTask;
 
     private final int clearCountdownSeconds;
+    private int clearGoal = 10;
 
     public JammingGameManager(JavaPlugin plugin, JammingBoxManager boxManager) {
         this.plugin = plugin;
@@ -51,7 +56,8 @@ public class JammingGameManager {
         boxManager.getActiveBox().ifPresent(JammingBox::activate);
         gameActive = true;
         gameStartTime = System.currentTimeMillis();
-        startActionBar();
+        // startActionBar();
+        createBossBar();
         startClearConditionWatcher();
     }
 
@@ -86,9 +92,17 @@ public class JammingGameManager {
     public void stopGame() {
         gameActive = false;
         gameStartTime = 0;
-        stopActionBar();
+        // stopActionBar();
         stopClearConditionWatcher();
         effects.playGameStop();
+        removeBossBar();
+    }
+
+    private void removeBossBar() {
+        if (bossBar != null) {
+            bossBar.removeAll();
+            bossBar = null;
+        }
     }
 
     // =========================================================
@@ -151,13 +165,13 @@ public class JammingGameManager {
 
     private void onGameClearComplete() {
         clearCount++;
-        if (onClearCallback != null) {
-            onClearCallback.run();
-        }
+        updateBossBar();
+        effects.showTitle("§6クリア達成！", "§e" + clearCount + " / " + clearGoal, 10, 60, 10);
         effects.playClear();
         effects.playClearFireworks(boxManager.getBox(), plugin);
         boxManager.clearInside();
         clearSequenceRunning = false;
+        if (onClearCallback != null) onClearCallback.run();
     }
 
     public int getClearCount() {
@@ -176,6 +190,32 @@ public class JammingGameManager {
             long sec = (System.currentTimeMillis() - gameStartTime) / 1000;
             effects.showActionBar("§a⏱ 経過時間: §e" + String.format("%02d:%02d", sec / 60, sec % 60));
         }, 0L, 20L);
+    }
+
+    private void createBossBar() {
+        bossBar = Bukkit.createBossBar(
+                "§aクリア数: §e0§7 / §6" + clearGoal, // ← 最初から目標も表示
+                BarColor.GREEN,
+                BarStyle.SOLID
+        );
+
+        Bukkit.getOnlinePlayers().forEach(bossBar::addPlayer);
+    }
+
+    private void updateBossBar() {
+        if (bossBar == null) return;
+        bossBar.setTitle("§aクリア数: §e" + clearCount + "§7 / §6" + clearGoal);
+        double progress = (double) clearCount / clearGoal;
+        bossBar.setProgress(Math.min(1.0, progress));
+    }
+
+    public void setClearGoal(int goal) {
+        if (goal < 1) return; // 1未満は無効
+        this.clearGoal = goal;
+        updateBossBar(); // ボスバーも更新
+    }
+    public int getClearGoal() {
+        return clearGoal;
     }
 
     private void stopActionBar() {
