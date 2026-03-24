@@ -18,6 +18,7 @@ USERNAME = config["tiktok"]["user"]
 HTTP_CONF = config["http"]
 RECONNECT_WAIT = 30
 like_user_total = {}
+gift_user_total = {}
 
 # =====================
 # Anti-spam / Rate limiting
@@ -39,6 +40,11 @@ def clean_nickname(nick: str) -> str:
     nick = re.sub(r'[\U00010000-\U0001FFFF]', '', nick)
     nick = re.sub(r'[\u2000-\u2FFF]', '', nick)
     return nick.strip()
+
+def reset_gift_totals():
+    global gift_user_total
+    gift_user_total = {}
+    print(f"[{datetime.now()}] [GIFT RESET] Stream offline → totals cleared")
 
 def reset_like_totals():
     global like_user_total
@@ -82,9 +88,24 @@ def create_client():
             gift = getattr(event, "m_gift", None)
             if not gift:
                 return
+            # コンボ途中は無視
             streakable = getattr(gift, "combo", False)
             if streakable and event.repeat_end != 1:
                 return
+
+            uid = event.user.unique_id
+            nickname = clean_nickname(event.user.nickname)
+            # 累計用初期化
+            if uid not in gift_user_total:
+                gift_user_total[uid] = {
+                    "total": 0,
+                    "nickname": nickname
+                }
+            # ダイヤモンド換算値（gift.diamond_count * repeat_count）
+            diamond_value = getattr(gift, "diamond_count", 0) * event.repeat_count
+            # 累計に加算
+            gift_user_total[uid]["total"] += diamond_value
+
             data = {
                 "user": event.user.unique_id,
                 "nickname": clean_nickname(event.user.nickname),
@@ -92,6 +113,7 @@ def create_client():
                 "count": event.repeat_count,
                 "streakable": streakable,
                 "repeat_end": event.repeat_end,
+                "diamond_total": gift_user_total[uid]["total"],
             }
             print(f"[{datetime.now()}] [GIFT] {data}")
             forward_event("gift", data)
@@ -198,6 +220,7 @@ while True:
                 "user": USERNAME
         }
         forward_event("offline", data)
+        reset_gift_totals()
         reset_like_totals()
         print(f"[{datetime.now()}] [INFO] retry in {RECONNECT_WAIT}s")
         time.sleep(RECONNECT_WAIT)
