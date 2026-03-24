@@ -595,29 +595,35 @@ public class JammingBoxCommand implements CommandExecutor {
        rocket
        ======================= */
     private void handleRocket(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cこのコマンドはプレイヤーのみ実行できます");
-            return;
-        }
 
         int count = 1;
         if (args.length >= 2) {
             try {
                 count = Integer.parseInt(args[1]);
             } catch (NumberFormatException e) {
-                player.sendMessage("§c回数は数字で指定してください");
+                sender.sendMessage("§c回数は数字で指定してください");
                 return;
             }
         }
         if (count < 1) count = 1;
         if (count > 30) count = 30;
 
-        final Location startLocation = player.getLocation().clone();
+        // 実行対象プレイヤーを決定
+        Player player;
+        if (sender instanceof Player p) {
+            player = p;
+        } else {
+            // Console / HTTP からの場合はオンラインプレイヤーの一人を対象に
+            player = sender.getServer().getOnlinePlayers().stream().findFirst().orElse(null);
+        }
+        if (player == null) {
+            sender.sendMessage("§c対象となるプレイヤーが見つかりません");
+            return;
+        }
+
         final double rocketPower = 3.0;
 
         for (int i = 0; i < count; i++) {
-            final int index = i; // ループ変数も final に
-
             new BukkitRunnable() {
                 @Override
                 public void run() {
@@ -625,14 +631,24 @@ public class JammingBoxCommand implements CommandExecutor {
                     player.setVelocity(player.getLocation().getDirection().multiply(0.1).setY(rocketPower));
 
                     // パーティクル
-                    player.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0, 0.5, 0), 10, 0.2, 0.2, 0.2, 0.05);
+                    player.getWorld().spawnParticle(
+                            Particle.FLAME,
+                            player.getLocation().add(0, 0.5, 0),
+                            10, 0.2, 0.2, 0.2, 0.05
+                    );
 
                     // サウンド
-                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 2.5f, 1.0f);
-
+                    player.getWorld().playSound(
+                            player.getLocation(),
+                            Sound.ENTITY_FIREWORK_ROCKET_LAUNCH,
+                            2.5f,
+                            1.0f
+                    );
                 }
             }.runTaskLater(plugin, i);
         }
+
+        sender.sendMessage("§c§l[ROCKET] §f" + count + " 回発射 🚀");
     }
     /* =======================
        help
@@ -677,7 +693,7 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§e/jammingevent reset <dragon|wither> §7- 演出付きリセット");
         sender.sendMessage("§e/jammingevent fillblock <1|2|3> §7- JammingBox内の下から指定列数を埋める");
         sender.sendMessage("§e/jammingevent prison [time] §7- 牢獄に投獄");
-        sender.sendMessage("§e/jammingevent rocket <power> §7- プレイヤーをロケットで打ち上げ");
+        sender.sendMessage("§e/jammingevent rocket <1|2|3> §7- プレイヤーをロケットで打ち上げ");
         sender.sendMessage("§7◀ help 1   help 3 ▶");
     }
     private void sendHelpPage3(CommandSender sender) {
