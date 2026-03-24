@@ -595,60 +595,68 @@ public class JammingBoxCommand implements CommandExecutor {
        rocket
        ======================= */
     private void handleRocket(CommandSender sender, String[] args) {
+        // CommandSender を Player に変換（プレイヤー限定でなくてもOK）
+        if (!(sender instanceof Player)) return;
+        Player player = (Player) sender;
 
+        // 回数の取得
         int count = 1;
         if (args.length >= 2) {
             try {
                 count = Integer.parseInt(args[1]);
             } catch (NumberFormatException e) {
-                sender.sendMessage("§c回数は数字で指定してください");
+                player.sendMessage("§c回数は数字で指定してください");
                 return;
             }
         }
         if (count < 1) count = 1;
         if (count > 30) count = 30;
 
-        // 実行対象プレイヤーを決定
-        Player player;
-        if (sender instanceof Player p) {
-            player = p;
-        } else {
-            // Console / HTTP からの場合はオンラインプレイヤーの一人を対象に
-            player = sender.getServer().getOnlinePlayers().stream().findFirst().orElse(null);
-        }
-        if (player == null) {
-            sender.sendMessage("§c対象となるプレイヤーが見つかりません");
-            return;
-        }
-
+        final int finalCount = count; // Runnable 内で使うため final に
+        final Player finalPlayer = player;
+        final Location startLocation = player.getLocation().clone();
         final double rocketPower = 3.0;
 
-        for (int i = 0; i < count; i++) {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    // ロケット発射
-                    player.setVelocity(player.getLocation().getDirection().multiply(0.1).setY(rocketPower));
+        // 飛距離更新用 BukkitRunnable
+        new BukkitRunnable() {
+            int launched = 0;
 
-                    // パーティクル
-                    player.getWorld().spawnParticle(
-                            Particle.FLAME,
-                            player.getLocation().add(0, 0.5, 0),
-                            10, 0.2, 0.2, 0.2, 0.05
-                    );
-
-                    // サウンド
-                    player.getWorld().playSound(
-                            player.getLocation(),
-                            Sound.ENTITY_FIREWORK_ROCKET_LAUNCH,
-                            2.5f,
-                            1.0f
-                    );
+            @Override
+            public void run() {
+                if (launched >= finalCount) {
+                    // ロケット全て発射後はサブタイトルを消す
+                    finalPlayer.sendTitle("", "", 0, 1, 0);
+                    cancel();
+                    return;
                 }
-            }.runTaskLater(plugin, i);
-        }
 
-        sender.sendMessage("§c§l[ROCKET] §f" + count + " 回発射 🚀");
+                // ロケット発射
+                finalPlayer.setVelocity(finalPlayer.getLocation().getDirection().multiply(0.1).setY(rocketPower));
+
+                // パーティクル
+                finalPlayer.getWorld().spawnParticle(Particle.FLAME,
+                        finalPlayer.getLocation().add(0, 0.5, 0),
+                        10, 0.2, 0.2, 0.2, 0.05);
+
+                // サウンド
+                finalPlayer.getWorld().playSound(finalPlayer.getLocation(),
+                        Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 2.5f, 1.0f);
+
+                // 飛距離計算
+                double distance = startLocation.distance(finalPlayer.getLocation());
+
+                // サブタイトルで飛距離更新
+                finalPlayer.sendTitle(
+                        "",
+                        "§6§l飛距離: " + String.format("%.2f", distance) + "m", // §6 = オレンジ
+                        0,  // fadeIn tick
+                        20, // stay tick
+                        0   // fadeOut tick
+                );
+
+                launched++;
+            }
+        }.runTaskTimer(plugin, 0L, 5L); // 5tickごとに発射
     }
     /* =======================
        help
