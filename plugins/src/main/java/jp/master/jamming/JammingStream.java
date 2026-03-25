@@ -31,8 +31,10 @@ public final class JammingStream extends JavaPlugin {
 
         boxManager = new JammingBoxManager(this);
         gameManager = new JammingGameManager(this, boxManager);
-        scoreboardManager = new JammingScoreboardManager(this, gameManager);
-        gameManager.setOnClearCallback(() -> scoreboardManager.updateAll());
+        scoreboardManager = new JammingScoreboardManager();
+        scoreboardManager.init();
+        scoreboardManager.showAll();
+        gameManager.setOnClearCallback(() -> scoreboardManager.reset());
         clickDelay = new JammingBoxClickDelay();
         prisonManager = new JammingPrisonManager(this);
 
@@ -57,12 +59,9 @@ public final class JammingStream extends JavaPlugin {
         getServer().getPluginManager().registerEvents(clickDelay, this);
 
         getLogger().info("JammingStream enabled");
-
-        JammingScoreboardListener scoreboardListener =
-                new JammingScoreboardListener(scoreboardManager);
-        getServer().getPluginManager().registerEvents(scoreboardListener, this);
-        // 既存プレイヤーにも適用（重要）
-        scoreboardListener.applyToOnlinePlayers();
+        getServer().getPluginManager().registerEvents(
+                new JammingScoreboardListener(scoreboardManager), this
+        );
     }
 
     @Override
@@ -79,4 +78,5 @@ public final class JammingStream extends JavaPlugin {
         return clickDelay;
     }
     public HttpServerManager getHttpServerManager() {return httpServerManager;}
+    public JammingScoreboardManager getScoreboardManager() {return scoreboardManager;}
 }

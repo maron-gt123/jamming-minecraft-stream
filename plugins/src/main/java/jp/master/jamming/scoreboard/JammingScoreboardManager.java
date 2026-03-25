@@ -1,93 +1,119 @@
 package jp.master.jamming.scoreboard;
 
-import jp.master.jamming.game.JammingGameManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class JammingScoreboardManager {
 
-    private final JavaPlugin plugin;
-    private final JammingGameManager gameManager;
-    private final Map<UUID, Scoreboard> boards = new HashMap<>();
+    private Scoreboard board;
+    private Objective objective;
 
-    public JammingScoreboardManager(JavaPlugin plugin, JammingGameManager gameManager) {
-        this.plugin = plugin;
-        this.gameManager = gameManager;
-    }
+    // UID → 名前
+    private final Map<String, String> names = new HashMap<>();
 
-    public JavaPlugin getPlugin() {
-        return plugin;
+    // UID → ダイヤ累計
+    private final Map<String, Integer> totals = new HashMap<>();
+
+    // =========================
+    // 初期化
+    // =========================
+    public void init() {
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
+        board = manager.getNewScoreboard();
+
+        objective = board.registerNewObjective("giftRank", "dummy", "§6§l★ RANKING ★");
+        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
     }
 
     // =========================
-    // プレイヤーに表示
+    // 全プレイヤーに表示
     // =========================
     public void show(Player player) {
-
-        Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
-
-        // 既存Objective全部削除（超重要）
-        for (DisplaySlot slot : DisplaySlot.values()) {
-            Objective o = board.getObjective(slot);
-            if (o != null) {
-                o.unregister();
-            }
-        }
-
-        Objective obj = board.registerNewObjective("jamming", "dummy", "§aJamming");
-        obj.setDisplaySlot(DisplaySlot.SIDEBAR);
-
-        boards.put(player.getUniqueId(), board);
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            player.setScoreboard(board);
-        }, 1L);
-
-        update(player);
-    }
-
-    // =========================
-    // 全体更新
-    // =========================
-    public void updateAll() {
-        for (UUID uuid : boards.keySet()) {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player != null) {
-                update(player);
-            }
-        }
-    }
-
-    // =========================
-    // 個別更新
-    // =========================
-    private void update(Player player) {
-        Scoreboard board = boards.get(player.getUniqueId());
         if (board == null) return;
+        player.setScoreboard(board);
+    }
+    public void showAll() {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.setScoreboard(board);
+        }
+    }
 
-        Objective obj = board.getObjective("jamming");
-        if (obj == null) return;
+    // =========================
+    // ギフト更新（HTTPから呼ぶ）
+    // =========================
+    public void updateGift(String user, String nickname, int diamondTotal) {
 
-        // リセット
-        for (String e : board.getEntries()) {
-            board.resetScores(e);
+        if (nickname == null || nickname.isEmpty()) {
+            nickname = user;
         }
 
-        String entry = "§0"; // ← ここ重要
+        names.put(user, nickname);
+        totals.put(user, diamondTotal);
 
-        Team team = board.getTeam("clear");
-        if (team == null) {
-            team = board.registerNewTeam("clear");
-            team.addEntry(entry);
+        updateBoard();
+    }
+
+    // =========================
+    // スコアボード更新
+    // =========================
+    private void updateBoard() {
+        if (board == null || objective == null) return;
+
+        // 全削除
+        for (String entry : board.getEntries()) {
+            board.resetScores(entry);
         }
 
-        team.setPrefix("§bクリア回数: §e" + gameManager.getClearCount());
+        // チーム削除（重要）
+        for (Team team : board.getTeams()) {
+            team.unregister();
+        }
 
-        obj.getScore(entry).setScore(1);
+        // ===== ランキング作成 =====
+        List<Map.Entry<String, Integer>> ranking = totals.entrySet()
+                .stream()
+                .sorted((a, b) -> b.getValue() - a.getValue())
+                .toList();
+
+        int score = 15;
+
+        for (int i = 0; i < Math.min(5, ranking.size()); i++) {
+
+            Map.Entry<String, Integer> entry = ranking.get(i);
+
+            String user = entry.getKey();
+            int diamond = entry.getValue();
+            String name = names.getOrDefault(user, user);
+
+            int rank = i + 1;
+
+            String entryKey = "§" + i;
+
+            Team team = board.registerNewTeam("rank_" + i);
+            team.addEntry(entryKey);
+
+            // 左側
+            team.setPrefix("§e" + rank + "位 §f" + name);
+
+            // 右側に付く文字
+            team.setSuffix(" §bpt.");
+
+            // 数値（中央右）
+            objective.getScore(entryKey).setScore(diamond);
+        }
+    }
+    // =========================
+    // リセット（配信終了用）
+    // =========================
+    public void reset() {
+        names.clear();
+        totals.clear();
+
+        for (String entry : board.getEntries()) {
+            board.resetScores(entry);
+        }
     }
 }

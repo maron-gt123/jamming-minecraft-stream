@@ -73,6 +73,19 @@ public class EventHttpHandler implements HttpHandler {
 
     private void executeCommands(String eventType, Object dataObj) {
         Map<String, Object> data = dataObj instanceof Map ? (Map<String, Object>) dataObj : Map.of();
+        // ===== スコアボード更新（追加）=====
+        if (eventType.equals("gift")) {
+
+            String user = (String) data.getOrDefault("user", "unknown");
+            String nickname = (String) data.getOrDefault("nickname", user);
+            int diamondTotal = ((Number) data.getOrDefault("diamond_total", 0)).intValue();
+
+            if (plugin instanceof jp.master.jamming.JammingStream stream) {
+                plugin.getServer().getScheduler().runTask(plugin, () -> {
+                    stream.getScoreboardManager().updateGift(user, nickname, diamondTotal);
+                });
+            }
+        }
         // ===== comment 強制チャット表示 =====
         if (eventType.equals("comment")) {
 
