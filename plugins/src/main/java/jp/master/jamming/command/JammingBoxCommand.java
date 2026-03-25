@@ -9,16 +9,12 @@ import jp.master.jamming.JammingStream;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
-import org.bukkit.Particle;
 import org.bukkit.Material;
-import org.bukkit.entity.TNTPrimed;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import java.util.Random;
-import net.kyori.adventure.title.Title;
 import net.kyori.adventure.text.Component;
 
 public class JammingBoxCommand implements CommandExecutor {
@@ -264,8 +260,8 @@ public class JammingBoxCommand implements CommandExecutor {
         player.sendMessage("§aJammingBox内のブロックを削除しました");
     }
     /* =======================
-   goal (クリア目標数設定)
-   ======================= */
+       goal (クリア目標数設定)
+       ======================= */
     private void handleTarget(Player player, String[] args) {
         if (args.length < 2) {
             player.sendMessage("§e/jammingbox goal <数値>  - クリア目標数を設定");
@@ -289,8 +285,8 @@ public class JammingBoxCommand implements CommandExecutor {
         player.sendMessage("§aクリア目標数を " + target + " に設定しました");
     }
     /* =======================
-    reset
-    ======================= */
+       reset
+       ======================= */
     private void handleReset(CommandSender sender, String[] args) {
 
         if (args.length < 2) {
@@ -332,8 +328,8 @@ public class JammingBoxCommand implements CommandExecutor {
         }
     }
     /* =======================
-   set_block_interaction_range
-   ======================= */
+       set_block_interaction_range
+       ======================= */
     private void handleSetBlockInteractionRange(Player player, String[] args) {
 
         if (args.length < 2) {
@@ -360,8 +356,8 @@ public class JammingBoxCommand implements CommandExecutor {
         player.sendMessage("§aブロック操作距離を " + range + " に設定しました");
     }
     /* =======================
-   clickdelay
-   ======================= */
+       clickdelay
+       ======================= */
     private void handleClickDelay(Player player, String[] args) {
         if (args.length < 2) {
             player.sendMessage("§e/jammingbox clickdelay <true|false>");
@@ -379,8 +375,8 @@ public class JammingBoxCommand implements CommandExecutor {
         }
     }
     /* =======================
-   text
-   ======================= */
+       text
+       ======================= */
     private void handleText(CommandSender sender, String[] args) {
 
         if (args.length < 2) {
@@ -433,10 +429,9 @@ public class JammingBoxCommand implements CommandExecutor {
         }
     }
     /* =======================
-    tnt
-    ======================= */
+       tnt
+       ======================= */
     private void handleTnt(CommandSender sender, String[] args) {
-
         if (!manager.hasBox()) {
             sender.sendMessage("§cJammingBoxが存在しません");
             return;
@@ -452,33 +447,17 @@ public class JammingBoxCommand implements CommandExecutor {
             }
         }
 
-        for (int i = 0; i < count; i++) {
-
-            Location inner = manager.getRandomInnerLocation().orElse(null);
-            if (inner == null) continue;
-
-            Location spawn = inner.clone().add(
-                    Math.random() * 3 - 1.5,
-                    10,
-                    Math.random() * 3 - 1.5
-            );
-
-            TNTPrimed tnt = spawn.getWorld().spawn(spawn, TNTPrimed.class);
-            tnt.setFuseTicks(60); // 3秒
-        }
-
-        sender.sendMessage("§c§l[TNT] §f" + count + " 個投下 💣");
+        gameManager.spawnTnt(count, false);
+        sender.sendMessage("§c§l[TNT] §f" + count + " 個投下");
     }
+
     private void handleEXTnt(CommandSender sender, String[] args) {
-
-        final double exPower = 8.0; // 強化版TNTの固定爆発力
-
         if (!manager.hasBox()) {
             sender.sendMessage("§cJammingBoxが存在しません");
             return;
         }
 
-        int count = 1; // 投下個数デフォルト1
+        int count = 1;
         if (args.length >= 2) {
             try {
                 count = Integer.parseInt(args[1]);
@@ -488,26 +467,12 @@ public class JammingBoxCommand implements CommandExecutor {
             }
         }
 
-        for (int i = 0; i < count; i++) {
-            Location inner = manager.getRandomInnerLocation().orElse(null);
-            if (inner == null) continue;
-
-            Location spawn = inner.clone().add(
-                    Math.random() * 3 - 1.5,
-                    10,
-                    Math.random() * 3 - 1.5
-            );
-
-            TNTPrimed tnt = spawn.getWorld().spawn(spawn, TNTPrimed.class);
-            tnt.setFuseTicks(60); // 3秒
-            tnt.setYield((float) exPower); // 強化TNT
-        }
-
-        sender.sendMessage("§c§l[EXTNT] §f" + count + " 個投下 💣 爆発力固定: " + exPower);
+        gameManager.spawnTnt(count, true);
+        sender.sendMessage("§c§l[EXTNT] §f" + count + " 個投下 爆発力固定: 8.0");
     }
     /* =======================
-   fillblock
-   ======================= */
+       fillblock
+       ======================= */
     private void handleFillBlock(CommandSender sender, String[] args) {
         if (!manager.hasBox()) {
             sender.sendMessage("§cJammingBoxが存在しません");
@@ -595,11 +560,9 @@ public class JammingBoxCommand implements CommandExecutor {
        rocket
        ======================= */
     private void handleRocket(CommandSender sender, String[] args) {
-        // CommandSender を Player に変換（プレイヤー限定でなくてもOK）
-        if (!(sender instanceof Player)) return;
-        Player player = (Player) sender;
+        if (!(sender instanceof Player player)) return;
 
-        // 回数の取得
+        // 回数を取得（引数チェックのみ）
         int count = 1;
         if (args.length >= 2) {
             try {
@@ -609,55 +572,10 @@ public class JammingBoxCommand implements CommandExecutor {
                 return;
             }
         }
-        if (count < 1) count = 1;
-        if (count > 30) count = 30;
 
-        final int finalCount = count; // Runnable 内で使うため final に
-        final Player finalPlayer = player;
-        final Location startLocation = player.getLocation().clone();
-        final double rocketPower = 3.0;
-
-        // 飛距離更新用 BukkitRunnable
-        new BukkitRunnable() {
-            int launched = 0;
-
-            @Override
-            public void run() {
-                if (launched >= finalCount) {
-                    // ロケット全て発射後はサブタイトルを消す
-                    finalPlayer.sendTitle("", "", 0, 1, 0);
-                    cancel();
-                    return;
-                }
-
-                // ロケット発射
-                finalPlayer.setVelocity(finalPlayer.getLocation().getDirection().multiply(0.1).setY(rocketPower));
-
-                // パーティクル
-                finalPlayer.getWorld().spawnParticle(Particle.FLAME,
-                        finalPlayer.getLocation().add(0, 0.5, 0),
-                        10, 0.2, 0.2, 0.2, 0.05);
-
-                // サウンド
-                finalPlayer.getWorld().playSound(finalPlayer.getLocation(),
-                        Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 2.5f, 1.0f);
-
-                // 飛距離計算
-                double distance = startLocation.distance(finalPlayer.getLocation());
-
-                // サブタイトルで飛距離更新
-                finalPlayer.sendTitle(
-                        "",
-                        "§6§l飛距離: " + String.format("%.2f", distance) + "m", // §6 = オレンジ
-                        0,  // fadeIn tick
-                        20, // stay tick
-                        0   // fadeOut tick
-                );
-
-                launched++;
-            }
-        }.runTaskTimer(plugin, 0L, 5L); // 5tickごとに発射
+        gameManager.launchRocket(player, count, 3.0);
     }
+
     /* =======================
        help
        ======================= */

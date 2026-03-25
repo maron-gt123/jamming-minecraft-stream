@@ -1,5 +1,6 @@
 package jp.master.jamming.game;
 
+import jp.master.jamming.JammingStream;
 import jp.master.jamming.box.JammingBox;
 import jp.master.jamming.box.JammingBoxManager;
 import jp.master.jamming.effect.JammingGameEffects;
@@ -9,6 +10,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -16,6 +18,8 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.Particle;
 
 public class JammingGameManager {
 
@@ -38,10 +42,13 @@ public class JammingGameManager {
     private final int clearCountdownSeconds;
     private int clearGoal = 10;
 
-    public JammingGameManager(JavaPlugin plugin, JammingBoxManager boxManager) {
+    public JammingGameManager(JammingStream plugin, JammingBoxManager boxManager) {
         this.plugin = plugin;
         this.boxManager = boxManager;
         this.clearCountdownSeconds = ConfigManager.getClearCountdown();
+    }
+    public JammingGameEffects getEffects() {
+        return effects;
     }
 
     public boolean isGameActive() {
@@ -221,19 +228,98 @@ public class JammingGameManager {
     private void stopActionBar() {
         if (actionBarTask != null) actionBarTask.cancel();
     }
+
+    // =========================================================
+    // Rocket
+    // =========================================================
+    public void launchRocket(Player player, int count, double rocketPower) {
+        if (count < 1) count = 1;
+        if (count > 30) count = 30;
+
+        final int finalCount = count;
+        final Player finalPlayer = player;
+        final Location startLocation = player.getLocation().clone();
+
+        new BukkitRunnable() {
+            int launched = 0;
+
+            @Override
+            public void run() {
+                if (launched >= finalCount) {
+                    finalPlayer.sendTitle("", "", 0, 1, 0);
+                    cancel();
+                    return;
+                }
+
+                // ロケット発射
+                finalPlayer.setVelocity(finalPlayer.getLocation().getDirection()
+                        .multiply(0.1).setY(rocketPower));
+
+                // パーティクル
+                finalPlayer.getWorld().spawnParticle(Particle.FLAME,
+                        finalPlayer.getLocation().add(0, 0.5, 0),
+                        10, 0.2, 0.2, 0.2, 0.05);
+
+                // サウンド
+                finalPlayer.getWorld().playSound(finalPlayer.getLocation(),
+                        Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 2.5f, 1.0f);
+
+                // 飛距離計算
+                double distance = startLocation.distance(finalPlayer.getLocation());
+
+                // サブタイトルで飛距離更新
+                finalPlayer.sendTitle(
+                        "",
+                        "§6§l飛距離: " + String.format("%.2f", distance) + "m",
+                        0, 20, 0
+                );
+
+                launched++;
+            }
+        }.runTaskTimer(plugin, 0L, 5L);
+    }
+    // =========================================================
+    // TNT
+    // =========================================================
+
+    public void spawnTnt(int count, boolean enhanced) {
+        if (!gameActive || !boxManager.hasBox()) return;
+
+        final double exPower = 8.0; // 強化TNTの固定爆発力
+        JammingBox box = boxManager.getBox();
+        Location center = box.getCenter();
+        int boxHalf = box.getHalf();
+
+        for (int i = 0; i < count; i++) {
+            double x = center.getX() + (Math.random() - 0.5) * (boxHalf * 2 - 1);
+            double z = center.getZ() + (Math.random() - 0.5) * (boxHalf * 2 - 1);
+
+            World w = center.getWorld();
+            int y = w.getHighestBlockYAt((int)Math.floor(x), (int)Math.floor(z)) + 1;
+            Location spawn = new Location(w, x, y, z);
+
+            TNTPrimed tnt = w.spawn(spawn, TNTPrimed.class);
+            tnt.setFuseTicks(60);
+
+            if (enhanced) tnt.setYield((float) exPower);
+        }
+    }
+    // =========================================================
+    // resetBox By Dragon or Wither
+    // =========================================================
     public void resetBoxByDragon(Player player) {
         JammingBox box = boxManager.getBox();
         effects.playDragonEffect(player, box, plugin, () -> {
             boxManager.clearInside();
         });
     }
-
     public void resetBoxByWither(Player player) {
         JammingBox box = boxManager.getBox();
         effects.playWitherEffect(player, box, plugin, () -> {
             boxManager.clearInside();
         });
     }
+
     public long getElapsedSeconds() {
         if (!isGameActive()) return 0;
         return (System.currentTimeMillis() - gameStartTime) / 1000;

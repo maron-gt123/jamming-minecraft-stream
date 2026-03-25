@@ -14,6 +14,7 @@ import jp.master.jamming.listener.JammingBoxProtectListener;
 import jp.master.jamming.listener.JammingBoxClickDelay;
 import jp.master.jamming.listener.JammingPrisonProtectListener;
 import jp.master.jamming.listener.JammingScoreboardListener;
+import jp.master.jamming.effect.JammingGameEffects;
 
 public final class JammingStream extends JavaPlugin {
 
@@ -57,7 +58,6 @@ public final class JammingStream extends JavaPlugin {
                 new JammingPrisonProtectListener(prisonManager), this
         );
         getServer().getPluginManager().registerEvents(clickDelay, this);
-
         getLogger().info("JammingStream enabled");
         getServer().getPluginManager().registerEvents(
                 new JammingScoreboardListener(scoreboardManager), this
