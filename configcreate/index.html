@@ -426,6 +426,8 @@
         });
         wrap.appendChild(sel);
       }
+      else if (info.type === "none") {
+      }
     }
 
     function addGiftCommand(btn) {
@@ -677,6 +679,9 @@
             }
             else if (o.toLowerCase() === "index") {
               commandMap[c] = { type: "index" };
+            }
+            else if (o.toLowerCase() === "none") {
+              commandMap[c] = { type: "none" };
             }
             else {
               if (!commandMap[c]) {
