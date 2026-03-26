@@ -68,7 +68,6 @@ public class JammingBoxCommand implements CommandExecutor {
             case "start"  -> handleStart(player, args);
             case "stop"   -> handleStop(player);
             case "replace" -> handleReplace(player, args);
-            case "fill" -> handleFill(player);
             case "clear" -> handleClear(player);
             case "goal" -> handleTarget(player, args);
             case "set_block_interaction_range" -> handleSetBlockInteractionRange(player, args);
@@ -89,6 +88,7 @@ public class JammingBoxCommand implements CommandExecutor {
             case "tnt"  -> handleTnt(sender, args);
             case "extnt" -> handleEXTnt(sender, args);
             case "reset" -> handleReset(sender, args);
+            case "fill" -> handleFill(sender, args);
             case "fillblock" -> handleFillBlock(sender, args);
             case "prison" -> handlePrison(sender, args);
             case "rocket" -> handleRocket(sender, args);
@@ -234,18 +234,6 @@ public class JammingBoxCommand implements CommandExecutor {
         player.sendMessage(
                 "§aJammingBox内ブロック置換: " + (enabled ? "有効" : "無効")
         );
-    }
-
-    /* =======================
-       fill
-       ======================= */
-    private void handleFill(Player player) {
-        if (!manager.hasBox()) {
-            player.sendMessage("§cJammingBoxが存在しません");
-            return;
-        }
-        manager.fillInsideForce();
-        player.sendMessage("§aJammingBoxを自動変換ルールで埋めました");
     }
 
     /* =======================
@@ -470,6 +458,18 @@ public class JammingBoxCommand implements CommandExecutor {
         gameManager.spawnTnt(count, true);
         sender.sendMessage("§c§l[EXTNT] §f" + count + " 個投下 爆発力固定: 8.0");
     }
+
+    /* =======================
+       fill
+       ======================= */
+    private void handleFill(CommandSender sender, String[] args) {
+        if (!manager.hasBox()) {
+            sender.sendMessage("§cJammingBoxが存在しません");
+            return;
+        }
+        manager.fillInsideForce();
+    }
+
     /* =======================
        fillblock
        ======================= */
@@ -604,7 +604,6 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§e/jammingbox start [time] §7- ゲーム開始");
         sender.sendMessage("§e/jammingbox stop         §7- ゲーム停止");
         sender.sendMessage("§e/jammingbox replace true | false §7- ブロック置換切替");
-        sender.sendMessage("§e/jammingbox fill         §7- jammingboxを埋める");
         sender.sendMessage("§e/jammingbox clear        §7- jammingboxを空にする");
         sender.sendMessage("§e/jammingbox goal <数値>  §7- クリア目標数を設定");
         sender.sendMessage("§e/jammingbox set_block_interaction_range <v>  §7- ブロック設置の長さ");
@@ -617,6 +616,7 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§e/jammingevent tnt <1|2|3> §7- TNT投下");
         sender.sendMessage("§e/jammingevent extnt <1|2|3> §7- 強化版TNT投下");
         sender.sendMessage("§e/jammingevent reset <dragon|wither> §7- 演出付きリセット");
+        sender.sendMessage("§e/jammingbox fill         §7- jammingboxを埋める");
         sender.sendMessage("§e/jammingevent fillblock <1|2|3> §7- JammingBox内の下から指定列数を埋める");
         sender.sendMessage("§e/jammingevent prison [time] §7- 牢獄に投獄");
         sender.sendMessage("§e/jammingevent rocket <1|2|3> §7- プレイヤーをロケットで打ち上げ");

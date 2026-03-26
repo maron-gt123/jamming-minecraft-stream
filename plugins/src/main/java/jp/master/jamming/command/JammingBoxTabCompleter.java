@@ -36,7 +36,6 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 result.add("start");
                 result.add("stop");
                 result.add("replace");
-                result.add("fill");
                 result.add("clear");
                 result.add("set_block_interaction_range");
                 result.add("clickdelay");
@@ -103,6 +102,7 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 result.add("tnt");
                 result.add("extnt");
                 result.add("reset");
+                result.add("fill");
                 result.add("fillblock");
                 result.add("prison");
                 result.add("rocket");
