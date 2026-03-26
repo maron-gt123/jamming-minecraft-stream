@@ -4,6 +4,7 @@ import jp.master.jamming.box.JammingBoxManager;
 import jp.master.jamming.game.JammingGameManager;
 import jp.master.jamming.config.ConfigManager;
 import jp.master.jamming.listener.JammingBoxClickDelay;
+import jp.master.jamming.listener.JammingDoublePlaceListener;
 import jp.master.jamming.prison.JammingPrisonManager;
 import jp.master.jamming.JammingStream;
 import org.bukkit.Bukkit;
@@ -25,19 +26,22 @@ public class JammingBoxCommand implements CommandExecutor {
     private final JammingPrisonManager prisonManager;
     private final Random random = new Random();
     private final JammingStream plugin;
+    private final JammingDoublePlaceListener doublePlace;
 
     public JammingBoxCommand(
             JammingStream plugin,
             JammingBoxManager manager,
             JammingGameManager gameManager,
             JammingBoxClickDelay clickDelay,
-            JammingPrisonManager prisonManager
+            JammingPrisonManager prisonManager,
+            JammingDoublePlaceListener doublePlace
     ) {
         this.plugin = plugin;
         this.manager = manager;
         this.gameManager = gameManager;
         this.clickDelay = clickDelay;
         this.prisonManager = prisonManager;
+        this.doublePlace = doublePlace;
     }
 
     @Override
@@ -92,6 +96,7 @@ public class JammingBoxCommand implements CommandExecutor {
             case "fillblock" -> handleFillBlock(sender, args);
             case "prison" -> handlePrison(sender, args);
             case "rocket" -> handleRocket(sender, args);
+            case "doubleplace" -> handleDoublePlace(sender, args);
             default -> sendHelpPage2(sender);
         }
         return true;
@@ -574,6 +579,36 @@ public class JammingBoxCommand implements CommandExecutor {
         }
 
         gameManager.launchRocket(player, count, 3.0);
+    }
+    /* =======================
+       eDoublePlace
+       ======================= */
+    private void handleDoublePlace(CommandSender sender, String[] args) {
+
+        if (args.length < 2) {
+            sender.sendMessage("§e/jammingevent doubleplace time <秒> | clear");
+            return;
+        }
+        switch (args[1].toLowerCase()) {
+            case "time" -> {
+                if (args.length < 3) {
+                    sender.sendMessage("§e/jammingevent doubleplace time <秒>");
+                    return;
+                }
+                int sec;
+                try {
+                    sec = Integer.parseInt(args[2]);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage("§c秒数は数値で指定");
+                    return;
+                }
+                doublePlace.enableWithTime(sec);
+            }
+            case "clear" -> {
+                doublePlace.enableClearMode();
+            }
+            default -> sender.sendMessage("§e/jammingevent doubleplace time <秒> | clear");
+        }
     }
 
     /* =======================

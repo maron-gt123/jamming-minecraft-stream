@@ -14,6 +14,7 @@ import jp.master.jamming.listener.JammingBoxProtectListener;
 import jp.master.jamming.listener.JammingBoxClickDelay;
 import jp.master.jamming.listener.JammingPrisonProtectListener;
 import jp.master.jamming.listener.JammingScoreboardListener;
+import jp.master.jamming.listener.JammingDoublePlaceListener;
 import jp.master.jamming.effect.JammingGameEffects;
 
 public final class JammingStream extends JavaPlugin {
@@ -24,6 +25,7 @@ public final class JammingStream extends JavaPlugin {
     private JammingScoreboardManager scoreboardManager;
     private JammingBoxClickDelay clickDelay;
     private JammingPrisonManager prisonManager;
+    private JammingDoublePlaceListener doublePlaceListener;
 
     @Override
     public void onEnable() {
@@ -38,11 +40,12 @@ public final class JammingStream extends JavaPlugin {
         gameManager.setOnClearCallback(() -> scoreboardManager.reset());
         clickDelay = new JammingBoxClickDelay();
         prisonManager = new JammingPrisonManager(this);
+        doublePlaceListener = new JammingDoublePlaceListener();
 
         httpServerManager = new HttpServerManager(this);
         httpServerManager.start();
 
-        JammingBoxCommand command = new JammingBoxCommand(this, boxManager, gameManager, clickDelay, prisonManager);
+        JammingBoxCommand command = new JammingBoxCommand(this, boxManager, gameManager, clickDelay, prisonManager, doublePlaceListener);
         getCommand("jammingbox").setExecutor(command);
         getCommand("jammingevent").setExecutor(command);
         getCommand("jammingbox").setTabCompleter(new JammingBoxTabCompleter(boxManager));
@@ -58,6 +61,9 @@ public final class JammingStream extends JavaPlugin {
                 new JammingPrisonProtectListener(prisonManager), this
         );
         getServer().getPluginManager().registerEvents(clickDelay, this);
+        getServer().getPluginManager().registerEvents(
+                doublePlaceListener, this
+        );
         getLogger().info("JammingStream enabled");
         getServer().getPluginManager().registerEvents(
                 new JammingScoreboardListener(scoreboardManager), this
