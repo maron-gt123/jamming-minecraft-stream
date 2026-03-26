@@ -3,7 +3,10 @@ jammingevent text,msg
 jammingevent title,msg
 jammingevent tnt,Index
 jammingevent extnt,Index
+jammingevent fill,none
 jammingevent fillblock,Index
 jammingevent reset,dragon
 jammingevent reset,wither
 jammingevent prison,Index
+jammingevent rocket,Index
+jammingevent doubleplace,Index
