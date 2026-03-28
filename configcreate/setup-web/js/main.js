@@ -205,4 +205,3 @@ function addLikeCommand(btn) {
 
 loadBlocks();
 loadCommands();
-populateCommandSelects();

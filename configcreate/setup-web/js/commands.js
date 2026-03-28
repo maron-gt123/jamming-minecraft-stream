@@ -1,3 +1,6 @@
+// ===============================
+// コマンドCSV読み込み＆UI反映
+// ===============================
 function loadCommands() {
   fetch(COMMAND_CSV_URL)
     .then(r => r.text())
@@ -42,6 +45,9 @@ function loadCommands() {
     });
 }
 
+// ===============================
+// コマンド文字列生成
+// ===============================
 function buildCommand(select) {
   if (!select.value) return null;
   const wrap =
@@ -61,6 +67,9 @@ function buildCommand(select) {
   return select.value;
 }
 
+// ===============================
+// コマンドセレクトUI更新
+// ===============================
 function populateCommandSelects() {
   document.querySelectorAll(
     ".gift-command, .like-command, .follow-command, .share-command, .subscribe-command, .comment-command"
