@@ -2,7 +2,6 @@
 // Minecraftバージョン変更処理
 // ===============================
 function changeVersion() {
-  MC_VERSION = document.getElementById("mcVersion").value;
   loadBlocks();
 }
 

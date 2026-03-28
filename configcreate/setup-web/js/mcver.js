@@ -24,8 +24,8 @@ async function loadMcVersions() {
       opt.value = ver;
       opt.textContent = ver;
 
-      // デフォルト選択（1.21優先）
-      if (ver === "1.21" || index === 0) {
+      // デフォルト選択（1.21.1優先）
+      if (ver === "1.21.1" || index === 0) {
         opt.selected = true;
       }
 
