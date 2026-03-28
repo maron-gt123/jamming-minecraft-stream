@@ -95,6 +95,8 @@ public class JammingBoxCommand implements CommandExecutor {
             case "fill" -> handleFill(sender, args);
             case "fillblock" -> handleFillBlock(sender, args);
             case "prison" -> handlePrison(sender, args);
+            case "addclear" -> handleAddClear(sender, args);
+            case "delclear" -> handleDelClear(sender, args);
             case "rocket" -> handleRocket(sender, args);
             case "doubleplace" -> handleDoublePlace(sender, args);
             default -> sendHelpPage2(sender);
@@ -562,6 +564,68 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§c§l[PRISON] §f" + seconds + "秒間投獄 ⛓");
     }
     /* =======================
+       addclear
+       ======================= */
+    private void handleAddClear(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("§cこのコマンドはプレイヤーのみ実行可能です");
+            return;
+        }
+        if (!gameManager.isGameActive()) {
+            sender.sendMessage("§cゲーム中のみクリア数を変更できます");
+            return;
+        }
+        if (args.length < 2) {
+            sender.sendMessage("§e/jammingbox addclear <数>");
+            return;
+        }
+        int amount;
+        try {
+            amount = Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage("§c数値を指定してください");
+            return;
+        }
+        if (amount <= 0) {
+            sender.sendMessage("§c1以上の数値を指定してください");
+            return;
+        }
+        gameManager.addClearCount(amount);
+        sender.sendMessage("§aクリア数を " + amount + " 増加させました §e現在: " + gameManager.getClearCount());
+    }
+
+    /* =======================
+       delclear
+       ======================= */
+    private void handleDelClear(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("§cこのコマンドはプレイヤーのみ実行可能です");
+            return;
+        }
+        if (!gameManager.isGameActive()) {
+            sender.sendMessage("§cゲーム中のみクリア数を変更できます");
+            return;
+        }
+        if (args.length < 2) {
+            sender.sendMessage("§e/jammingbox delclear <数>");
+            return;
+        }
+        int amount;
+        try {
+            amount = Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage("§c数値を指定してください");
+            return;
+        }
+        if (amount <= 0) {
+            sender.sendMessage("§c1以上の数値を指定してください");
+            return;
+        }
+        gameManager.addClearCount(-amount);
+        sender.sendMessage("§cクリア数を " + amount + " 減少させました §e現在: " + gameManager.getClearCount());
+    }
+
+    /* =======================
        rocket
        ======================= */
     private void handleRocket(CommandSender sender, String[] args) {
@@ -654,6 +718,8 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§e/jammingbox fill         §7- jammingboxを埋める");
         sender.sendMessage("§e/jammingevent fillblock <1|2|3> §7- JammingBox内の下から指定列数を埋める");
         sender.sendMessage("§e/jammingevent prison [time] §7- 牢獄に投獄");
+        sender.sendMessage("§e/jammingevent addclear <1|2|3> §7- クリア数増加");
+        sender.sendMessage("§e/jammingevent delclear <1|2|3> §7- クリア数減少");
         sender.sendMessage("§e/jammingevent rocket <1|2|3> §7- プレイヤーをロケットで打ち上げ");
         sender.sendMessage("§e/jammingevent doubleplace <time> §7- 同時に2個ブロック設置");
         sender.sendMessage("§7◀ help 1   help 3 ▶");

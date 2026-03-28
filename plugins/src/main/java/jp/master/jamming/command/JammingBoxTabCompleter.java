@@ -105,7 +105,10 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 result.add("fill");
                 result.add("fillblock");
                 result.add("prison");
+                result.add("addclear");
+                result.add("delclear");
                 result.add("rocket");
+                result.add("doubleplace");
                 return result;
             }
 
@@ -159,11 +162,41 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 result.add("10");
                 return result;
             }
+
+            // /jammingevent addclear
+            if (args.length == 2 && args[0].equalsIgnoreCase("addclear")) {
+                result.add("1");
+                result.add("5");
+                result.add("10");
+                return result;
+            }
+
+            // /jammingevent delclear
+            if (args.length == 2 && args[0].equalsIgnoreCase("delclear")) {
+                result.add("1");
+                result.add("5");
+                result.add("10");
+                return result;
+            }
+
             // /jammingevent rocket
             if (args.length == 2 && args[0].equalsIgnoreCase("rocket")) {
                 result.add("1");
                 result.add("5");
                 result.add("10");
+                return result;
+            }
+
+            // /jammingevent doubleplace
+            if (args.length == 2 && args[0].equalsIgnoreCase("doubleplace")) {
+                result.add("time");
+                result.add("clear");
+                return result;
+            }
+            if (args.length == 3 && args[0].equalsIgnoreCase("doubleplace") && args[1].equalsIgnoreCase("time")) {
+                result.add("5");
+                result.add("10");
+                result.add("15");
                 return result;
             }
         }

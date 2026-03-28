@@ -230,6 +230,20 @@ public class JammingGameManager {
     }
 
     // =========================================================
+    // Clear count manipulation
+    // =========================================================
+    public void addClearCount(int amount) {
+        clearCount += amount;
+        if (clearCount < 0) clearCount = 0;
+        updateBossBar();
+    }
+
+    public void setClearCount(int count) {
+        clearCount = Math.max(0, count);
+        updateBossBar();
+    }
+
+    // =========================================================
     // Rocket
     // =========================================================
     public void launchRocket(Player player, int count, double rocketPower) {

@@ -8,5 +8,7 @@ jammingevent fillblock,Index
 jammingevent reset,dragon
 jammingevent reset,wither
 jammingevent prison,Index
+jammingevent addclear,Index
+jammingevent delclear,Index
 jammingevent rocket,Index
 jammingevent doubleplace time,Index
