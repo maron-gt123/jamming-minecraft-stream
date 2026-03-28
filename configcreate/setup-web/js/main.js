@@ -1,52 +1,3 @@
-fetch(CSV_URL)
-  .then(r => r.text())
-  .then(parseCSV);
-
-function parseCSV(text) {
-  const lines = text.trim().split("\n");
-  const header = lines.shift().split(",");
-  gifts = lines.map(l => {
-    const c = l.split(",");
-    const o = {};
-    header.forEach((h,i)=>o[h]=c[i]);
-    return o;
-  });
-  renderGifts();
-}
-
-function renderGifts() {
-  const non = document.getElementById("gifts-nonstreak");
-  const yes = document.getElementById("gifts-streak");
-  non.innerHTML = "";
-  yes.innerHTML = "";
-
-  gifts.forEach(g => {
-    const isStreak = g.streakable === "True" || g.streakable === true;
-
-    const d = document.createElement("div");
-    d.className = "gift " + (isStreak ? "streakable" : "non-streakable");
-    d.dataset.name = g.gift_name;
-
-    d.innerHTML = `
-      <input type="checkbox" class="gift-enable">
-      <img src="${g.image_url}">
-      <div>
-        <div class="streak-label">${isStreak ? "連続可" : "連続不可"}</div>
-        <strong>${g.gift_name}</strong><br>
-        💎 ${g.diamond}<br>
-        コマンド<br>
-        <div class="gift-commands">
-          <select class="gift-command" onchange="updateOptionUI(this)"></select>
-          <span class="gift-option-wrap"></span>
-        </div>
-        <button onclick="addGiftCommand(this)">＋ command</button>
-      </div>
-    `;
-
-    (isStreak ? yes : non).appendChild(d);
-  });
-}
-
 function updateOptionUI(commandSelect) {
   const wrap =
     commandSelect.parentElement.querySelector(".gift-option-wrap")
@@ -203,5 +154,10 @@ function addLikeCommand(btn) {
   commandsWrap.appendChild(row);
 }
 
-loadBlocks();
-loadCommands();
+async function init() {
+  loadBlocks();
+  await loadCommands(); // ←待つ
+  await loadGifts();    // ←その後
+}
+
+window.addEventListener("DOMContentLoaded", init);
