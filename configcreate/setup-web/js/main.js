@@ -1,3 +1,58 @@
+function changeLang(lang) {
+    currentLang = lang;
+    // 既存のスクリプト削除
+    const oldScript = document.getElementById("langScript");
+    if (oldScript) oldScript.remove();
+
+    // 言語に応じてスクリプトパスを決定
+    let src;
+    switch(lang) {
+        case "JP":
+            src = "js/lang/lang_jp.js";break;
+        case "EN":
+            src = "js/lang/lang_en.js";
+            break;
+        case "ES":
+            src = "js/lang/lang_es.js";
+            break;
+        case "FR":
+            src = "js/lang/lang_fr.js";
+            break;
+        case "DE":
+            src = "js/lang/lang_de.js";
+            break;
+        case "ZH":
+            src = "js/lang/lang_zh.js";
+            break;
+        case "KO":
+            src = "js/lang/lang_ko.js";
+            break;
+        default:
+            src = "js/lang/lang_jp.js"; // デフォルトは日本語
+    }
+    // スクリプト生成して読み込み
+    let langScript = document.createElement("script");
+    langScript.src = src;
+    langScript.id = "langScript";
+    langScript.onload = () => applyText();
+    document.body.appendChild(langScript);
+}
+
+// HTML に反映
+function applyText() {
+    document.getElementById("box_setting_title").textContent = TEXT.box_setting;
+    document.getElementById("clear_countdown_title").textContent = TEXT.clear_countdown;
+    document.getElementById("event_setting_title").textContent = TEXT.event_setting;
+    document.getElementById("gift_setting_nonstreak_title").textContent = TEXT.gift_setting_nonstreak;
+    document.getElementById("gift_setting_streak_title").textContent = TEXT.gift_setting_streak;
+    document.getElementById("like_setting_title").textContent = TEXT.like_setting;
+    document.getElementById("follow_setting_title").textContent = TEXT.follow_setting;
+    document.getElementById("share_setting_title").textContent = TEXT.share_setting;
+    document.getElementById("subscribe_setting_title").textContent = TEXT.subscribe_setting;
+    document.getElementById("result_title").textContent = TEXT.result;
+    document.getElementById("search_input").placeholder = TEXT.search;
+}
+
 function updateOptionUI(commandSelect) {
   const wrap =
     commandSelect.parentElement.querySelector(".gift-option-wrap")
@@ -160,4 +215,7 @@ async function init() {
   await loadGifts();    // ←その後
 }
 
-window.addEventListener("DOMContentLoaded", init);
+window.addEventListener("DOMContentLoaded", async () => {
+    changeLang("JP");  // 言語を先にロード
+    await init();      // ブロック・コマンド・ギフトのロード
+});

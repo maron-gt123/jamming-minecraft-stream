@@ -7,33 +7,46 @@
 </head>
 
 <body>
+<div class="panel">
+    <label for="langSelect">🌐 Language:</label>
+    <select id="langSelect" onchange="changeLang(this.value)">
+        <option value="JP">日本語</option>
+        <option value="EN">English</option>
+        <option value="ES">Español</option>
+        <option value="FR">Français</option>
+        <option value="DE">Deutsch</option>
+        <option value="ZH">中文</option>
+        <option value="KO">한국어</option>
+    </select>
+</div>
+
 <h1>🎵 TikTok Stream config.yml Generator</h1>
 <div class="panel">
-    <h2>🧊 BOX内部の自動変換 設定</h2>
+    <h2 id="box_setting_title">🧊 BOX内部の自動変換 設定</h2>
     <select id="mcVersion" onchange="changeVersion()"></select>
     <div class="event-row">
         <img id="img_top" width="32" height="32">
         Top
-        <input type="text" placeholder="検索" oninput="searchBlock('top', this.value)">
+        <input type="text" placeholder="Search" oninput="searchBlock('top', this.value)">
         <select id="block_top" onchange="updateBlockImage('top')"></select>
     </div>
     <div class="event-row">
         <img id="img_middle" width="32" height="32">
         Middle
-        <input type="text" placeholder="検索" oninput="searchBlock('middle', this.value)">
+        <input type="text" placeholder="Search" oninput="searchBlock('middle', this.value)">
         <select id="block_middle" onchange="updateBlockImage('middle')"></select>
     </div>
     <div class="event-row">
         <img id="img_bottom" width="32" height="32">
         Bottom
-        <input type="text" placeholder="検索" oninput="searchBlock('bottom', this.value)">
+        <input type="text" placeholder="Search" oninput="searchBlock('bottom', this.value)">
         <select id="block_bottom" onchange="updateBlockImage('bottom')"></select>
     </div>
-    <h2>⏳ クリアカウントダウン数設定</h2>
+    <h2 id="clear_countdown_title">⏳ クリアカウントダウン数設定</h2>
     <div class="event-row">
         <input type="number" id="clear_countdown" value="15" min="0">
     </div>
-    <h2>🎮 イベント設定</h2>
+    <h2 id="event_setting_title">🎮 イベント設定</h2>
     <div class="event-note">
         チェック(有効)にするとTikTokの該当イベントをMinecraftに転送できます
     </div>
@@ -67,40 +80,40 @@
 </div>
 
 <div class="panel">
-    <h2 onclick="toggleSection(this,'gifts-nonstreak')" style="cursor:pointer;">
+    <h2 id="gift_setting_nonstreak_title" onclick="toggleSection(this,'gifts-nonstreak')" style="cursor:pointer;">
         <span class="arrow">▶</span> 🎁 ギフト設定（連続なし）
     </h2>
     <div id="gifts-nonstreak" class="gift-grid" style="display:none;"></div>
 </div>
 
 <div class="panel">
-    <h2 onclick="toggleSection(this,'gifts-streak')" style="cursor:pointer;">
-        <span class="arrow">▶</span> 🎁 ギフト設定（連続あり）｜　コマンド×連続ギフト数　のイベントになります
+    <h2 id="gift_setting_streak_title" onclick="toggleSection(this,'gifts-streak')" style="cursor:pointer;">
+        <span class="arrow">▶</span> 🎁 ギフト設定（連続あり）｜コマンド×連続ギフト数　のイベントになります
     </h2>
 
     <div id="gifts-streak" class="gift-grid" style="display:none;"></div>
 </div>
 
 <div class="panel">
-    <h2>❤️ Like 設定（count条件）</h2>
+    <h2 id="like_setting_title">❤️ Like 設定（count条件）</h2>
     <button onclick="addLikeRule()">＋ ルール追加</button>
     <div id="like-rules"></div>
 </div>
 
 <div class="panel">
-    <h2>📢 Follow 設定</h2>
+    <h2 id="follow_setting_title">📢 Follow 設定</h2>
     <button onclick="addEventCommand('follow', this)">＋ command</button>
     <div class="follow-commands"></div>
 </div>
 
 <div class="panel">
-    <h2>🔁 Share 設定</h2>
+    <h2 id="share_setting_title">🔁 Share 設定</h2>
     <button onclick="addEventCommand('share', this)">＋ command</button>
     <div class="share-commands"></div>
 </div>
 
 <div class="panel">
-    <h2>⭐ Subscribe 設定</h2>
+    <h2 id="subscribe_setting_title">⭐ Subscribe 設定</h2>
     <button onclick="addEventCommand('subscribe', this)">＋ command</button>
     <div class="subscribe-commands"></div>
 </div>
@@ -108,7 +121,7 @@
 <button onclick="generateYaml()">YAML生成</button>
 
 <div class="panel">
-    <h2>生成結果</h2>
+    <h2 id="result_title">生成結果</h2>
     <textarea id="output" readonly></textarea>
 </div>
 <script src="js/config.js"></script>
