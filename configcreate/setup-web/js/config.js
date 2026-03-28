@@ -1,5 +1,7 @@
 let MC_VERSION = "1.20";
 
+let MC_VERSION_REPO = "https://raw.githubusercontent.com/PrismarineJS/minecraft-data/refs/heads/master/data/pc/common/versions.json";
+
 let CSV_URL =
   "https://raw.githubusercontent.com/maron-gt123/jamming-minecraft-stream/refs/heads/main/configcreate/gifts.csv";
 
