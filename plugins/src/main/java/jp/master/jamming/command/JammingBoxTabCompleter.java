@@ -41,7 +41,7 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 result.add("clickdelay");
                 return result;
             }
-            // /jammingbox create <size>
+            // /jammingbox create <XZ>
             if (args.length == 2 && args[0].equalsIgnoreCase("create")) {
                 result.add("7");
                 result.add("9");
@@ -50,8 +50,18 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 return result;
             }
 
-            // /jammingbox create <size> <material>
+            // /jammingbox create <XZ> <Y>
             if (args.length == 3 && args[0].equalsIgnoreCase("create")) {
+                result.add("5");
+                result.add("7");
+                result.add("9");
+                result.add("11");
+                result.add("13");
+                return result;
+            }
+
+            // /jammingbox create <XZ> <Y> <material>
+            if (args.length == 4 && args[0].equalsIgnoreCase("create")) {
                 result.add("GLASS");
                 result.add("RED_STAINED_GLASS");
                 result.add("IRON_BLOCK");

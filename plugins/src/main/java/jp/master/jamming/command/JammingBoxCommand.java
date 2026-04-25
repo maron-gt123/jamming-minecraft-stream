@@ -125,42 +125,70 @@ public class JammingBoxCommand implements CommandExecutor {
             return;
         }
 
-        int size = 9;
-        if (args.length >= 2) {
-            try {
-                size = Integer.parseInt(args[1]);
-            } catch (NumberFormatException e) {
-                player.sendMessage("§cサイズは数値で指定してください");
-                return;
-            }
-        }
-
-        if (size < 5) {
-            player.sendMessage("§cサイズは5以上を指定してください");
-            return;
-        }
-
-        if (size % 2 == 0) {
-            player.sendMessage("§cサイズは奇数で指定してください（例: 7, 9, 11）");
-            return;
-        }
-
-        Location center = player.getLocation();
+        int sizeXZ = 9;
+        int height = 9;
         Material material = Material.GLASS;
-        if (args.length >= 3) {
-            Material m = Material.matchMaterial(args[2]);
+
+        // =====================
+        // サイズ取得
+        // =====================
+        try {
+            if (args.length >= 2) {
+                sizeXZ = Integer.parseInt(args[1]);
+            }
+
+            if (args.length >= 3) {
+                height = Integer.parseInt(args[2]);
+            } else {
+                height = sizeXZ; // 指定なしならXZと同じ
+            }
+
+        } catch (NumberFormatException e) {
+            player.sendMessage("§cサイズは数値で指定してください");
+            return;
+        }
+
+        // =====================
+        // バリデーション
+        // =====================
+        if (sizeXZ < 5 || height < 3) {
+            player.sendMessage("§cサイズが小さすぎます（XZ>=5, Y>=3）");
+            return;
+        }
+
+        if (sizeXZ % 2 == 0) {
+            player.sendMessage("§cXZサイズは奇数で指定してください（例: 7, 9, 11）");
+            return;
+        }
+
+        if (height % 2 == 0) {
+            player.sendMessage("§cYサイズは奇数で指定してください（例: 7, 9, 11）");
+            return;
+        }
+
+        // =====================
+        // Material取得
+        // =====================
+        int materialIndex = (args.length >= 3) ? 3 : 2;
+
+        if (args.length > materialIndex) {
+            Material m = Material.matchMaterial(args[materialIndex]);
             if (m != null && m.isBlock()) {
                 material = m;
             } else {
-                player.sendMessage("§c無効なブロック素材です: " + args[2]);
+                player.sendMessage("§c無効なブロック素材です: " + args[materialIndex]);
                 return;
             }
         }
 
-        manager.createBox(center, size, size, material);
+        // =====================
+        // 作成
+        // =====================
+        Location center = player.getLocation();
+        manager.createBox(center, sizeXZ, height, material);
 
-        player.sendMessage("§ajammingboxを作成しました");
-        player.sendMessage("§7サイズ: " + size + " / 素材: " + material.name());
+        player.sendMessage("§aJammingBoxを作成しました");
+        player.sendMessage("§7XZ: " + sizeXZ + " / Y: " + height + " / 素材: " + material.name());
     }
 
     /* =======================
