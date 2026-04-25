@@ -157,7 +157,7 @@ public class JammingBoxCommand implements CommandExecutor {
             }
         }
 
-        manager.createBox(center, size, material);
+        manager.createBox(center, size, size, material);
 
         player.sendMessage("§ajammingboxを作成しました");
         player.sendMessage("§7サイズ: " + size + " / 素材: " + material.name());
@@ -542,14 +542,17 @@ public class JammingBoxCommand implements CommandExecutor {
 
         var box = manager.getBox();
         var c = box.getCenter();
-        int h = box.getHalf();
+        int halfXZ = box.getHalfXZ();
+        int hy = box.getHalfY();
+        int hx = halfXZ;
+        int hz = halfXZ;
 
         // 天井左上
         Location base = new Location(
                 box.getWorld(),
-                c.getBlockX() - h,
-                c.getBlockY() + h,
-                c.getBlockZ() - h
+                c.getBlockX() - hx,
+                c.getBlockY() + hy,
+                c.getBlockZ() - hz
         );
 
         // 20マス範囲

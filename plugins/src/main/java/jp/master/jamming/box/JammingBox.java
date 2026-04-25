@@ -26,10 +26,12 @@ public class JammingBox {
 
     /** 箱の中心位置 */
     private final Location center;
-    /** 箱のサイズ（1辺の長さ） */
-    private final int size;
-    /** サイズの半分（中心から端までの距離） */
-    private final int half;
+    /** 箱のXZ軸サイズ */
+    private final int sizeXZ;
+    private final int halfXZ;
+    /** 箱のY軸サイズ */
+    private final int height;
+    private final int halfY;
     /** 箱が存在するワールド */
     private final World world;
     /** 箱がアクティブかどうか（ゲーム中かどうか） */
@@ -47,10 +49,12 @@ public class JammingBox {
      * ・world 情報もここで確定させる
      * ============================================
      */
-    public JammingBox(Location center, int size) {
+    public JammingBox(Location center, int sizeXZ, int height) {
         this.center = center.getBlock().getLocation();
-        this.size = size;
-        this.half = size / 2;
+        this.sizeXZ = sizeXZ;
+        this.height = height;
+        this.halfXZ = sizeXZ / 2;
+        this.halfY = height / 2;
         this.world = center.getWorld();
     }
     // =========================================================
@@ -78,13 +82,18 @@ public class JammingBox {
     public Location getCenter() {
         return center.clone();
     }
-    /** 箱のサイズを取得する */
-    public int getSize() {
-        return size;
+    /** 箱の各種サイズを取得する */
+    public int getSizeXZ() {
+        return sizeXZ;
     }
-    /** 箱の半分サイズ（中心から端まで）を取得する */
-    public int getHalf() {
-        return half;
+    public int getHeight() {
+        return height;
+    }
+    public int getHalfXZ() {
+        return halfXZ;
+    }
+    public int getHalfY() {
+        return halfY;
     }
     /** 箱が存在するワールドを取得する */
     public World getWorld() {
@@ -115,9 +124,9 @@ public class JammingBox {
         int cz = center.getBlockZ();
 
         // 中心から half 以内であれば箱の中
-        return x >= cx - half && x <= cx + half
-                && y >= cy - half && y <= cy + half
-                && z >= cz - half && z <= cz + half;
+        return x >= cx - halfXZ && x <= cx + halfXZ
+                && y >= cy - halfY && y <= cy + halfY
+                && z >= cz - halfXZ && z <= cz + halfXZ;
     }
 
     // =========================================================
@@ -131,12 +140,14 @@ public class JammingBox {
         int cz = center.getBlockZ();
 
         // 外壁を除くため +1 / -1
-        int minX = cx - half + 1;
-        int maxX = cx + half - 1;
-        int minY = cy - half + 1;
-        int maxY = cy + half - 1;
-        int minZ = cz - half + 1;
-        int maxZ = cz + half - 1;
+        int minX = cx - halfXZ + 1;
+        int maxX = cx + halfXZ - 1;
+
+        int minY = cy - halfY + 1;
+        int maxY = cy + halfY - 1;
+
+        int minZ = cz - halfXZ + 1;
+        int maxZ = cz + halfXZ - 1;
 
         int x = randomBetween(minX, maxX);
         int y = randomBetween(minY, maxY);
@@ -149,9 +160,12 @@ public class JammingBox {
     public List<Location> getInnerBlocks() {
         List<Location> blocks = new ArrayList<>();
 
-        for (int x = center.getBlockX() - half + 1; x <= center.getBlockX() + half - 1; x++) {
-            for (int y = center.getBlockY() - half + 1; y <= center.getBlockY() + half - 1; y++) {
-                for (int z = center.getBlockZ() - half + 1; z <= center.getBlockZ() + half - 1; z++) {
+        int cx = center.getBlockX();
+        int cy = center.getBlockY();
+        int cz = center.getBlockZ();
+        for (int x = cx - halfXZ + 1; x <= cx + halfXZ - 1; x++) {
+            for (int y = cy - halfY + 1; y <= cy + halfY - 1; y++) {
+                for (int z = cz - halfXZ + 1; z <= cz + halfXZ - 1; z++) {
                     blocks.add(new Location(world, x, y, z));
                 }
             }

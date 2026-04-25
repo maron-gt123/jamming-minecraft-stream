@@ -67,9 +67,9 @@ public class JammingBoxManager {
     // =========================================================
 
     /** 箱を新規作成する。すでに箱が存在する場合は何もしない */
-    public void createBox(Location center, int size, Material material) {
+    public void createBox(Location center, int sizeXZ, int height, Material material) {
         if (box != null) return;
-        box = new JammingBox(center, size);
+        box = new JammingBox(center, sizeXZ, height);
         buildWalls(box, material);
     }
 
@@ -128,8 +128,8 @@ public class JammingBoxManager {
 
     /** 箱の高さ（Y座標）に応じて 使用する置換ブロックを決定する */
     public Material getReplaceBlockType(JammingBox box, int y) {
-        int minY = box.getCenter().getBlockY() - box.getHalf() + 1;
-        int maxY = box.getCenter().getBlockY() + box.getHalf();
+        int minY = box.getCenter().getBlockY() - box.getHalfY() + 1;
+        int maxY = box.getCenter().getBlockY() + box.getHalfY();
 
         int height = maxY - minY;
         int relativeY = y - minY;
@@ -192,21 +192,23 @@ public class JammingBoxManager {
         JammingBox b = box;
 
         Location center = b.getCenter();
-        int half = b.getHalf();
+        int halfXZ = b.getHalfXZ();
+        int halfY = b.getHalfY();
         World w = b.getWorld();
 
-        int minX = center.getBlockX() - half + 1;
-        int maxX = center.getBlockX() + half - 1;
-        int minZ = center.getBlockZ() - half + 1;
-        int maxZ = center.getBlockZ() + half - 1;
-        int floorY = center.getBlockY() - half; // 床のY座標
+        int minX = center.getBlockX() - halfXZ + 1;
+        int maxX = center.getBlockX() + halfXZ - 1;
+        int minZ = center.getBlockZ() - halfXZ + 1;
+        int maxZ = center.getBlockZ() + halfXZ - 1;
+
+        int floorY = center.getBlockY() - halfY; // 床のY座標
 
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
 
                 // 床のYから上に向かって最初にAIRがあるYを探す
                 int startY = -1;
-                for (int y = floorY + 1; y <= center.getBlockY() + half - 1; y++) {
+                for (int y = floorY + 1; y <= center.getBlockY() + halfY - 1; y++) {
                     if (w.getBlockAt(x, y, z).getType() == Material.AIR) {
                         startY = y;
                         break;
@@ -217,7 +219,7 @@ public class JammingBoxManager {
 
                 // levels分上にブロックを積む
                 for (int y = startY; y < startY + levels; y++) {
-                    if (y > center.getBlockY() + half - 1) break;
+                    if (y > center.getBlockY() + halfY - 1) break;
 
                     // 置換機能が有効なら replaceBlockType を取得
                     Material blockType = isReplaceEnabled()
@@ -237,15 +239,18 @@ public class JammingBoxManager {
     private void buildWalls(JammingBox box, Material material) {
         Location c = box.getCenter();
         World w = box.getWorld();
-        int h = box.getHalf();
+        int hx = box.getHalfXZ();
+        int hy = box.getHalfY();
 
-        for (int x = c.getBlockX() - h; x <= c.getBlockX() + h; x++) {
-            for (int y = c.getBlockY() - h; y <= c.getBlockY() + h; y++) {
-                for (int z = c.getBlockZ() - h; z <= c.getBlockZ() + h; z++) {
-                    boolean wall = x == c.getBlockX() - h || x == c.getBlockX() + h
-                            || z == c.getBlockZ() - h || z == c.getBlockZ() + h;
-                    boolean floor = y == c.getBlockY() - h;
-                    boolean ceiling = y == c.getBlockY() + h;
+        for (int x = c.getBlockX() - hx; x <= c.getBlockX() + hx; x++) {
+            for (int y = c.getBlockY() - hy; y <= c.getBlockY() + hy; y++) {
+                for (int z = c.getBlockZ() - hx; z <= c.getBlockZ() + hx; z++) {
+
+                    boolean wall = x == c.getBlockX() - hx || x == c.getBlockX() + hx
+                            || z == c.getBlockZ() - hx || z == c.getBlockZ() + hx;
+
+                    boolean floor = y == c.getBlockY() - hy;
+                    boolean ceiling = y == c.getBlockY() + hy;
 
                     if (ceiling) continue;
                     if (wall || floor) {

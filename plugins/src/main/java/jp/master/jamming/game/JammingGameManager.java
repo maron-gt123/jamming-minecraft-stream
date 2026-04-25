@@ -131,11 +131,12 @@ public class JammingGameManager {
         JammingBox box = boxManager.getBox();
         World w = box.getWorld();
         Location c = box.getCenter();
-        int h = box.getHalf();
+        int hx = box.getHalfXZ();
+        int hy = box.getHalfY();
 
-        for (int x = c.getBlockX() - h + 1; x <= c.getBlockX() + h - 1; x++)
-            for (int y = c.getBlockY() - h + 1; y <= c.getBlockY() + h - 1; y++)
-                for (int z = c.getBlockZ() - h + 1; z <= c.getBlockZ() + h - 1; z++)
+        for (int x = c.getBlockX() - hx + 1; x <= c.getBlockX() + hx - 1; x++)
+            for (int y = c.getBlockY() - hy + 1; y <= c.getBlockY() + hy - 1; y++)
+                for (int z = c.getBlockZ() - hx + 1; z <= c.getBlockZ() + hx - 1; z++)
                     if (w.getBlockAt(x, y, z).getType() == Material.AIR)
                         return false;
         return true;
@@ -302,7 +303,7 @@ public class JammingGameManager {
         final double exPower = 8.0; // 強化TNTの固定爆発力
         JammingBox box = boxManager.getBox();
         Location center = box.getCenter();
-        int boxHalf = box.getHalf();
+        int boxHalf = box.getHalfXZ();
 
         for (int i = 0; i < count; i++) {
             double x = center.getX() + (Math.random() - 0.5) * (boxHalf * 2 - 1);

@@ -48,8 +48,8 @@ public class JammingBoxPlaceListener implements Listener {
         // 設置されたブロックのY座標
         int y = event.getBlockPlaced().getY();
         // 箱の内部Y範囲（外壁を除外）
-        int minY = box.getCenter().getBlockY() - box.getHalf() + 1;
-        int maxY = box.getCenter().getBlockY() + box.getHalf() - 1;
+        int minY = box.getCenter().getBlockY() - box.getHalfY() + 1;
+        int maxY = box.getCenter().getBlockY() + box.getHalfY() - 1;
 
         // 内部Y範囲外なら変換しない
         if (y < minY || y > maxY) return;
