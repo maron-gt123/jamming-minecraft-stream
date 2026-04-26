@@ -212,6 +212,22 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 result.add("15");
                 return result;
             }
+            // /jammingevent heightup
+            if (args.length == 2 && args[0].equalsIgnoreCase("heightup")) {
+                result.add("-1");
+                result.add("-5");
+                result.add("1");
+                result.add("5");
+                return result;
+            }
+            // /jammingevent sizeup
+            if (args.length == 2 && args[0].equalsIgnoreCase("sizeup")) {
+                result.add("-1");
+                result.add("-5");
+                result.add("1");
+                result.add("5");
+                return result;
+            }
         }
         return result;
     }

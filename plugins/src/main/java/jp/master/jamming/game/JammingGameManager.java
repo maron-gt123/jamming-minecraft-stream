@@ -129,16 +129,18 @@ public class JammingGameManager {
 
     private boolean isBoxFullyFilled() {
         JammingBox box = boxManager.getBox();
+        if (box == null) return false;
         World w = box.getWorld();
-        Location c = box.getCenter();
-        int hx = box.getHalfXZ();
-        int hy = box.getHalfY();
 
-        for (int x = c.getBlockX() - hx + 1; x <= c.getBlockX() + hx - 1; x++)
-            for (int y = c.getBlockY() - hy + 1; y <= c.getBlockY() + hy - 1; y++)
-                for (int z = c.getBlockZ() - hx + 1; z <= c.getBlockZ() + hx - 1; z++)
-                    if (w.getBlockAt(x, y, z).getType() == Material.AIR)
+        for (int x = box.getMinX() + 1; x <= box.getMaxX() - 1; x++) {
+            for (int y = box.getMinY() + 1; y <= box.getMaxY() - 1; y++) {
+                for (int z = box.getMinZ() + 1; z <= box.getMaxZ() - 1; z++) {
+                    if (w.getBlockAt(x, y, z).getType() == Material.AIR) {
                         return false;
+                    }
+                }
+            }
+        }
         return true;
     }
 
@@ -300,22 +302,39 @@ public class JammingGameManager {
     public void spawnTnt(int count, boolean enhanced) {
         if (!gameActive || !boxManager.hasBox()) return;
 
-        final double exPower = 8.0; // 強化TNTの固定爆発力
+        final double exPower = 12.0;
+
         JammingBox box = boxManager.getBox();
-        Location center = box.getCenter();
-        int boxHalf = box.getHalfXZ();
+        if (box == null) return;
+
+        int minX = box.getMinX() + 1;
+        int maxX = box.getMaxX() - 1;
+        int minZ = box.getMinZ() + 1;
+        int maxZ = box.getMaxZ() - 1;
+        int minY = box.getMinY() + 1;
+        int maxY = box.getMaxY() - 1;
+
+        World w = box.getWorld();
 
         for (int i = 0; i < count; i++) {
-            double x = center.getX() + (Math.random() - 0.5) * (boxHalf * 2 - 1);
-            double z = center.getZ() + (Math.random() - 0.5) * (boxHalf * 2 - 1);
+            double x = minX + Math.random() * (maxX - minX + 1);
+            double z = minZ + Math.random() * (maxZ - minZ + 1);
 
-            World w = center.getWorld();
-            int y = w.getHighestBlockYAt((int)Math.floor(x), (int)Math.floor(z)) + 1;
-            Location spawn = new Location(w, x, y, z);
+            int ix = (int) Math.floor(x);
+            int iz = (int) Math.floor(z);
 
+            int highestY = minY;
+
+            for (int y = maxY; y >= minY; y--) {
+                if (w.getBlockAt(ix, y, iz).getType() != Material.AIR) {
+                    highestY = y + 1;
+                    break;
+                }
+            }
+            if (highestY < minY) highestY = minY;
+            Location spawn = new Location(w, x, highestY, z);
             TNTPrimed tnt = w.spawn(spawn, TNTPrimed.class);
             tnt.setFuseTicks(60);
-
             if (enhanced) tnt.setYield((float) exPower);
         }
     }

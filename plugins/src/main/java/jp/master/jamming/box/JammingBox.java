@@ -24,20 +24,17 @@ import java.util.Random;
  */
 public class JammingBox {
 
-    /** 箱の中心位置 */
-    private final Location center;
-    /** 箱のXZ軸サイズ */
-    private final int sizeXZ;
-    private final int halfXZ;
-    /** 箱のY軸サイズ */
-    private final int height;
-    private final int halfY;
+    /** 箱の座標 */
+    private final int minX, maxX;
+    private final int minY, maxY;
+    private final int minZ, maxZ;
+
     /** 箱が存在するワールド */
     private final World world;
     /** 箱がアクティブかどうか（ゲーム中かどうか） */
     private boolean active = false;
     /** ランダム生成用 */
-    private final Random random = new Random();
+    private static final Random random = new Random();
 
     /*
      * ============================================
@@ -49,13 +46,21 @@ public class JammingBox {
      * ・world 情報もここで確定させる
      * ============================================
      */
-    public JammingBox(Location center, int sizeXZ, int height) {
-        this.center = center.getBlock().getLocation();
-        this.sizeXZ = sizeXZ;
-        this.height = height;
-        this.halfXZ = sizeXZ / 2;
-        this.halfY = height / 2;
-        this.world = center.getWorld();
+    public JammingBox(Location pos1, Location pos2) {
+        this.world = pos1.getWorld();
+
+        this.minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
+        this.maxX = Math.max(pos1.getBlockX(), pos2.getBlockX());
+
+        this.minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
+        this.maxY = Math.max(pos1.getBlockY(), pos2.getBlockY());
+
+        this.minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ());
+        this.maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ());
+
+        if (maxX - minX < 2 || maxY - minY < 2 || maxZ - minZ < 2) {
+            throw new IllegalArgumentException("Box must be at least 3x3x3");
+        }
     }
     // =========================================================
     // State（状態管理）
@@ -78,23 +83,25 @@ public class JammingBox {
     // Getter（外部参照用）
     // =========================================================
 
-    /** 箱の中心位置を取得する 外部から Location を変更されないよう clone を返す */
-    public Location getCenter() {
-        return center.clone();
-    }
+    public int getMinX() { return minX; }
+    public int getMaxX() { return maxX; }
+
+    public int getMinY() { return minY; }
+    public int getMaxY() { return maxY; }
+
+    public int getMinZ() { return minZ; }
+    public int getMaxZ() { return maxZ; }
+
+
     /** 箱の各種サイズを取得する */
     public int getSizeXZ() {
-        return sizeXZ;
+        return maxX - minX + 1;
     }
+
     public int getHeight() {
-        return height;
+        return maxY - minY + 1;
     }
-    public int getHalfXZ() {
-        return halfXZ;
-    }
-    public int getHalfY() {
-        return halfY;
-    }
+
     /** 箱が存在するワールドを取得する */
     public World getWorld() {
         return world;
@@ -110,23 +117,13 @@ public class JammingBox {
      * ・異なるワールドの場合は常に false
      */
     public boolean isInside(Location loc) {
-        if (loc == null || loc.getWorld() != world) return false;
+        int x = loc.getBlockX();
+        int y = loc.getBlockY();
+        int z = loc.getBlockZ();
 
-        // 比較をブロック単位に揃える
-        Location b = loc.getBlock().getLocation();
-
-        int x = b.getBlockX();
-        int y = b.getBlockY();
-        int z = b.getBlockZ();
-
-        int cx = center.getBlockX();
-        int cy = center.getBlockY();
-        int cz = center.getBlockZ();
-
-        // 中心から half 以内であれば箱の中
-        return x >= cx - halfXZ && x <= cx + halfXZ
-                && y >= cy - halfY && y <= cy + halfY
-                && z >= cz - halfXZ && z <= cz + halfXZ;
+        return x >= getMinX() && x <= getMaxX()
+                && y >= getMinY() && y <= getMaxY()
+                && z >= getMinZ() && z <= getMaxZ();
     }
 
     // =========================================================
@@ -135,23 +132,9 @@ public class JammingBox {
 
     /** 箱の内部（外壁を除いた範囲）からランダムなブロック座標を1つ返す */
     public Location getRandomInnerLocation() {
-        int cx = center.getBlockX();
-        int cy = center.getBlockY();
-        int cz = center.getBlockZ();
-
-        // 外壁を除くため +1 / -1
-        int minX = cx - halfXZ + 1;
-        int maxX = cx + halfXZ - 1;
-
-        int minY = cy - halfY + 1;
-        int maxY = cy + halfY - 1;
-
-        int minZ = cz - halfXZ + 1;
-        int maxZ = cz + halfXZ - 1;
-
-        int x = randomBetween(minX, maxX);
-        int y = randomBetween(minY, maxY);
-        int z = randomBetween(minZ, maxZ);
+        int x = randomBetween(minX + 1, maxX - 1);
+        int y = randomBetween(minY + 1, maxY - 1);
+        int z = randomBetween(minZ + 1, maxZ - 1);
 
         return new Location(world, x, y, z);
     }
@@ -160,12 +143,9 @@ public class JammingBox {
     public List<Location> getInnerBlocks() {
         List<Location> blocks = new ArrayList<>();
 
-        int cx = center.getBlockX();
-        int cy = center.getBlockY();
-        int cz = center.getBlockZ();
-        for (int x = cx - halfXZ + 1; x <= cx + halfXZ - 1; x++) {
-            for (int y = cy - halfY + 1; y <= cy + halfY - 1; y++) {
-                for (int z = cz - halfXZ + 1; z <= cz + halfXZ - 1; z++) {
+        for (int x = minX + 1; x <= maxX - 1; x++) {
+            for (int y = minY + 1; y <= maxY - 1; y++) {
+                for (int z = minZ + 1; z <= maxZ - 1; z++) {
                     blocks.add(new Location(world, x, y, z));
                 }
             }

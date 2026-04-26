@@ -34,33 +34,26 @@ public class JammingBoxPlaceListener implements Listener {
      */
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        // 自動置換機能が無効なら何もしない
+
         if (!manager.isReplaceEnabled()) return;
         if (!gameManager.isGameActive()) return;
 
-        // 現在の JammingBox を取得
         JammingBox box = manager.getBox();
         if (box == null) return;
 
-        // 設置されたブロックが箱の中でなければ無視
+        // 箱内判定
         if (!box.isInside(event.getBlockPlaced().getLocation())) return;
 
-        // 設置されたブロックのY座標
         int y = event.getBlockPlaced().getY();
-        // 箱の内部Y範囲（外壁を除外）
-        int minY = box.getCenter().getBlockY() - box.getHalfY() + 1;
-        int maxY = box.getCenter().getBlockY() + box.getHalfY() - 1;
 
-        // 内部Y範囲外なら変換しない
+        // ★ 完全に min/max ベースに統一
+        int minY = box.getMinY() + 1;
+        int maxY = box.getMaxY() - 1;
+
         if (y < minY || y > maxY) return;
 
-        // 設置された高さに応じて置換後のブロックタイプを取得
-        Material converted = manager.getReplaceBlockType(
-                box,
-                event.getBlockPlaced().getY()
-        );
+        Material converted = manager.getReplaceBlockType(box, y);
 
-        // 実際にブロックを置換する
         event.getBlockPlaced().setType(converted);
     }
 }

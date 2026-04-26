@@ -188,7 +188,18 @@ public class JammingBoxCommand implements CommandExecutor {
         // 作成
         // =====================
         Location center = player.getLocation();
-        manager.createBox(center, sizeXZ, height, material);
+
+        int halfXZ = sizeXZ / 2;
+        int halfY = height / 2;
+
+        // corner1（最小）
+        Location c1 = center.clone().add(-halfXZ, -halfY, -halfXZ);
+
+        // corner2（最大）
+        Location c2 = center.clone().add(halfXZ, halfY, halfXZ);
+
+        // 作成
+        manager.createBox(c1, c2, material);
 
         player.sendMessage("§aJammingBoxを作成しました");
         player.sendMessage("§7XZ: " + sizeXZ + " / Y: " + height + " / 素材: " + material.name());
@@ -572,31 +583,34 @@ public class JammingBoxCommand implements CommandExecutor {
         if (player == null) return;
 
         var box = manager.getBox();
-        var c = box.getCenter();
-        int halfXZ = box.getHalfXZ();
-        int hy = box.getHalfY();
-        int hx = halfXZ;
-        int hz = halfXZ;
+
+        int minX = box.getMinX();
+        int maxX = box.getMaxX();
+        int minY = box.getMinY();
+        int maxY = box.getMaxY();
+        int minZ = box.getMinZ();
+        int maxZ = box.getMaxZ();
 
         // 天井左上
         Location base = new Location(
                 box.getWorld(),
-                c.getBlockX() - hx,
-                c.getBlockY() + hy,
-                c.getBlockZ() - hz
+                minX,
+                maxY,
+                minZ
         );
 
         // 20マス範囲
         Location prisonCenter = base.clone().add(
-                1 + random.nextInt(20), // X
-                10,                       // Y: 箱の上端+10
-                1 + random.nextInt(20)  // Z
+                1 + random.nextInt(20),
+                10,
+                1 + random.nextInt(20)
         );
 
         prisonManager.imprison(player, prisonCenter, seconds);
 
         sender.sendMessage("§c§l[PRISON] §f" + seconds + "秒間投獄 ⛓");
     }
+
     /* =======================
        addclear
        ======================= */
@@ -733,7 +747,7 @@ public class JammingBoxCommand implements CommandExecutor {
 
         manager.addHeight(value);
 
-        sender.sendMessage("§a高さを +" + value + " しました");
+        sender.sendMessage("§a高さを " + value + " しました");
     }
     private void handleSizeUp(CommandSender sender, String[] args) {
 
@@ -757,7 +771,7 @@ public class JammingBoxCommand implements CommandExecutor {
 
         manager.addSizeXZ(value);
 
-        sender.sendMessage("§aXZサイズを +" + value + " しました");
+        sender.sendMessage("§aXZサイズを " + value + " しました");
     }
     private void handleSizeReset(CommandSender sender) {
 

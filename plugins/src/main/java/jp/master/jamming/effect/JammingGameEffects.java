@@ -91,7 +91,12 @@ public class JammingGameEffects {
     // ===== ゲームクリア花火演出 =====
     public void playClearFireworks(JammingBox box, JavaPlugin plugin) {
         World world = box.getWorld();
-        Location center = box.getCenter().clone().add(0, box.getHalfY() + 3, 0);
+        Location center = new Location(
+                box.getWorld(),
+                (box.getMinX() + box.getMaxX()) / 2.0,
+                box.getMaxY() + 3,
+                (box.getMinZ() + box.getMaxZ()) / 2.0
+        );
 
         new BukkitRunnable() {
             int fired = 0;
@@ -159,9 +164,14 @@ public class JammingGameEffects {
             Runnable onFinish
     ) {
         World world = box.getWorld();
-        Location center = box.getCenter();
+        Location center = new Location(
+                box.getWorld(),
+                (box.getMinX() + box.getMaxX()) / 2.0,
+                (box.getMinY() + box.getMaxY()) / 2.0,
+                (box.getMinZ() + box.getMaxZ()) / 2.0
+        );
 
-        double radius = box.getHalfXZ() + 3;
+        double radius = ((box.getMaxX() - box.getMinX()) / 2.0) + 3;
         Location spawn = center.clone().add(0, 12, radius);
 
         EnderDragon dragon = (EnderDragon) world.spawnEntity(spawn, EntityType.ENDER_DRAGON);
@@ -260,7 +270,12 @@ public class JammingGameEffects {
             Runnable onFinish
     ) {
         World world = box.getWorld();
-        Location center = box.getCenter();
+        Location center = new Location(
+                box.getWorld(),
+                (box.getMinX() + box.getMaxX()) / 2.0,
+                (box.getMinY() + box.getMaxY()) / 2.0,
+                (box.getMinZ() + box.getMaxZ()) / 2.0
+        );
 
         Location spawn = center.clone().add(0, 8, 0);
         Wither wither = (Wither) world.spawnEntity(spawn, EntityType.WITHER);

@@ -36,11 +36,14 @@ public class JammingBoxManager {
     /** 現在存在している JammingBox（未生成の場合は null） */
     private JammingBox box = null;
 
-    // 初期値（リセット用）
-    private int baseSizeXZ;
-    private int baseHeight;
+    // 最新のcreate基準
+    private Location basePos1;
+    private Location basePos2;
+    // reset用
+    private Location resetPos1;
+    private Location resetPos2;
+
     private Material baseMaterial;
-    private Location baseCenter;
 
     /** このマネージャーが「自分で設置した」ブロック一覧 → 後で一括削除・保護判定に使う */
     private final Set<BlockKey> placedBlocks = new HashSet<>();
@@ -73,18 +76,22 @@ public class JammingBoxManager {
     // =========================================================
 
     /** 箱を新規作成する。すでに箱が存在する場合は何もしない */
-    public void createBox(Location center, int sizeXZ, int height, Material material) {
+    public void createBox(Location pos1, Location pos2, Material material) {
+        if (pos1.getWorld() != pos2.getWorld()) {
+            throw new IllegalArgumentException("pos1 and pos2 must be in same world");
+        }
         if (box != null) return;
 
-        // 初期値保存
-        if (baseCenter == null) {
-            this.baseCenter = center.clone();
-            this.baseSizeXZ = sizeXZ;
-            this.baseHeight = height;
-            this.baseMaterial = material;
-        }
+        // 常に更新（今の箱の基準）
+        this.basePos1 = pos1.clone();
+        this.basePos2 = pos2.clone();
+        // ★ reset用は「createコマンドのときだけ更新」
+        this.resetPos1 = pos1.clone();
+        this.resetPos2 = pos2.clone();
 
-        box = new JammingBox(center, sizeXZ, height);
+        this.baseMaterial = material;
+
+        box = new JammingBox(pos1, pos2);
         buildWalls(box, material);
     }
     /** 箱の現在サイズ取得用 */
@@ -151,10 +158,9 @@ public class JammingBoxManager {
 
     /** 箱の高さ（Y座標）に応じて 使用する置換ブロックを決定する */
     public Material getReplaceBlockType(JammingBox box, int y) {
-        int minY = box.getCenter().getBlockY() - box.getHalfY() + 1;
-        int maxY = box.getCenter().getBlockY() + box.getHalfY();
-
-        int height = maxY - minY;
+        int minY = box.getMinY() + 1;
+        int maxY = box.getMaxY() - 1;
+        int height = maxY - minY + 1;
         int relativeY = y - minY;
         int layerHeight = height / 3;
 
@@ -214,40 +220,36 @@ public class JammingBoxManager {
         if (!hasBox()) return;
         JammingBox b = box;
 
-        Location center = b.getCenter();
-        int halfXZ = b.getHalfXZ();
-        int halfY = b.getHalfY();
         World w = b.getWorld();
 
-        int minX = center.getBlockX() - halfXZ + 1;
-        int maxX = center.getBlockX() + halfXZ - 1;
-        int minZ = center.getBlockZ() - halfXZ + 1;
-        int maxZ = center.getBlockZ() + halfXZ - 1;
+        int minX = b.getMinX() + 1;
+        int maxX = b.getMaxX() - 1;
+        int minZ = b.getMinZ() + 1;
+        int maxZ = b.getMaxZ() - 1;
 
-        int floorY = center.getBlockY() - halfY; // 床のY座標
+        int floorY = b.getMinY();
+        int maxY = b.getMaxY();
 
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
 
-                // 床のYから上に向かって最初にAIRがあるYを探す
                 int startY = -1;
-                for (int y = floorY + 1; y <= center.getBlockY() + halfY - 1; y++) {
+
+                for (int y = floorY + 1; y <= maxY - 1; y++) {
                     if (w.getBlockAt(x, y, z).getType() == Material.AIR) {
                         startY = y;
                         break;
                     }
                 }
 
-                if (startY == -1) continue; // AIR列がない場合はスキップ
+                if (startY == -1) continue;
 
-                // levels分上にブロックを積む
                 for (int y = startY; y < startY + levels; y++) {
-                    if (y > center.getBlockY() + halfY - 1) break;
+                    if (y > maxY - 1) break;
 
-                    // 置換機能が有効なら replaceBlockType を取得
                     Material blockType = isReplaceEnabled()
                             ? getReplaceBlockType(b, y)
-                            : Material.STONE; // デフォルトブロック
+                            : material;
 
                     w.getBlockAt(x, y, z).setType(blockType, false);
                 }
@@ -260,25 +262,22 @@ public class JammingBoxManager {
 
     /** 箱の壁と床を構築する+天井は作らない+設置したブロックは placedBlocks に記録する */
     private void buildWalls(JammingBox box, Material material) {
-        Location c = box.getCenter();
-        World w = box.getWorld();
-        int hx = box.getHalfXZ();
-        int hy = box.getHalfY();
 
-        for (int x = c.getBlockX() - hx; x <= c.getBlockX() + hx; x++) {
-            for (int y = c.getBlockY() - hy; y <= c.getBlockY() + hy; y++) {
-                for (int z = c.getBlockZ() - hx; z <= c.getBlockZ() + hx; z++) {
+        for (int x = box.getMinX(); x <= box.getMaxX(); x++) {
+            for (int y = box.getMinY(); y <= box.getMaxY(); y++) {
+                for (int z = box.getMinZ(); z <= box.getMaxZ(); z++) {
 
-                    boolean wall = x == c.getBlockX() - hx || x == c.getBlockX() + hx
-                            || z == c.getBlockZ() - hx || z == c.getBlockZ() + hx;
+                    boolean wall = x == box.getMinX() || x == box.getMaxX()
+                            || z == box.getMinZ() || z == box.getMaxZ();
 
-                    boolean floor = y == c.getBlockY() - hy;
-                    boolean ceiling = y == c.getBlockY() + hy;
+                    boolean floor = y == box.getMinY();
+                    boolean ceiling = y == box.getMaxY();
 
                     if (ceiling) continue;
+
                     if (wall || floor) {
-                        Location loc = new Location(w, x, y, z);
-                        w.getBlockAt(loc).setType(material);
+                        Location loc = new Location(box.getWorld(), x, y, z);
+                        loc.getBlock().setType(material);
                         placedBlocks.add(new BlockKey(loc));
                     }
                 }
@@ -333,38 +332,82 @@ public class JammingBoxManager {
     /** heightup */
     public void addHeight(int delta) {
         if (box == null) return;
-        int oldHeight = box.getHeight();
-        int newHeight = oldHeight + delta;
-        if (newHeight < 3) newHeight = 3;
-        int diff = newHeight - oldHeight;
-        Location oldCenter = box.getCenter();
-        Location newCenter = oldCenter.clone().add(0, diff, 0);
-        int sizeXZ = box.getSizeXZ();
-        Material material = baseMaterial;
+
+        int current = box.getHeight();
+        int newHeight = current + delta;
+
+        // =========================
+        // バリデーション
+        // =========================
+        if (newHeight < 3) {
+            return;
+        }
+
+        if (newHeight % 2 == 0) {
+            return;
+        }
+
+        Location pos1 = new Location(box.getWorld(), box.getMinX(), box.getMinY(), box.getMinZ());
+        Location pos2 = new Location(box.getWorld(), box.getMaxX(), box.getMaxY() + delta, box.getMaxZ());
+
         removeBox();
-        createBox(newCenter, sizeXZ, newHeight, material);
+        this.basePos1 = pos1.clone();
+        this.basePos2 = pos2.clone();
+
+        box = new JammingBox(pos1, pos2);
+        buildWalls(box, baseMaterial);
     }
     /** addSizeXZ */
     public void addSizeXZ(int delta) {
         if (box == null) return;
-        int newSize = box.getSizeXZ() + delta;
-        // 最低サイズ制限
-        if (newSize < 1) newSize = 1;
-        resize(box.getHeight(), newSize);
+
+        int current = box.getSizeXZ();
+        int newSize = current + delta * 2;
+
+        // =========================
+        // バリデーション
+        // =========================
+        if (newSize < 5) {
+            return; // またはメッセージ送信
+        }
+
+        if (newSize % 2 == 0) {
+            return;
+        }
+
+        Location pos1 = new Location(
+                box.getWorld(),
+                box.getMinX() - delta,
+                box.getMinY(),
+                box.getMinZ() - delta
+        );
+
+        Location pos2 = new Location(
+                box.getWorld(),
+                box.getMaxX() + delta,
+                box.getMaxY(),
+                box.getMaxZ() + delta
+        );
+
+        removeBox();
+        this.basePos1 = pos1.clone();
+        this.basePos2 = pos2.clone();
+
+        box = new JammingBox(pos1, pos2);
+        buildWalls(box, baseMaterial);
     }
     /** SizeXYZ RESET */
     public void resetSize() {
         if (box == null) return;
+        if (resetPos1 == null || resetPos2 == null) return;
 
         removeBox();
-        createBox(baseCenter, baseSizeXZ, baseHeight, baseMaterial);
-    }
-    /** 共通リサイズ処理 */
-    private void resize(int newHeight, int newSizeXZ) {
-        Location center = box.getCenter();
-        Material material = baseMaterial; // or 現在の材質保持でもOK
 
-        removeBox();
-        createBox(center, newSizeXZ, newHeight, material);
+        // ★ reset用に戻す
+        box = new JammingBox(resetPos1, resetPos2);
+        buildWalls(box, baseMaterial);
+
+        this.basePos1 = resetPos1.clone();
+        this.basePos2 = resetPos2.clone();
     }
 }
