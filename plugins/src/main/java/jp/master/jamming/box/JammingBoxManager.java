@@ -36,6 +36,12 @@ public class JammingBoxManager {
     /** 現在存在している JammingBox（未生成の場合は null） */
     private JammingBox box = null;
 
+    // 初期値（リセット用）
+    private int baseSizeXZ;
+    private int baseHeight;
+    private Material baseMaterial;
+    private Location baseCenter;
+
     /** このマネージャーが「自分で設置した」ブロック一覧 → 後で一括削除・保護判定に使う */
     private final Set<BlockKey> placedBlocks = new HashSet<>();
 
@@ -69,8 +75,25 @@ public class JammingBoxManager {
     /** 箱を新規作成する。すでに箱が存在する場合は何もしない */
     public void createBox(Location center, int sizeXZ, int height, Material material) {
         if (box != null) return;
+
+        // 初期値保存
+        if (baseCenter == null) {
+            this.baseCenter = center.clone();
+            this.baseSizeXZ = sizeXZ;
+            this.baseHeight = height;
+            this.baseMaterial = material;
+        }
+
         box = new JammingBox(center, sizeXZ, height);
         buildWalls(box, material);
+    }
+    /** 箱の現在サイズ取得用 */
+    public int getCurrentSizeXZ() {
+        return box != null ? box.getSizeXZ() : 0;
+    }
+
+    public int getCurrentHeight() {
+        return box != null ? box.getHeight() : 0;
     }
 
     /** 箱を完全に削除する。壁・床ブロックもすべて消去する */
@@ -305,5 +328,43 @@ public class JammingBoxManager {
         public int hashCode() {
             return Objects.hash(worldId, x, y, z);
         }
+    }
+
+    /** heightup */
+    public void addHeight(int delta) {
+        if (box == null) return;
+        int oldHeight = box.getHeight();
+        int newHeight = oldHeight + delta;
+        if (newHeight < 3) newHeight = 3;
+        int diff = newHeight - oldHeight;
+        Location oldCenter = box.getCenter();
+        Location newCenter = oldCenter.clone().add(0, diff, 0);
+        int sizeXZ = box.getSizeXZ();
+        Material material = baseMaterial;
+        removeBox();
+        createBox(newCenter, sizeXZ, newHeight, material);
+    }
+    /** addSizeXZ */
+    public void addSizeXZ(int delta) {
+        if (box == null) return;
+        int newSize = box.getSizeXZ() + delta;
+        // 最低サイズ制限
+        if (newSize < 1) newSize = 1;
+        resize(box.getHeight(), newSize);
+    }
+    /** SizeXYZ RESET */
+    public void resetSize() {
+        if (box == null) return;
+
+        removeBox();
+        createBox(baseCenter, baseSizeXZ, baseHeight, baseMaterial);
+    }
+    /** 共通リサイズ処理 */
+    private void resize(int newHeight, int newSizeXZ) {
+        Location center = box.getCenter();
+        Material material = baseMaterial; // or 現在の材質保持でもOK
+
+        removeBox();
+        createBox(center, newSizeXZ, newHeight, material);
     }
 }

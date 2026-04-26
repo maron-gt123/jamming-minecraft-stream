@@ -119,6 +119,9 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 result.add("delclear");
                 result.add("rocket");
                 result.add("doubleplace");
+                result.add("heightup");
+                result.add("sizeup");
+                result.add("size_reset");
                 return result;
             }
 

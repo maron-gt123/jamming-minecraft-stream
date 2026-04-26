@@ -99,6 +99,9 @@ public class JammingBoxCommand implements CommandExecutor {
             case "delclear" -> handleDelClear(sender, args);
             case "rocket" -> handleRocket(sender, args);
             case "doubleplace" -> handleDoublePlace(sender, args);
+            case "heightup" -> handleHeightUp(sender, args);
+            case "sizeup" -> handleSizeUp(sender, args);
+            case "size_reset" -> handleSizeReset(sender);
             default -> sendHelpPage2(sender);
         }
         return true;
@@ -705,6 +708,68 @@ public class JammingBoxCommand implements CommandExecutor {
             default -> sender.sendMessage("§e/jammingevent doubleplace time <秒> | clear");
         }
     }
+    /* =======================
+       box size
+       ======================= */
+    private void handleHeightUp(CommandSender sender, String[] args) {
+
+        if (!manager.hasBox()) {
+            sender.sendMessage("§cJammingBoxが存在しません");
+            return;
+        }
+
+        if (args.length < 2) {
+            sender.sendMessage("§e/jammingevent heightup <数値>");
+            return;
+        }
+
+        int value;
+        try {
+            value = Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage("§c数値を指定してください");
+            return;
+        }
+
+        manager.addHeight(value);
+
+        sender.sendMessage("§a高さを +" + value + " しました");
+    }
+    private void handleSizeUp(CommandSender sender, String[] args) {
+
+        if (!manager.hasBox()) {
+            sender.sendMessage("§cJammingBoxが存在しません");
+            return;
+        }
+
+        if (args.length < 2) {
+            sender.sendMessage("§e/jammingevent sizeup <数値>");
+            return;
+        }
+
+        int value;
+        try {
+            value = Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage("§c数値を指定してください");
+            return;
+        }
+
+        manager.addSizeXZ(value);
+
+        sender.sendMessage("§aXZサイズを +" + value + " しました");
+    }
+    private void handleSizeReset(CommandSender sender) {
+
+        if (!manager.hasBox()) {
+            sender.sendMessage("§cJammingBoxが存在しません");
+            return;
+        }
+
+        manager.resetSize();
+
+        sender.sendMessage("§aサイズを初期値に戻しました");
+    }
 
     /* =======================
        help
@@ -729,7 +794,7 @@ public class JammingBoxCommand implements CommandExecutor {
     private void sendHelpPage1(CommandSender sender) {
         sender.sendMessage("§6==== JammingBox Help (1/3) ====");
         sender.sendMessage("§e/jammingbox reload        §7- configを再読込");
-        sender.sendMessage("§e/jammingbox create [size] §7- jammingboxを作成");
+        sender.sendMessage("§e/jammingbox create [XZ] [Y] [BLOCK]§7- jammingboxを作成");
         sender.sendMessage("§e/jammingbox remove        §7- jammingboxを削除");
         sender.sendMessage("§e/jammingbox start [time] §7- ゲーム開始");
         sender.sendMessage("§e/jammingbox stop         §7- ゲーム停止");
@@ -753,6 +818,9 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§e/jammingevent delclear <1|2|3> §7- クリア数減少");
         sender.sendMessage("§e/jammingevent rocket <1|2|3> §7- プレイヤーをロケットで打ち上げ");
         sender.sendMessage("§e/jammingevent doubleplace <time> §7- 同時に2個ブロック設置");
+        sender.sendMessage("§e/jammingevent heightup <数値> §7- 高さを拡張");
+        sender.sendMessage("§e/jammingevent sizeup <数値> §7- 横サイズを拡張");
+        sender.sendMessage("§e/jammingevent size_reset §7- サイズを初期化");
         sender.sendMessage("§7◀ help 1   help 3 ▶");
     }
     private void sendHelpPage3(CommandSender sender) {
