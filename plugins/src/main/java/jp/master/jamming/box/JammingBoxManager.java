@@ -357,7 +357,7 @@ public class JammingBoxManager {
     public void Heightdown(int delta) {
         if (box == null) return;
 
-        if (delta < 0) delta = -delta; // 念のため正規化
+        if (delta < 0) delta = -delta;
 
         int current = box.getHeight();
         int newHeight = current - delta;
@@ -368,6 +368,21 @@ public class JammingBoxManager {
         if (newHeight < 3) {
             return;
         }
+
+
+        Location clearPos1 = new Location(
+                box.getWorld(),
+                box.getMinX(),
+                box.getMaxY() - delta + 1,
+                box.getMinZ()
+        );
+        Location clearPos2 = new Location(
+                box.getWorld(),
+                box.getMaxX(),
+                box.getMaxY(),
+                box.getMaxZ()
+        );
+        clearRegion(clearPos1, clearPos2);
 
         Location pos1 = new Location(
                 box.getWorld(),
@@ -392,7 +407,7 @@ public class JammingBoxManager {
         buildWalls(box, baseMaterial);
     }
 
-    /** addSizeXZ */
+    /** SizeupXZ */
     public void SizeupXZ(int delta) {
         if (box == null) return;
 
@@ -431,7 +446,7 @@ public class JammingBoxManager {
     public void SizedownXZ(int delta) {
         if (box == null) return;
 
-        if (delta < 0) delta = -delta; // 正規化
+        if (delta < 0) delta = -delta;
 
         int current = box.getSizeXZ();
         int newSize = current - delta * 2;
@@ -442,6 +457,23 @@ public class JammingBoxManager {
         if (newSize < 5) {
             return;
         }
+
+        clearRegion(
+                new Location(box.getWorld(), box.getMinX(), box.getMinY(), box.getMinZ()),
+                new Location(box.getWorld(), box.getMinX() + delta - 1, box.getMaxY(), box.getMaxZ())
+        );
+        clearRegion(
+                new Location(box.getWorld(), box.getMaxX() - delta + 1, box.getMinY(), box.getMinZ()),
+                new Location(box.getWorld(), box.getMaxX(), box.getMaxY(), box.getMaxZ())
+        );
+        clearRegion(
+                new Location(box.getWorld(), box.getMinX(), box.getMinY(), box.getMinZ()),
+                new Location(box.getWorld(), box.getMaxX(), box.getMaxY(), box.getMinZ() + delta - 1)
+        );
+        clearRegion(
+                new Location(box.getWorld(), box.getMinX(), box.getMinY(), box.getMaxZ() - delta + 1),
+                new Location(box.getWorld(), box.getMaxX(), box.getMaxY(), box.getMaxZ())
+        );
 
         Location pos1 = new Location(
                 box.getWorld(),
@@ -465,6 +497,27 @@ public class JammingBoxManager {
         box = new JammingBox(pos1, pos2);
         buildWalls(box, baseMaterial);
     }
+
+    /** down reset */
+    private void clearRegion(Location pos1, Location pos2) {
+        World world = pos1.getWorld();
+
+        int minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
+        int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX());
+        int minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
+        int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY());
+        int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ());
+        int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ());
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    world.getBlockAt(x, y, z).setType(Material.AIR, false);
+                }
+            }
+        }
+    }
+
     /** SizeXYZ RESET */
     public void resetSize() {
         if (box == null) return;
