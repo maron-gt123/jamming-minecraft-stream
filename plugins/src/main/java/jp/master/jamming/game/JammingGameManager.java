@@ -12,6 +12,11 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Animals;
+import org.bukkit.entity.Chicken;
+import org.bukkit.entity.Pig;
+import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Salmon;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -404,6 +409,65 @@ public class JammingGameManager {
 
             w.playSound(spawn, Sound.ENTITY_CREEPER_PRIMED, 1.5f, 1.2f);
             w.spawnParticle(Particle.SMOKE_NORMAL, spawn, 20, 0.5, 0.5, 0.5, 0.05);
+        }
+    }
+    // =========================================================
+    // Mob's
+    // =========================================================
+    public void spawnJammingMobs(String type, int count) {
+        if (!gameActive || !boxManager.hasBox()) return;
+
+        if (count < 1) count = 1;
+
+        JammingBox box = boxManager.getBox();
+        if (box == null) return;
+
+        World w = box.getWorld();
+
+        int minX = box.getMinX() + 1;
+        int maxX = box.getMaxX() - 1;
+        int minZ = box.getMinZ() + 1;
+        int maxZ = box.getMaxZ() - 1;
+        int minY = box.getMinY() + 1;
+        int maxY = box.getMaxY() - 1;
+
+        for (int i = 0; i < count; i++) {
+
+            double x = minX + Math.random() * (maxX - minX + 1);
+            double z = minZ + Math.random() * (maxZ - minZ + 1);
+
+            int ix = (int) Math.floor(x);
+            int iz = (int) Math.floor(z);
+
+            int highestY = minY;
+
+            for (int y = maxY; y >= minY; y--) {
+                if (w.getBlockAt(ix, y, iz).getType() != Material.AIR) {
+                    highestY = y + 1;
+                    break;
+                }
+            }
+
+            Location spawn = new Location(w, x, highestY, z);
+
+            switch (type.toLowerCase()) {
+
+                case "chicken" -> w.spawn(spawn, Chicken.class);
+
+                case "pig" -> w.spawn(spawn, Pig.class);
+
+                case "sheep" -> {
+                    Sheep sheep = w.spawn(spawn, Sheep.class);
+                    sheep.setColor(org.bukkit.DyeColor.WHITE);
+                }
+
+                case "salmon", "sake" -> {
+                    // 水中じゃないと微妙だけど一応
+                    w.spawn(spawn, Salmon.class);
+                }
+
+                default -> w.spawn(spawn, Chicken.class);
+            }
         }
     }
 }

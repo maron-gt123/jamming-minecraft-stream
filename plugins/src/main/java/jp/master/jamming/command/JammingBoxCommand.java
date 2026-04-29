@@ -99,6 +99,7 @@ public class JammingBoxCommand implements CommandExecutor {
             case "delclear" -> handleDelClear(sender, args);
             case "rocket" -> handleRocket(sender, args);
             case "creeper" -> handleCreeper(sender, args);
+            case "mob" -> handleMob(sender, args);
             case "doubleplace" -> handleDoublePlace(sender, args);
             case "heightup" -> handleHeightUp(sender, args);
             case "heightdown" -> handleHeightDown(sender, args);
@@ -727,6 +728,27 @@ public class JammingBoxCommand implements CommandExecutor {
         gameManager.spawnCreepers(target, count, false);
     }
     /* =======================
+      Mob
+    ======================= */
+    private void handleMob(CommandSender sender, String[] args) {
+        if (args.length < 3) {
+            sender.sendMessage("§e/jammingevent mob <type> <count>");
+            return;
+        }
+
+        String type = args[1];
+        int count;
+
+        try {
+            count = Integer.parseInt(args[2]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage("§c数値で指定して");
+            return;
+        }
+
+        gameManager.spawnJammingMobs(type, count);
+    }
+    /* =======================
        eDoublePlace
        ======================= */
     private void handleDoublePlace(CommandSender sender, String[] args) {
@@ -921,6 +943,7 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§e/jammingevent delclear <数値> §7- クリア数減少");
         sender.sendMessage("§e/jammingevent rocket <数値> §7- プレイヤーをロケットで打ち上げ");
         sender.sendMessage("§e/jammingevent creeper <数値> §7- クリーパー召喚");
+        sender.sendMessage("§e/jammingevent mob <name> <数値> §7- mob召喚");
         sender.sendMessage("§e/jammingevent doubleplace <time> §7- 同時に2個ブロック設置");
         sender.sendMessage("§e/jammingevent heightup <数値> §7- 高さを拡張");
         sender.sendMessage("§e/jammingevent heightdown <数値> §7- 高さを減少");

@@ -119,6 +119,7 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 result.add("delclear");
                 result.add("rocket");
                 result.add("creeper");
+                result.add("mob");
                 result.add("doubleplace");
                 result.add("heightup");
                 result.add("heightdown");
@@ -205,6 +206,21 @@ public class JammingBoxTabCompleter implements TabCompleter {
             // /jammingevent creeper
             if (args.length == 2 && args[0].equalsIgnoreCase("creeper")) {
                 result.add("1");
+                result.add("5");
+                result.add("10");
+                return result;
+            }
+            // /jammingevent mob
+            if (args.length == 2 && args[0].equalsIgnoreCase("mob")) {
+                result.add("chicken");
+                result.add("pig");
+                result.add("sheep");
+                result.add("salmon");
+                return result;
+            }
+            if (args.length == 3 && args[0].equalsIgnoreCase("mob")) {
+                result.add("1");
+                result.add("3");
                 result.add("5");
                 result.add("10");
                 return result;
