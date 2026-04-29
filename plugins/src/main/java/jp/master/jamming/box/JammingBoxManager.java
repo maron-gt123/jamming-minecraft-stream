@@ -372,13 +372,13 @@ public class JammingBoxManager {
         Location clearPos1 = new Location(
                 box.getWorld(),
                 box.getMinX(),
-                box.getMaxY() - delta + 1,
+                box.getMaxY() - delta,
                 box.getMinZ()
         );
         Location clearPos2 = new Location(
                 box.getWorld(),
                 box.getMaxX(),
-                box.getMaxY(),
+                box.getMaxY() + 1,
                 box.getMaxZ()
         );
         clearRegion(clearPos1, clearPos2);
@@ -522,6 +522,76 @@ public class JammingBoxManager {
         if (box == null) return;
         if (resetPos1 == null || resetPos2 == null) return;
 
+        // ===== 現在の箱範囲 =====
+        JammingBox oldBox = box;
+        int oldMinX = oldBox.getMinX();
+        int oldMaxX = oldBox.getMaxX();
+        int oldMinY = oldBox.getMinY();
+        int oldMaxY = oldBox.getMaxY();
+        int oldMinZ = oldBox.getMinZ();
+        int oldMaxZ = oldBox.getMaxZ();
+
+        // ===== reset後の範囲 =====
+        JammingBox newBox = new JammingBox(resetPos1, resetPos2);
+
+        int newMinX = newBox.getMinX();
+        int newMaxX = newBox.getMaxX();
+        int newMinY = newBox.getMinY();
+        int newMaxY = newBox.getMaxY();
+        int newMinZ = newBox.getMinZ();
+        int newMaxZ = newBox.getMaxZ();
+
+        // =========================
+        // 縮小方向のみ差分削除
+        // =========================
+
+        // X-
+        if (newMinX > oldMinX) {
+            clearRegion(
+                    new Location(oldBox.getWorld(), oldMinX, oldMinY, oldMinZ),
+                    new Location(oldBox.getWorld(), newMinX - 1, oldMaxY, oldMaxZ)
+            );
+        }
+
+        // X+
+        if (newMaxX < oldMaxX) {
+            clearRegion(
+                    new Location(oldBox.getWorld(), newMaxX + 1, oldMinY, oldMinZ),
+                    new Location(oldBox.getWorld(), oldMaxX, oldMaxY, oldMaxZ)
+            );
+        }
+
+        // Z-
+        if (newMinZ > oldMinZ) {
+            clearRegion(
+                    new Location(oldBox.getWorld(), oldMinX, oldMinY, oldMinZ),
+                    new Location(oldBox.getWorld(), oldMaxX, oldMaxY, newMinZ - 1)
+            );
+        }
+
+        // Z+
+        if (newMaxZ < oldMaxZ) {
+            clearRegion(
+                    new Location(oldBox.getWorld(), oldMinX, oldMinY, newMaxZ + 1),
+                    new Location(oldBox.getWorld(), oldMaxX, oldMaxY, oldMaxZ)
+            );
+        }
+
+        // Y+
+        if (newMaxY < oldMaxY) {
+            clearRegion(
+                    new Location(oldBox.getWorld(), oldMinX, newMaxY + 1, oldMinZ),
+                    new Location(oldBox.getWorld(), oldMaxX, oldMaxY, oldMaxZ)
+            );
+        }
+
+        // Y-
+        if (newMinY > oldMinY) {
+            clearRegion(
+                    new Location(oldBox.getWorld(), oldMinX, oldMinY, oldMinZ),
+                    new Location(oldBox.getWorld(), oldMaxX, newMinY - 1, oldMaxZ)
+            );
+        }
         removeBox();
 
         // ★ reset用に戻す
