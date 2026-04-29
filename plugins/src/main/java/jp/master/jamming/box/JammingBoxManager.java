@@ -330,7 +330,7 @@ public class JammingBoxManager {
     }
 
     /** heightup */
-    public void addHeight(int delta) {
+    public void Heightup(int delta) {
         if (box == null) return;
 
         int current = box.getHeight();
@@ -340,10 +340,6 @@ public class JammingBoxManager {
         // バリデーション
         // =========================
         if (newHeight < 3) {
-            return;
-        }
-
-        if (newHeight % 2 == 0) {
             return;
         }
 
@@ -357,8 +353,47 @@ public class JammingBoxManager {
         box = new JammingBox(pos1, pos2);
         buildWalls(box, baseMaterial);
     }
+    /** heightdown */
+    public void Heightdown(int delta) {
+        if (box == null) return;
+
+        if (delta < 0) delta = -delta; // 念のため正規化
+
+        int current = box.getHeight();
+        int newHeight = current - delta;
+
+        // =========================
+        // バリデーション
+        // =========================
+        if (newHeight < 3) {
+            return;
+        }
+
+        Location pos1 = new Location(
+                box.getWorld(),
+                box.getMinX(),
+                box.getMinY(),
+                box.getMinZ()
+        );
+
+        Location pos2 = new Location(
+                box.getWorld(),
+                box.getMaxX(),
+                box.getMaxY() - delta,
+                box.getMaxZ()
+        );
+
+        removeBox();
+
+        this.basePos1 = pos1.clone();
+        this.basePos2 = pos2.clone();
+
+        box = new JammingBox(pos1, pos2);
+        buildWalls(box, baseMaterial);
+    }
+
     /** addSizeXZ */
-    public void addSizeXZ(int delta) {
+    public void SizeupXZ(int delta) {
         if (box == null) return;
 
         int current = box.getSizeXZ();
@@ -369,10 +404,6 @@ public class JammingBoxManager {
         // =========================
         if (newSize < 5) {
             return; // またはメッセージ送信
-        }
-
-        if (newSize % 2 == 0) {
-            return;
         }
 
         Location pos1 = new Location(
@@ -390,6 +421,44 @@ public class JammingBoxManager {
         );
 
         removeBox();
+        this.basePos1 = pos1.clone();
+        this.basePos2 = pos2.clone();
+
+        box = new JammingBox(pos1, pos2);
+        buildWalls(box, baseMaterial);
+    }
+    /** SizedownXZ */
+    public void SizedownXZ(int delta) {
+        if (box == null) return;
+
+        if (delta < 0) delta = -delta; // 正規化
+
+        int current = box.getSizeXZ();
+        int newSize = current - delta * 2;
+
+        // =========================
+        // バリデーション
+        // =========================
+        if (newSize < 5) {
+            return;
+        }
+
+        Location pos1 = new Location(
+                box.getWorld(),
+                box.getMinX() + delta,
+                box.getMinY(),
+                box.getMinZ() + delta
+        );
+
+        Location pos2 = new Location(
+                box.getWorld(),
+                box.getMaxX() - delta,
+                box.getMaxY(),
+                box.getMaxZ() - delta
+        );
+
+        removeBox();
+
         this.basePos1 = pos1.clone();
         this.basePos2 = pos2.clone();
 

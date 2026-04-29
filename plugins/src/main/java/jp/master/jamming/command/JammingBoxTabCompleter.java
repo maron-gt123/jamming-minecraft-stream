@@ -120,7 +120,9 @@ public class JammingBoxTabCompleter implements TabCompleter {
                 result.add("rocket");
                 result.add("doubleplace");
                 result.add("heightup");
+                result.add("heightdown");
                 result.add("sizeup");
+                result.add("sizedown");
                 result.add("size_reset");
                 return result;
             }
@@ -214,17 +216,33 @@ public class JammingBoxTabCompleter implements TabCompleter {
             }
             // /jammingevent heightup
             if (args.length == 2 && args[0].equalsIgnoreCase("heightup")) {
-                result.add("-1");
-                result.add("-5");
                 result.add("1");
+                result.add("2");
+                result.add("3");
+                result.add("5");
+                return result;
+            }
+            // /jammingevent heightdown
+            if (args.length == 2 && args[0].equalsIgnoreCase("heightdown")) {
+                result.add("1");
+                result.add("2");
+                result.add("3");
                 result.add("5");
                 return result;
             }
             // /jammingevent sizeup
             if (args.length == 2 && args[0].equalsIgnoreCase("sizeup")) {
-                result.add("-1");
-                result.add("-5");
                 result.add("1");
+                result.add("2");
+                result.add("3");
+                result.add("5");
+                return result;
+            }
+            // /jammingevent sizedown
+            if (args.length == 2 && args[0].equalsIgnoreCase("sizedown")) {
+                result.add("1");
+                result.add("2");
+                result.add("3");
                 result.add("5");
                 return result;
             }

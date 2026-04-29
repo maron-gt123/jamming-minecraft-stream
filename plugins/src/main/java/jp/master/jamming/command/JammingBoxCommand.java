@@ -100,7 +100,9 @@ public class JammingBoxCommand implements CommandExecutor {
             case "rocket" -> handleRocket(sender, args);
             case "doubleplace" -> handleDoublePlace(sender, args);
             case "heightup" -> handleHeightUp(sender, args);
+            case "heightdown" -> handleHeightDown(sender, args);
             case "sizeup" -> handleSizeUp(sender, args);
+            case "sizedown" -> handleSizeDown(sender, args);
             case "size_reset" -> handleSizeReset(sender);
             default -> sendHelpPage2(sender);
         }
@@ -744,10 +746,39 @@ public class JammingBoxCommand implements CommandExecutor {
             sender.sendMessage("§c数値を指定してください");
             return;
         }
+        if (value <= 0) {
+            sender.sendMessage("§c1以上の数値を指定してください");
+            return;
+        }
+        manager.Heightup(value);
+    }
+    private void handleHeightDown(CommandSender sender, String[] args) {
 
-        manager.addHeight(value);
+        if (!manager.hasBox()) {
+            sender.sendMessage("§cJammingBoxが存在しません");
+            return;
+        }
 
-        sender.sendMessage("§a高さを " + value + " しました");
+        if (args.length < 2) {
+            sender.sendMessage("§e/jammingevent heightdown <数値>");
+            return;
+        }
+
+        int value;
+        try {
+            value = Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage("§c数値を指定してください");
+            return;
+        }
+
+        if (value <= 0) {
+            sender.sendMessage("§c1以上の数値を指定してください");
+            return;
+        }
+
+        manager.Heightdown(value);
+
     }
     private void handleSizeUp(CommandSender sender, String[] args) {
 
@@ -768,10 +799,38 @@ public class JammingBoxCommand implements CommandExecutor {
             sender.sendMessage("§c数値を指定してください");
             return;
         }
+        if (value <= 0) {
+            sender.sendMessage("§c1以上の数値を指定してください");
+            return;
+        }
+        manager.SizeupXZ(value);
+    }
+    private void handleSizeDown(CommandSender sender, String[] args) {
 
-        manager.addSizeXZ(value);
+        if (!manager.hasBox()) {
+            sender.sendMessage("§cJammingBoxが存在しません");
+            return;
+        }
 
-        sender.sendMessage("§aXZサイズを " + value + " しました");
+        if (args.length < 2) {
+            sender.sendMessage("§e/jammingevent sizedown <数値>");
+            return;
+        }
+
+        int value;
+        try {
+            value = Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage("§c数値を指定してください");
+            return;
+        }
+
+        if (value <= 0) {
+            sender.sendMessage("§c1以上の数値を指定してください");
+            return;
+        }
+
+        manager.SizedownXZ(value);
     }
     private void handleSizeReset(CommandSender sender) {
 
@@ -781,8 +840,6 @@ public class JammingBoxCommand implements CommandExecutor {
         }
 
         manager.resetSize();
-
-        sender.sendMessage("§aサイズを初期値に戻しました");
     }
 
     /* =======================
