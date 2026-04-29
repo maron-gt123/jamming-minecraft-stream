@@ -7,7 +7,7 @@
 
     <groupId>jp.master.jamming</groupId>
     <artifactId>jamming-minecraft-stream</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <properties>
