@@ -98,6 +98,7 @@ public class JammingBoxCommand implements CommandExecutor {
             case "addclear" -> handleAddClear(sender, args);
             case "delclear" -> handleDelClear(sender, args);
             case "rocket" -> handleRocket(sender, args);
+            case "creeper" -> handleCreeper(sender, args);
             case "doubleplace" -> handleDoublePlace(sender, args);
             case "heightup" -> handleHeightUp(sender, args);
             case "heightdown" -> handleHeightDown(sender, args);
@@ -695,6 +696,37 @@ public class JammingBoxCommand implements CommandExecutor {
         gameManager.launchRocket(player, count, 3.0);
     }
     /* =======================
+       creeper
+       ======================= */
+    private void handleCreeper(CommandSender sender, String[] args) {
+        if (!gameManager.isGameActive()) {
+            sender.sendMessage("§cゲーム中のみ実行できます");
+            return;
+        }
+        Player target;
+        if (sender instanceof Player p) {
+            target = p;
+        } else {
+            target = Bukkit.getOnlinePlayers().stream().findFirst().orElse(null);
+        }
+
+        if (target == null) {
+            sender.sendMessage("§c対象プレイヤーが見つかりません");
+            return;
+        }
+        int count = 1;
+
+        if (args.length >= 2) {
+            try {
+                count = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§c数値を指定してください");
+                return;
+            }
+        }
+        gameManager.spawnCreepers(target, count, false);
+    }
+    /* =======================
        eDoublePlace
        ======================= */
     private void handleDoublePlace(CommandSender sender, String[] args) {
@@ -879,18 +911,21 @@ public class JammingBoxCommand implements CommandExecutor {
         sender.sendMessage("§6==== JammingEvent Help ====");
         sender.sendMessage("§e/jammingevent text <msg> §7- 全体メッセージ");
         sender.sendMessage("§e/jammingevent title <msg> §7- タイトル表示");
-        sender.sendMessage("§e/jammingevent tnt <1|2|3> §7- TNT投下");
-        sender.sendMessage("§e/jammingevent extnt <1|2|3> §7- 強化版TNT投下");
+        sender.sendMessage("§e/jammingevent tnt <数値> §7- TNT投下");
+        sender.sendMessage("§e/jammingevent extnt <数値> §7- 強化版TNT投下");
         sender.sendMessage("§e/jammingevent reset <dragon|wither> §7- 演出付きリセット");
         sender.sendMessage("§e/jammingbox fill         §7- jammingboxを埋める");
-        sender.sendMessage("§e/jammingevent fillblock <1|2|3> §7- JammingBox内の下から指定列数を埋める");
+        sender.sendMessage("§e/jammingevent fillblock <数値> §7- JammingBox内の下から指定列数を埋める");
         sender.sendMessage("§e/jammingevent prison [time] §7- 牢獄に投獄");
-        sender.sendMessage("§e/jammingevent addclear <1|2|3> §7- クリア数増加");
-        sender.sendMessage("§e/jammingevent delclear <1|2|3> §7- クリア数減少");
-        sender.sendMessage("§e/jammingevent rocket <1|2|3> §7- プレイヤーをロケットで打ち上げ");
+        sender.sendMessage("§e/jammingevent addclear <数値> §7- クリア数増加");
+        sender.sendMessage("§e/jammingevent delclear <数値> §7- クリア数減少");
+        sender.sendMessage("§e/jammingevent rocket <数値> §7- プレイヤーをロケットで打ち上げ");
+        sender.sendMessage("§e/jammingevent creeper <数値> §7- クリーパー召喚");
         sender.sendMessage("§e/jammingevent doubleplace <time> §7- 同時に2個ブロック設置");
         sender.sendMessage("§e/jammingevent heightup <数値> §7- 高さを拡張");
+        sender.sendMessage("§e/jammingevent heightdown <数値> §7- 高さを減少");
         sender.sendMessage("§e/jammingevent sizeup <数値> §7- 横サイズを拡張");
+        sender.sendMessage("§e/jammingevent sizedown <数値> §7- 横サイズを減少");
         sender.sendMessage("§e/jammingevent size_reset §7- サイズを初期化");
         sender.sendMessage("§7◀ help 1   help 3 ▶");
     }

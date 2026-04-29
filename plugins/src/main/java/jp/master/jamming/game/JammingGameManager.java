@@ -11,6 +11,7 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.Creeper;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -357,5 +358,52 @@ public class JammingGameManager {
     public long getElapsedSeconds() {
         if (!isGameActive()) return 0;
         return (System.currentTimeMillis() - gameStartTime) / 1000;
+    }
+    // =========================================================
+    // Creeper's
+    // =========================================================
+    public void spawnCreepers(Player player, int count, boolean enhanced) {
+        if (!gameActive || !boxManager.hasBox()) return;
+
+        if (count < 1) count = 1;
+
+        JammingBox box = boxManager.getBox();
+        if (box == null) return;
+
+        int minX = box.getMinX() + 1;
+        int maxX = box.getMaxX() - 1;
+        int minZ = box.getMinZ() + 1;
+        int maxZ = box.getMaxZ() - 1;
+        int minY = box.getMinY() + 1;
+        int maxY = box.getMaxY() - 1;
+
+        World w = box.getWorld();
+
+        for (int i = 0; i < count; i++) {
+            double x = minX + Math.random() * (maxX - minX + 1);
+            double z = minZ + Math.random() * (maxZ - minZ + 1);
+            int ix = (int) Math.floor(x);
+            int iz = (int) Math.floor(z);
+            int highestY = minY;
+
+            for (int y = maxY; y >= minY; y--) {
+                if (w.getBlockAt(ix, y, iz).getType() != Material.AIR) {
+                    highestY = y + 1;
+                    break;
+                }
+            }
+            if (highestY < minY) highestY = minY;
+            Location spawn = new Location(w, x, highestY, z);
+            Creeper creeper = w.spawn(spawn, Creeper.class);
+            // time
+            int fuse = 40;
+            creeper.setMaxFuseTicks(fuse);
+            creeper.setFuseTicks(5);
+            creeper.setExplosionRadius(6);
+            creeper.ignite();
+
+            w.playSound(spawn, Sound.ENTITY_CREEPER_PRIMED, 1.5f, 1.2f);
+            w.spawnParticle(Particle.SMOKE_NORMAL, spawn, 20, 0.5, 0.5, 0.5, 0.05);
+        }
     }
 }

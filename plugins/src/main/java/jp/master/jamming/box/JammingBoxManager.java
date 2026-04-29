@@ -369,7 +369,6 @@ public class JammingBoxManager {
             return;
         }
 
-
         Location clearPos1 = new Location(
                 box.getWorld(),
                 box.getMinX(),
