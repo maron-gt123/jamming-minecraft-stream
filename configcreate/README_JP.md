@@ -53,6 +53,33 @@
 3. 必要に応じてオプション（メッセージや数値、選択肢）を入力
 4. 複数コマンドも追加可能
 
+#### コマンド解説
+| コマンド | コマンドオプション | 実行内容                  | コマンドオプション解説 |
+| ----------------------------: |-----------|-----------------------|---|
+| jammingevent text | msg | チャット欄にメッセージを表示します     | テキスト記載で表示 |
+| jammingevent title | msg | 画面中央にタイトルを表示します       | テキスト記載で表示 |
+| jammingevent tnt | Index | TNTをスポーンします           | スポーン数を指定 |
+| jammingevent extnt | Index | 強化なTNTをスポーンします        | スポーン数を指定 |
+| jammingevent reset | dragon | エンダードラゴンでBOX内ブロックを全破壊 | - |
+| jammingevent reset | wither | ウィザーでBOX内ブロックを全破壊     | - |
+| jammingevent fill | none | BOX内をブロックで全埋め         | - |
+| jammingevent fillblock | Index | BOX内を指定した高さ分ブロックで埋めます | 埋める高さを指定 |
+| jammingevent prison | Index | プレイヤーを閉じ込めます          | 閉じ込める時間を指定 |
+| jammingevent addclear | Index | クリア数を追加します            | 増加数指定 |
+| jammingevent delclear | Index     | クリア数を減少します            | 減少数指定 |
+| jammingevent rocket | Index     | 花火ロケットを発射します          | 発射数指定 |
+| jammingevent creeper | Index     | クリーパーをスポーンします         | スポーン数を指定 |
+| jammingevent mob chicken | Index     | ニワトリをスポーンします          | スポーン数を指定 |
+| jammingevent mob pig | Index     | ブタをスポーンします            | スポーン数を指定 |
+| jammingevent mob sheep | Index     | ヒツジをスポーンします           | スポーン数を指定 |
+| jammingevent mob salmon | Index     | サーモンをスポーンします          | スポーン数を指定 |
+| jammingevent doubleplace time | Index     | 一定時間ブロックを2倍設置         | timeで時間指定 |
+| jammingevent heightup | Index     | BOXの高さを増加します          | 上方向に拡張 |
+| jammingevent heightdown | Index     | BOXの高さを減少します          | 下方向に縮小 |
+| jammingevent sizeup | Index     | BOXのサイズを拡張します         | 横方向に拡張 |
+| jammingevent sizedown | Index     | BOXのサイズを縮小します         | 横方向に縮小 |
+| jammingevent size_reset | Index     | BOXサイズを初期化します         | 初期値に戻す |
+
 ---
 
 ### 4. ギフト設定
