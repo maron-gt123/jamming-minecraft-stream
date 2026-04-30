@@ -6,10 +6,10 @@ function getMcVersion() {
 }
 
 let GIFT_CSV_URL =
-  "https://raw.githubusercontent.com/maron-gt123/jamming-minecraft-stream/refs/heads/main/configcreate/gifts.csv";
+  "https://raw.githubusercontent.com/maron-gt123/jamming-minecraft-stream/refs/heads/main/configcreate/setup-web/list/gifts.csv";
 
 let COMMAND_CSV_URL =
-  "https://raw.githubusercontent.com/maron-gt123/jamming-minecraft-stream/refs/heads/main/configcreate/command.csv";
+  "https://raw.githubusercontent.com/maron-gt123/jamming-minecraft-stream/refs/heads/main/configcreate/setup-web/list/command.csv";
 
 function getBlocksUrl() {
   return `https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/${getMcVersion()}/blocks.json`;
