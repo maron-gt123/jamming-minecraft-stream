@@ -12,7 +12,7 @@
     - Minecraftのバージョン選択
     - 上・中・下のブロック選択（検索可）
 - **イベント設定**
-    - Gift / Like / Follow / Share / Subscribe の有効/無効
+    - Gift / Like / Follow / Share / Subscribe / Comment の有効/無効
     - イベントごとのコマンド設定（複数追加可）
 - **ギフト設定**
     - 連続可能／不可能ギフトの管理
@@ -44,7 +44,7 @@
 
 ### 3. イベント設定
 
-各イベント（Gift / Like / Follow / Share / Subscribe）のチェックボックスで有効/無効を切り替えます。
+各イベント（Gift / Like / Follow / Share / Subscribe / Comment）のチェックボックスで有効/無効を切り替えます。
 
 #### コマンドの追加
 

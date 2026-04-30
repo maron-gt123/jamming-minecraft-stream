@@ -1,5 +1,6 @@
 # Jamming Minecraft Stream（全体概要）
 
+[English](https://github.com/maron-gt123/jamming-minecraft-stream/blob/main/README.md)<br>
 このリポジトリは、**TikTok LiveのイベントをMinecraftサーバに連携するための仕組み**を提供します。
 
 - **Python側**：TikTok Liveのイベントを取得し、HTTPでMinecraftプラグインへ転送するブリッジ
@@ -11,13 +12,20 @@
 ```
 jamming-minecraft-stream/
 ├─ python/ ← Pythonブリッジ
-│ ├─ README.md ← Pythonの英語ドキュメント
-│ ├─ README_JP.md ← Pythonの日本語ドキュメント
-│ └─ (コード・設定)
-├─ plugins/ ← Minecraftプラグイン
-│ ├─ README.md ← プラグインのドキュメント
-│ └─ README_JP.md ← プラグインの日本語ドキュメント
-└─ README.md ← この全体概要
+│ ├─ README.md         ← Pythonのドキュメント（英語）
+│ ├─ README_JP.md      ← Pythonのドキュメント（日本語）
+│ └─ （コード・設定）
+├─ configcreate/       ← コンフィグ作成ツール & イベントトリガー凡例ツール
+│ ├─ setup-web/        ← コンフィグ作成ツール
+│ │  ├─ README.md      ← ツールドキュメント（英語）
+│ │  └─ README_JP.md   ← ツールドキュメント（日本語）
+│ ├─ config-overlay/   ← イベントトリガー凡例ツール
+│ │  ├─ README.md      ← ツールドキュメント（英語）
+│ │  └─ README_JP.md   ← ツールドキュメント（日本語）
+│ └─ gift&command/     ← ギフト＆コマンド解説
+│    ├─ README.md      ← ドキュメント（英語）
+│    └─ README_JP.md   ← ドキュメント（日本語）
+└─ README.md           ← この概要
 ```
 ---
 
@@ -30,11 +38,10 @@ PythonブリッジはTikTok Liveのイベントを取得し、Minecraftプラグ
 
 ---
 
-## Minecraftプラグインの説明
+## config作成及びイベントトリガー凡例作成ツールの説明
 
-MinecraftプラグインはPythonブリッジから送られてくるHTTPイベントを受け取り、  
-ゲーム内での通知やコマンド実行などに利用します。
+プラグインの設定であるconfigファイルの作成及び配信時のイベントトリガー凡例の作成ツールの解説
 
-プラグイン側の詳細ドキュメントは以下に作成します。
+詳細ドキュメントは以下に作成します。
 - `plugins/README.md`（英語）
 - `plugins/README_JP.md`（日本語）

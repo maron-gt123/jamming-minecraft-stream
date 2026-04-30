@@ -13,7 +13,7 @@ Using this tool, you can configure the following:
     - Select Minecraft version
     - Choose Top / Middle / Bottom blocks (searchable)
 - **Event settings**
-    - Enable/disable Gift / Like / Follow / Share / Subscribe
+    - Enable/disable Gift / Like / Follow / Share / Subscribe / Comment
     - Configure commands for each event (multiple commands allowed)
 - **Gift settings**
     - Manage streakable / non-streakable gifts
@@ -45,7 +45,7 @@ Block information and textures will update automatically according to the select
 
 ### 3. Event Settings
 
-Use the checkboxes to enable or disable each event (Gift / Like / Follow / Share / Subscribe).
+Use the checkboxes to enable or disable each event (Gift / Like / Follow / Share / Subscribe / Comment).
 
 #### Adding Commands
 

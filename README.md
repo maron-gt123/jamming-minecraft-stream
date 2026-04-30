@@ -1,5 +1,6 @@
 # Jamming Minecraft Stream (Overview)
 
+[日本語](https://github.com/maron-gt123/jamming-minecraft-stream/blob/main/README_JP.md)<br>
 This repository provides a system to **integrate TikTok Live events into a Minecraft server**.
 
 - **Python side**: A bridge that retrieves TikTok Live events and forwards them to the Minecraft plugin via HTTP.
@@ -12,13 +13,20 @@ This repository provides a system to **integrate TikTok Live events into a Minec
 ```
 jamming-minecraft-stream/
 ├─ python/ ← Python bridge
-│ ├─ README.md ← English documentation for Python
-│ ├─ README_JP.md ← Japanese documentation for Python
+│ ├─ README.md         ← documentation for Python (English)
+│ ├─ README_JP.md      ← documentation for Python (Japanese)
 │ └─ (code & configuration)
-├─ plugins/ ← Minecraft plugin
-│ ├─ README.md ← Documentation for the plugin (English)
-│ └─ README_JP.md ← Documentation for the plugin (Japanese)
-└─ README.md ← This overview
+├─ configcreate/       ← Config generator & event trigger reference tool
+│ ├─ setup-web/        ← Config generator
+│ │  ├─ README.md      ← Tool documentation (English)
+│ │  └─ README_JP.md   ← Tool documentation (Japanese)
+│ ├─ config-overlay/   ← event trigger reference tool
+│ │  ├─ README.md      ← Tool documentation (English)
+│ │  └─ README_JP.md   ← Tool documentation (Japanese)
+│ └─ gift&command/     ← Gifts and Commands Guide
+│    ├─ README.md      ← documentation (English)
+│    └─ README_JP.md   ← documentation (Japanese)
+└─ README.md        ← This overview
 ```
 ---
 
@@ -32,11 +40,11 @@ For more details, please refer to:
 
 ---
 
-## Minecraft Plugin Description
+## Config Generator & Event Trigger Reference Tool
 
-The Minecraft plugin receives HTTP events sent from the Python bridge and uses them for in-game notifications or command execution.
+This tool helps generate the plugin's configuration files and create a reference for event triggers used during streaming.
 
-Detailed documentation for the plugin will be created here:
+Detailed documentation will be available at:
 
 - `plugins/README.md` (English)
 - `plugins/README_JP.md` (Japanese)
