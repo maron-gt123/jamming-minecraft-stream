@@ -3,12 +3,22 @@ jammingevent text,msg
 jammingevent title,msg
 jammingevent tnt,Index
 jammingevent extnt,Index
-jammingevent fill,none
-jammingevent fillblock,Index
 jammingevent reset,dragon
 jammingevent reset,wither
+jammingevent fill,none
+jammingevent fillblock,Index
 jammingevent prison,Index
 jammingevent addclear,Index
 jammingevent delclear,Index
 jammingevent rocket,Index
+jammingevent creeper,Index
+jammingevent mob chicken,Index
+jammingevent mob pig,Index
+jammingevent mob sheep,Index
+jammingevent mob salmon,Index
 jammingevent doubleplace time,Index
+jammingevent heightup,Index
+jammingevent heightdown,Index
+jammingevent sizeup,Index
+jammingevent sizedown,Index
+jammingevent size_reset,Index
