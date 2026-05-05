@@ -462,7 +462,6 @@ public class JammingGameManager {
                 }
 
                 case "salmon", "sake" -> {
-                    // 水中じゃないと微妙だけど一応
                     w.spawn(spawn, Salmon.class);
                 }
 
