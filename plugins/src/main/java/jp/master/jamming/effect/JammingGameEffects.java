@@ -278,10 +278,10 @@ public class JammingGameEffects {
         );
 
         Location spawn = center.clone().add(0, 8, 0);
-        world.getChunkAt(spawn).load();
-        Wither wither = (Wither) world.spawnEntity(spawn, EntityType.WITHER);
+        spawn.getChunk().load(true);
+        Wither wither = world.spawn(spawn, Wither.class);
 
-        wither.setAI(false);
+        wither.setAI(true);
         wither.setInvulnerable(true);
         //wither.setGravity(false);
         wither.setSilent(true);

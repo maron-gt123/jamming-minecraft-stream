@@ -74,12 +74,12 @@ public class EventHttpHandler implements HttpHandler {
     private void executeCommands(String eventType, Object dataObj) {
         Map<String, Object> data = dataObj instanceof Map ? (Map<String, Object>) dataObj : Map.of();
 
-        if (eventType.equals("connect") ||
-                eventType.equals("online") ||
-                eventType.equals("offline")) {
+        if (eventType.equals("connect")
+                || eventType.equals("online")
+                || eventType.equals("offline")) {
 
             handleStreamStatus(eventType, data);
-            return;
+            return; // ←これ入れる
         }
 
         // ===== スコアボード更新（追加）=====
@@ -97,7 +97,11 @@ public class EventHttpHandler implements HttpHandler {
         }
         // ===== comment 強制チャット表示 =====
         if (eventType.equals("comment")) {
-
+            if (plugin instanceof jp.master.jamming.JammingStream stream) {
+                if (!stream.getGameManager().isGameActive()) {
+                    return;
+                }
+            }
             String nickname = (String) data.getOrDefault("nickname", "???");
             String comment = (String) data.getOrDefault("comment", "");
 
@@ -114,21 +118,16 @@ public class EventHttpHandler implements HttpHandler {
                     "{\"text\":\" " + comment + "\",\"color\":\"white\"}" +
                     "]";
 
-            plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
-                @Override
-                public void run() {
+            plugin.getServer().getScheduler().runTask(plugin, () -> {
 
-                    if (plugin.getServer().getOnlinePlayers().isEmpty()) {
-                        return;
-                    }
+                if (plugin.getServer().getOnlinePlayers().isEmpty()) return;
 
-                    plugin.getServer().dispatchCommand(
-                            plugin.getServer().getConsoleSender(),
-                            command
-                    );
-
-                }
+                plugin.getServer().dispatchCommand(
+                        plugin.getServer().getConsoleSender(),
+                        command
+                );
             });
+
             return;
         }
         if (plugin instanceof jp.master.jamming.JammingStream stream) {
