@@ -278,11 +278,12 @@ public class JammingGameEffects {
         );
 
         Location spawn = center.clone().add(0, 8, 0);
+        world.getChunkAt(spawn).load();
         Wither wither = (Wither) world.spawnEntity(spawn, EntityType.WITHER);
 
-        wither.setAI(true);
+        wither.setAI(false);
         wither.setInvulnerable(true);
-        wither.setGravity(false);
+        //wither.setGravity(false);
         wither.setSilent(true);
 
         Location fixed = spawn.clone();
@@ -299,7 +300,7 @@ public class JammingGameEffects {
                 loc.setPitch(0f);
                 wither.teleport(loc);
             }
-        }.runTaskTimer(plugin, 0L, 1L);
+        }.runTaskTimer(plugin, 0L, 2L);
 
         if (player != null && player.isOnline()) {
             Location tp = spawn.clone().add(3, 6, -6);
