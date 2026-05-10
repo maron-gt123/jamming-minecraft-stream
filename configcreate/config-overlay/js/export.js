@@ -4,6 +4,13 @@ export async function exportOverlay(overlay, bgColor) {
 
   try {
 
+    // inputを一時非表示
+    const inputs = overlay.querySelectorAll(".gift-comment-input");
+
+    inputs.forEach(input => {
+      input.style.display = "none";
+    });
+
     const imgs = overlay.querySelectorAll("img");
 
     await Promise.all([...imgs].map(img => {
@@ -26,6 +33,11 @@ export async function exportOverlay(overlay, bgColor) {
       width: rect.width,
       height: rect.height,
       scale: 2
+    });
+
+    // input戻す
+    inputs.forEach(input => {
+      input.style.display = "block";
     });
 
     const a = document.createElement("a");

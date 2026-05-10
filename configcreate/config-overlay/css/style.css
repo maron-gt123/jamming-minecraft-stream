@@ -53,8 +53,25 @@ textarea {
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  padding: 0 2px;
-  height: 140px;
+  padding: 0 4px;
+  min-height: 220px;
+  box-sizing: border-box;
+}
+
+.gift-comment {
+  font-size: 12px;
+  color: #444;
+  text-align: center;
+  min-height: 28px;
+  width: 90px;
+  word-break: break-word;
+}
+
+.gift-comment-input {
+  width: 90px;
+  font-size: 12px;
+  padding: 4px;
+  box-sizing: border-box;
 }
 
 .gift img {
