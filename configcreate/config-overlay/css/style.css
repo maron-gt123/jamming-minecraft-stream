@@ -1,0 +1,106 @@
+body {
+  margin: 0;
+  background: #fff;
+  font-family: sans-serif;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.editor {
+  width: 40%;
+  padding: 16px;
+  background: #1e1e1e;
+  color: #fff;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+textarea {
+  flex: 1;
+  width: 100%;
+  background: #111;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  box-sizing: border-box;
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.preview {
+  width: 60%;
+  padding: 16px;
+  background: #fff;
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
+.overlay {
+  display: inline-flex;
+  gap: 0;
+  align-items: center;
+  white-space: nowrap;
+  padding: 8px;
+}
+
+.gift {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 0 2px;
+  height: 140px;
+}
+
+.gift img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.gift-name,
+.gift-count {
+  font-size: 14px;
+  color: #333;
+  line-height: 18px;
+}
+
+.gift-count {
+  font-weight: bold;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #000;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+.btn-area {
+  margin-top: 8px;
+}
+
+.btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #4caf50;
+  color: #fff;
+  font-weight: bold;
+}
