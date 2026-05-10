@@ -1,6 +1,7 @@
 import time
 import yaml
 import re
+import threading
 from datetime import datetime
 
 import requests
@@ -70,6 +71,13 @@ def forward_event(event_type: str, data: dict):
     except Exception as e:
         print(f"[{datetime.now()}] [HTTP ERROR] {event_type}: {e}")
 
+def async_forward(event_type: str, data: dict):
+    threading.Thread(
+        target=forward_event,
+        args=(event_type, data),
+        daemon=True
+    ).start()
+
 # =====================
 # TikTok Client
 # =====================
@@ -80,8 +88,8 @@ def create_client():
         data = {
             "user": USERNAME
         }
-        print(f"[{datetime.now()}] [CONNECT] {data}")
-        forward_event("connect", data)
+        print(f"[{datetime.now()}] [ONLINE] {data}")
+        async_forward("online", data)
     # ---- Gift ----
     @client.on(GiftEvent)
     async def on_gift(event: GiftEvent):
@@ -219,7 +227,7 @@ while True:
         data = {
                 "user": USERNAME
         }
-        forward_event("offline", data)
+        async_forward("offline", data)
         reset_gift_totals()
         reset_like_totals()
         print(f"[{datetime.now()}] [INFO] retry in {RECONNECT_WAIT}s")
@@ -227,7 +235,7 @@ while True:
 
     except KeyboardInterrupt:
         print("Shutdown requested (KeyboardInterrupt)")
-        shutdown_event.set()
+        break
 
     except Exception as e:
         print(f"[{datetime.now()}] [ERROR] TikTok client crashed: {e}")

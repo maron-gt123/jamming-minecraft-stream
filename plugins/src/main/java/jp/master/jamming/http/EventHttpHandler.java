@@ -48,7 +48,11 @@ public class EventHttpHandler implements HttpHandler {
                 return;
             }
 
-            if (!ConfigManager.isEventEnabled(eventType)) {
+            if (
+                    !eventType.equals("online")
+                            && !eventType.equals("offline")
+                            && !ConfigManager.isEventEnabled(eventType)
+            ) {
                 exchange.sendResponseHeaders(200, 0);
                 exchange.getResponseBody().write("OK".getBytes());
                 exchange.close();
@@ -74,12 +78,23 @@ public class EventHttpHandler implements HttpHandler {
     private void executeCommands(String eventType, Object dataObj) {
         Map<String, Object> data = dataObj instanceof Map ? (Map<String, Object>) dataObj : Map.of();
 
-        if (eventType.equals("connect")
-                || eventType.equals("online")
-                || eventType.equals("offline")) {
-
-            handleStreamStatus(eventType, data);
-            return; // ←これ入れる
+        if (eventType.equals("online")) {
+            plugin.getServer().getScheduler().runTask(plugin, () -> {
+                plugin.getServer().dispatchCommand(
+                        plugin.getServer().getConsoleSender(),
+                        "say [TikTok LIVE] 配信開始！"
+                );
+            });
+            return;
+        }
+        if (eventType.equals("offline")) {
+            plugin.getServer().getScheduler().runTask(plugin, () -> {
+                plugin.getServer().dispatchCommand(
+                        plugin.getServer().getConsoleSender(),
+                        "say [TikTok LIVE] 配信終了！"
+                );
+            });
+            return;
         }
 
         // ===== スコアボード更新（追加）=====
@@ -227,35 +242,4 @@ public class EventHttpHandler implements HttpHandler {
         return command;
     }
 
-    private void handleStreamStatus(String eventType, Map<String, Object> data) {
-
-        String user = (String) data.getOrDefault("user", "unknown");
-
-        if (eventType.equals("connect") || eventType.equals("online")) {
-
-            String command =
-                    "tellraw @a {\"text\":\"[TikTok] " + user + " が配信を開始\",\"color\":\"green\"}";
-
-            plugin.getServer().getScheduler().runTask(plugin, () ->
-                    plugin.getServer().dispatchCommand(
-                            plugin.getServer().getConsoleSender(),
-                            command
-                    )
-            );
-            return;
-        }
-
-        if (eventType.equals("offline")) {
-
-            String command =
-                    "tellraw @a {\"text\":\"[TikTok] " + user + " の配信終了\",\"color\":\"red\"}";
-
-            plugin.getServer().getScheduler().runTask(plugin, () ->
-                    plugin.getServer().dispatchCommand(
-                            plugin.getServer().getConsoleSender(),
-                            command
-                    )
-            );
-        }
-    }
 }

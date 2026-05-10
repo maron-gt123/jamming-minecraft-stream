@@ -2,6 +2,10 @@ http:
   port: 8080
   path: /event
 
+stream:
+  online-message: true
+  offline-message: true
+
 events:
   gift:
     enabled: true

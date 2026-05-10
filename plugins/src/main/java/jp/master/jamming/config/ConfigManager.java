@@ -68,6 +68,23 @@ public class ConfigManager {
     public static String getPath() {
         return path;
     }
+
+    // =========================================================
+    // stream 設定
+    // =========================================================
+    public static boolean isOnlineMessageEnabled() {
+        return plugin.getConfig().getBoolean(
+                "stream.online-message",
+                true
+        );
+    }
+    public static boolean isOfflineMessageEnabled() {
+        return plugin.getConfig().getBoolean(
+                "stream.offline-message",
+                true
+        );
+    }
+
     // =========================================================
     // Events 設定
     // =========================================================
